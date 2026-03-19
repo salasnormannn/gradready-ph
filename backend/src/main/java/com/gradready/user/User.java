@@ -31,6 +31,9 @@ public class User {
     @Column(name = "graduation_year")
     private Integer graduationYear;
 
+    @Column
+    private String status;
+
     private String region;
     private String school;
 
