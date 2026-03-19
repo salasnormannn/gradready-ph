@@ -64,4 +64,7 @@ logging:
   level:
     com.gradready: DEBUG
     org.springframework.security: INFO
-    org.springframework.ai: INFO
+    org.springframework.ai: INFObackend/.env
+frontend/.env
+.env
+*.env
