@@ -10,6 +10,7 @@ import GovPage from './pages/dashboard/GovPage'
 import ChatPage from './pages/dashboard/ChatPage'
 import JobsPage from './pages/dashboard/JobsPage'
 import ProfilePage from './pages/dashboard/ProfilePage'
+import EditProfilePage from './pages/dashboard/EditProfilePage'
 
 function PrivateRoute({ children }) {
   const { token } = useAuthStore()
@@ -39,6 +40,7 @@ export default function App() {
         <Route path="/onboarding" element={<OnboardingRoute><OnboardingPage /></OnboardingRoute>} />
 
         {/* Dashboard nested routes */}
+        <Route path="/dashboard/profile/edit" element={<PrivateRoute><EditProfilePage /></PrivateRoute>} />
         <Route path="/dashboard" element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
         <Route path="/dashboard/roadmap" element={<PrivateRoute><RoadmapPage /></PrivateRoute>} />
         <Route path="/dashboard/gov" element={<PrivateRoute><GovPage /></PrivateRoute>} />

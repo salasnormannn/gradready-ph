@@ -7,6 +7,7 @@ import { authApi } from '../../services/api'
 import useAuthStore from '../../store/authStore'
 import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
+import { useQueryClient } from '@tanstack/react-query'
 
 const schema = z.object({
   email: z.string().email('Enter a valid email'),
@@ -18,6 +19,7 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const { setAuth, isOnboarded } = useAuthStore()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
 
   const { register, handleSubmit, formState: { errors } } = useForm({
     resolver: zodResolver(schema)
@@ -28,6 +30,7 @@ export default function LoginPage() {
     setError('')
     try {
       const res = await authApi.login(data)
+      queryClient.clear()
       setAuth(res.data, res.data.token)
       navigate(isOnboarded ? '/dashboard' : '/onboarding')
     } catch (err) {

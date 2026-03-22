@@ -30,10 +30,26 @@ public class ChatService {
                 : UUID.randomUUID().toString();
 
         String systemPrompt = buildSystemPrompt(user, context);
+        String userMessage = request.getMessage().toLowerCase();
 
-        ChatClient chatClient = chatClientBuilder.build();
+        boolean isLongGeneration = userMessage.contains("cover letter")
+                || userMessage.contains("resume")
+                || userMessage.contains("red flag")
+                || userMessage.contains("write")
+                || userMessage.contains("generate");
 
-        String response = chatClient.prompt()
+        String model = isLongGeneration ? "gpt-4o-mini" : "gpt-4o";
+
+        String response = chatClientBuilder
+                .defaultOptions(
+                        org.springframework.ai.openai.OpenAiChatOptions.builder()
+                                .model(model)
+                                .temperature(0.7)
+                                .maxTokens(800)
+                                .build()
+                )
+                .build()
+                .prompt()
                 .system(systemPrompt)
                 .user(request.getMessage())
                 .call()

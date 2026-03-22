@@ -17,7 +17,8 @@ public class CorsConfig {
         config.setAllowedOrigins(List.of(
                 "http://localhost:5173",
                 "http://localhost:5174",
-                "https://gradready-ph.vercel.app"
+                "https://gradready-ph.vercel.app",    // ← your actual Vercel URL
+                "https://gradready-ph-git-main-salasnormannn.vercel.app"  // preview URL
         ));
         config.setAllowedMethods(List.of(
                 "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"
