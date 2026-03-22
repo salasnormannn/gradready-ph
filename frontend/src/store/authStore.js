@@ -10,7 +10,12 @@ const useAuthStore = create(
 
       setAuth: (user, token) => {
         localStorage.setItem('token', token)
-        set({ user, token })
+        const hasProfile = user.course || user.region || user.school
+        set({
+          user,
+          token,
+          isOnboarded: hasProfile ? true : false,
+        })
       },
 
       setOnboarded: () => set({ isOnboarded: true }),
@@ -20,11 +25,26 @@ const useAuthStore = create(
       })),
 
       logout: () => {
+        // Clear everything from localStorage
         localStorage.removeItem('token')
-        set({ user: null, token: null, isOnboarded: false })
+        localStorage.removeItem('gradready-auth')
+        // Reset state to defaults
+        set({
+          user: null,
+          token: null,
+          isOnboarded: false,
+        })
       },
     }),
-    { name: 'gradready-auth' }
+    {
+      name: 'gradready-auth',
+      // Only persist these specific fields
+      partialize: (state) => ({
+        user: state.user,
+        token: state.token,
+        isOnboarded: state.isOnboarded,
+      }),
+    }
   )
 )
 

@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: ${DATABASE_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/gradready}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
     hikari:
       connection-timeout: 20000
@@ -28,7 +28,7 @@ spring:
   mail:
     host: ${MAIL_HOST:smtp.gmail.com}
     port: ${MAIL_PORT:587}
-    username: ${MAIL_USERNAME:placeholder}
+    username: ${MAIL_USERNAME:placeholder@gmail.com}
     password: ${MAIL_PASSWORD:placeholder}
     properties:
       mail:
@@ -63,8 +63,13 @@ server:
     include-binding-errors: always
 
 jwt:
-  secret: ${JWT_SECRET}
+  secret: ${JWT_SECRET:gradready-default-secret-key-change-in-production-min-32chars}
   expiration: 86400000
+
+jsearch:
+  api:
+    key: ${JSEARCH_API_KEY:placeholder}
+    host: ${JSEARCH_API_HOST:jsearch.p.rapidapi.com}
 
 logging:
   level:

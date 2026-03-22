@@ -7,6 +7,7 @@ import { authApi } from '../../services/api'
 import useAuthStore from '../../store/authStore'
 import Button from '../../components/ui/Button'
 import Input from '../../components/ui/Input'
+import { useQueryClient } from '@tanstack/react-query'
 
 const schema = z.object({
   fullName: z.string().min(2, 'Enter your full name'),
@@ -23,6 +24,7 @@ export default function RegisterPage() {
   const [error, setError] = useState('')
   const { setAuth } = useAuthStore()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()  // ← MOVED HERE, top level
 
   const { register, handleSubmit, formState: { errors } } = useForm({
     resolver: zodResolver(schema)
@@ -37,6 +39,7 @@ export default function RegisterPage() {
         email: data.email,
         password: data.password,
       })
+      queryClient.clear()
       setAuth(res.data, res.data.token)
       navigate('/onboarding')
     } catch (err) {

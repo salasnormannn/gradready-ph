@@ -1,5 +1,6 @@
 package com.gradready.user;
 
+import com.gradready.roadmap.RoadmapService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final RoadmapService roadmapService;
 
     public User getByEmail(String email) {
         return userRepository.findByEmail(email)
@@ -22,6 +24,11 @@ public class UserService {
         if (req.getStatus() != null) user.setStatus(req.getStatus());
         if (req.getGraduationYear() != null)
             user.setGraduationYear(Integer.parseInt(req.getGraduationYear()));
-        return userRepository.save(user);
+        User saved = userRepository.save(user);
+
+        // Auto-generate roadmap after profile is saved
+        roadmapService.generateRoadmapForUser(saved);
+
+        return saved;
     }
 }

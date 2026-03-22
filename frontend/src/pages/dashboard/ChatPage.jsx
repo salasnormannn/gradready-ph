@@ -22,7 +22,7 @@ export default function ChatPage() {
 
   var firstName = user && user.fullName ? user.fullName.split(' ')[0] : 'Ka-grad'
 
-  var initialMessages = [
+  var messagesState = useState([
     {
       id: 'init-1',
       from: 'kuya',
@@ -33,9 +33,7 @@ export default function ChatPage() {
       from: 'kuya',
       text: 'I can help you with TIN, SSS, PhilHealth, Pag-IBIG, NBI clearance, job applications, salary negotiation — anything a fresh grad needs!',
     },
-  ]
-
-  var messagesState = useState(initialMessages)
+  ])
   var messages = messagesState[0]
   var setMessages = messagesState[1]
 
@@ -47,79 +45,89 @@ export default function ChatPage() {
   var conversationId = convState[0]
   var setConversationId = convState[1]
 
+  // Store the initial message to send AFTER mount
+  var pendingState = useState(null)
+  var pendingInitialMessage = pendingState[0]
+  var setPendingInitialMessage = pendingState[1]
+
   var messagesEndRef = useRef(null)
-  var inputRef = useRef(null)
-  var didSendInitial = useRef(false)
+  var isMounted = useRef(false)
 
+  // Step 1 — On mount, just grab the initial message from nav state
+  // Do NOT call sendMessage here — mutation not ready yet
   useEffect(function() {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
-    }
-  }, [messages])
-
-  useEffect(function() {
-    if (location.state && location.state.initialMessage && !didSendInitial.current) {
-      didSendInitial.current = true
-      handleSend(location.state.initialMessage)
+    if (location.state && location.state.initialMessage) {
+      var message = location.state.initialMessage
+      window.history.replaceState({}, document.title)
+      setPendingInitialMessage(message)
     }
   }, [])
 
-  function handleSend(text) {
-    var msg = text || input.trim()
-    if (!msg || isPending) return
+  // Step 2 — After first render, isMounted becomes true
+  useEffect(function() {
+    isMounted.current = true
+  }, [])
 
-    var userMessage = {
-      id: 'user-' + Date.now(),
-      from: 'user',
-      text: msg,
+  // Step 3 — Once pendingInitialMessage is set AND component is mounted,
+  // fire the message for real
+  useEffect(function() {
+    if (pendingInitialMessage && isMounted.current && !isPending) {
+      setPendingInitialMessage(null)
+      doSend(pendingInitialMessage)
     }
+  }, [pendingInitialMessage])
 
+  function doSend(message) {
+    // Add to UI
     setMessages(function(prev) {
-      return prev.concat([userMessage])
+      return prev.concat([{
+        id: 'user-' + Date.now(),
+        from: 'user',
+        text: message,
+      }])
     })
-    setInput('')
 
+    // Call API
     sendMessage(
-      { message: msg, conversationId: conversationId },
+      { message: message, conversationId: conversationId },
       {
         onSuccess: function(data) {
           setConversationId(data.conversationId)
-          var kuyaMessage = {
-            id: 'kuya-' + Date.now(),
-            from: 'kuya',
-            text: data.message,
-          }
           setMessages(function(prev) {
-            return prev.concat([kuyaMessage])
+            return prev.concat([{
+              id: 'kuya-' + Date.now(),
+              from: 'kuya',
+              text: data.message,
+            }])
           })
         },
         onError: function() {
-          var errorMessage = {
-            id: 'err-' + Date.now(),
-            from: 'kuya',
-            text: 'Sorry, may error. Subukan mo ulit?',
-          }
           setMessages(function(prev) {
-            return prev.concat([errorMessage])
+            return prev.concat([{
+              id: 'err-' + Date.now(),
+              from: 'kuya',
+              text: 'Sorry, may error. Subukan mo ulit?',
+            }])
           })
         },
       }
     )
   }
 
-  function handleKeyDown(e) {
-    if (e.key === 'Enter') {
-      handleSend(null)
+  function handleSend(text) {
+    var msg = text && text.trim ? text.trim() : input.trim()
+    if (!msg) return
+    if (isPending) return
+    setInput('')
+    doSend(msg)
+  }
+
+  // Auto scroll
+  useEffect(function() {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
     }
-  }
-
-  function handleInputChange(e) {
-    setInput(e.target.value)
-  }
-
-  function handleSendClick() {
-    handleSend(null)
-  }
+  }, [messages])
 
   return (
     <div className="min-h-screen bg-[#F7F3EE] flex flex-col">
@@ -188,12 +196,17 @@ export default function ChatPage() {
             <div className="w-8 h-8 rounded-full bg-[#F4C430] flex items-center justify-center text-base flex-shrink-0">
               🤙
             </div>
-            <div className="bg-white border border-[#EAE4DC] rounded-2xl rounded-tl-sm px-4 py-3">
-              <div className="flex gap-1 items-center">
-                <div className="w-2 h-2 rounded-full bg-gray-300 animate-bounce" style={{ animationDelay: '0ms' }} />
-                <div className="w-2 h-2 rounded-full bg-gray-300 animate-bounce" style={{ animationDelay: '150ms' }} />
-                <div className="w-2 h-2 rounded-full bg-gray-300 animate-bounce" style={{ animationDelay: '300ms' }} />
+            <div className="flex flex-col gap-1">
+              <div className="bg-white border border-[#EAE4DC] rounded-2xl rounded-tl-sm px-4 py-3">
+                <div className="flex gap-1 items-center">
+                  <div className="w-2 h-2 rounded-full bg-gray-300 animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <div className="w-2 h-2 rounded-full bg-gray-300 animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <div className="w-2 h-2 rounded-full bg-gray-300 animate-bounce" style={{ animationDelay: '300ms' }} />
+                </div>
               </div>
+              <p className="text-xs text-gray-400 px-1">
+                Generating... may take up to 30 seconds
+              </p>
             </div>
           </div>
         )}
@@ -203,16 +216,15 @@ export default function ChatPage() {
 
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#EAE4DC] px-4 py-3 flex items-center gap-3">
         <input
-          ref={inputRef}
           type="text"
           value={input}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
+          onChange={function(e) { setInput(e.target.value) }}
+          onKeyDown={function(e) { if (e.key === 'Enter') handleSend(null) }}
           placeholder="Magtanong kay Kuya AI..."
           className="flex-1 bg-[#F7F3EE] border border-[#EAE4DC] rounded-full px-4 py-2.5 text-sm text-[#1C0A08] outline-none focus:border-[#C0392B] placeholder:text-gray-300"
         />
         <button
-          onClick={handleSendClick}
+          onClick={function() { handleSend(null) }}
           disabled={isPending || !input.trim()}
           className="w-10 h-10 rounded-full bg-[#C0392B] flex items-center justify-center text-white font-bold text-lg disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
         >
