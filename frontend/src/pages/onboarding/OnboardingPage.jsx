@@ -47,13 +47,19 @@ export default function OnboardingPage() {
 
   const update = (key, val) => setData(d => ({ ...d, [key]: val }))
 
-  const canNext = () => {
-    if (step === 1) return data.course !== ''
-    if (step === 2) return data.school !== '' && data.graduationYear !== ''
-    if (step === 3) return data.region !== ''
-    if (step === 4) return data.status !== ''
-    return true
-  }
+ const currentYear = new Date().getFullYear()
+
+ const canNext = () => {
+   if (step === 1) return data.course !== ''
+   if (step === 2) {
+     const year = parseInt(data.graduationYear)
+     const validYear = !isNaN(year) && year >= 1990 && year <= 2030
+     return data.school !== '' && validYear
+   }
+   if (step === 3) return data.region !== ''
+   if (step === 4) return data.status !== ''
+   return true
+ }
 
   const next = () => {
     if (step < 5) setStep(s => s + 1)
@@ -149,21 +155,32 @@ export default function OnboardingPage() {
                   <label className="text-xs font-semibold uppercase tracking-wide text-[#888] block mb-1">
                     Graduation year
                   </label>
-                  <div className="flex gap-2">
-                    {YEARS.map(y => (
-                      <button
-                        key={y}
-                        onClick={() => update('graduationYear', y)}
-                        className={`flex-1 py-3 rounded-xl border text-sm font-semibold transition-all
-                          ${data.graduationYear === y
-                            ? 'bg-[#C0392B] text-white border-[#C0392B]'
-                            : 'bg-white text-[#1C0A08] border-[#EAE4DC] hover:border-[#C0392B]'
-                          }`}
-                      >
-                        {y}
-                      </button>
-                    ))}
-                  </div>
+                  <input
+                    type="number"
+                    placeholder="e.g. 2024"
+                    min="1990"
+                    max="2030"
+                    value={data.graduationYear}
+                    onChange={e => {
+                      const val = parseInt(e.target.value)
+                      if (!e.target.value || (val >= 1990 && val <= 2030)) {
+                        update('graduationYear', e.target.value)
+                      }
+                    }}
+                    className="w-full px-4 py-3 rounded-xl border border-[#EAE4DC] bg-white
+                      text-sm text-[#1C0A08] outline-none focus:border-[#C0392B]
+                      focus:ring-2 focus:ring-[#C0392B]/10 placeholder:text-gray-300"
+                  />
+                  {data.graduationYear && (parseInt(data.graduationYear) > 2030) && (
+                    <p className="text-xs text-red-500 mt-1">
+                      Graduation year cannot be later than 2030
+                    </p>
+                  )}
+                  {data.graduationYear && (parseInt(data.graduationYear) < 1990) && (
+                    <p className="text-xs text-red-500 mt-1">
+                      Please enter a valid graduation year
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

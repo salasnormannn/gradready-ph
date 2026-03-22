@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import PageLayout from '../../components/ui/PageLayout'
 import { useProfile } from '../../hooks/useProfile'
 import useAuthStore from '../../store/authStore'
+import { useQueryClient } from '@tanstack/react-query'
 
 const STATUS_LABELS = {
   job_hunting: { label: 'Job hunting', emoji: '🔍' },
@@ -28,6 +29,7 @@ export default function ProfilePage() {
   const { logout } = useAuthStore()
   const { data: profile, isLoading } = useProfile()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
 
   const firstName = profile?.fullName?.split(' ')[0] ?? '?'
   const initials = profile?.fullName
@@ -40,6 +42,7 @@ export default function ProfilePage() {
   const status = STATUS_LABELS[profile?.status]
 
   const handleLogout = () => {
+    queryClient.clear()
     logout()
     navigate('/')
   }
@@ -100,9 +103,8 @@ export default function ProfilePage() {
           {/* Actions */}
           <div className="flex flex-col gap-2 mt-4">
             <button
-              onClick={() => navigate('/onboarding')}
-              className="w-full bg-[#1C0A08] text-white font-bold py-3
-                rounded-2xl text-sm"
+              onClick={() => navigate('/dashboard/profile/edit')}
+              className="w-full bg-[#1C0A08] text-white font-bold py-3 rounded-2xl text-sm"
             >
               Edit profile
             </button>

@@ -1,12 +1,48 @@
 import { Link } from 'react-router-dom'
 
 const features = [
-  { icon: '🗺️', title: 'Personalized roadmap', desc: 'Week-by-week checklist tailored to your course, region, and employment status.', tag: 'Core feature', tagColor: 'bg-red-50 text-[#C0392B]' },
-  { icon: '🏛️', title: 'Gov registration guide', desc: 'Step-by-step for TIN, SSS, PhilHealth, Pag-IBIG, NBI clearance, and National ID.', tag: 'RAG-powered', tagColor: 'bg-green-50 text-green-800' },
-  { icon: '💼', title: 'AI job search', desc: 'Aggregates jobs from Indeed, LinkedIn, JobStreet, and Kalibrr. AI scores each listing for your fit.', tag: 'Phase 3', tagColor: 'bg-blue-50 text-blue-800' },
-  { icon: '📄', title: 'Smart resume builder', desc: 'AI generates an ATS-optimized resume. Philippine-context aware — TOR, board ratings included.', tag: 'Phase 3', tagColor: 'bg-blue-50 text-blue-800' },
-  { icon: '💰', title: 'Financial literacy', desc: 'First salary guide, budgeting, GCash vs Maya, UITF investments, and ITR filing for Filipinos.', tag: 'Phase 4', tagColor: 'bg-amber-50 text-amber-800' },
-  { icon: '🎓', title: 'Board exam tracker', desc: 'PRC schedules, review centers, AI study plans for nursing, engineering, CPA, architecture grads.', tag: 'Phase 4', tagColor: 'bg-amber-50 text-amber-800' },
+  {
+    icon: '🗺️',
+    title: 'Personalized roadmap',
+    desc: 'Week-by-week checklist tailored to your course, region, and employment status.',
+    tag: 'Core feature',
+    tagColor: 'bg-red-50 text-[#C0392B]'
+  },
+  {
+    icon: '🏛️',
+    title: 'Gov registration guide',
+    desc: 'Step-by-step for TIN, SSS, PhilHealth, Pag-IBIG, NBI clearance, and National ID.',
+    tag: 'RAG-powered',
+    tagColor: 'bg-green-50 text-green-800'
+  },
+  {
+    icon: '💼',
+    title: 'AI job search',
+    desc: 'Aggregates jobs from Indeed, LinkedIn, JobStreet, and Kalibrr. AI scores each listing for your fit.',
+    tag: 'Available now',
+    tagColor: 'bg-blue-50 text-blue-800'
+  },
+  {
+    icon: '📄',
+    title: 'Smart resume builder',
+    desc: 'AI generates an ATS-optimized resume. Philippine-context aware — TOR, board ratings included.',
+    tag: 'Available now',
+    tagColor: 'bg-blue-50 text-blue-800'
+  },
+  {
+    icon: '💰',
+    title: 'Financial literacy',
+    desc: 'First salary guide, budgeting, GCash vs Maya, UITF investments, and ITR filing for Filipinos.',
+    tag: 'Coming soon',
+    tagColor: 'bg-amber-50 text-amber-800'
+  },
+  {
+    icon: '🎓',
+    title: 'Board exam tracker',
+    desc: 'PRC schedules, review centers, AI study plans for nursing, engineering, CPA, architecture grads.',
+    tag: 'Coming soon',
+    tagColor: 'bg-amber-50 text-amber-800'
+  },
 ]
 
 const steps = [

@@ -65,6 +65,8 @@ public class AuthService {
                 .userId(user.getId())
                 .course(user.getCourse())
                 .region(user.getRegion())
+                .school(user.getSchool())
+                .status(user.getStatus())
                 .build();
     }
 }
