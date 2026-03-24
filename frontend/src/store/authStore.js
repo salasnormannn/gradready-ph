@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware'
 
 const useAuthStore = create(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       token: null,
       isOnboarded: false,
@@ -25,20 +25,21 @@ const useAuthStore = create(
       })),
 
       logout: () => {
-        // Clear everything from localStorage
         localStorage.removeItem('token')
         localStorage.removeItem('gradready-auth')
-        // Reset state to defaults
-        set({
-          user: null,
-          token: null,
-          isOnboarded: false,
-        })
+        // Clear all user-specific gov status keys
+        Object.keys(localStorage)
+          .filter(function(key) {
+            return key.startsWith('gradready-gov-statuses')
+          })
+          .forEach(function(key) {
+            localStorage.removeItem(key)
+          })
+        set({ user: null, token: null, isOnboarded: false })
       },
     }),
     {
       name: 'gradready-auth',
-      // Only persist these specific fields
       partialize: (state) => ({
         user: state.user,
         token: state.token,

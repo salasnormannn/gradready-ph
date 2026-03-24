@@ -3,7 +3,7 @@ import { useLocation, Link } from 'react-router-dom'
 import { useChat } from '../../hooks/useChat'
 import useAuthStore from '../../store/authStore'
 
-const QUICK_ASKS = [
+var QUICK_ASKS = [
   'Paano mag-register sa PhilHealth?',
   'What do I need for NBI clearance?',
   'How do I negotiate my first salary?',
@@ -11,6 +11,84 @@ const QUICK_ASKS = [
   'How to open a savings account?',
   'What is Pag-IBIG MP2?',
 ]
+
+// Formats Kuya AI reply text into readable JSX
+function FormattedMessage(props) {
+  var text = props.text
+
+  // Split into lines
+  var lines = text.split('\n')
+  var elements = []
+  var key = 0
+
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i]
+
+    // Skip empty lines but add spacing
+    if (line.trim() === '') {
+      elements.push(<div key={key++} className="h-2" />)
+      continue
+    }
+
+    // Numbered list: "1. something" or "1) something"
+    var numberedMatch = line.match(/^(\d+)[.)]\s+(.+)/)
+    if (numberedMatch) {
+      elements.push(
+        <div key={key++} className="flex items-start gap-2 mb-1">
+          <span className="w-5 h-5 rounded-full bg-[#C0392B] text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+            {numberedMatch[1]}
+          </span>
+          <span className="text-sm leading-relaxed">{formatInline(numberedMatch[2])}</span>
+        </div>
+      )
+      continue
+    }
+
+    // Bullet list: "- something" or "* something" or "• something"
+    var bulletMatch = line.match(/^[-*•]\s+(.+)/)
+    if (bulletMatch) {
+      elements.push(
+        <div key={key++} className="flex items-start gap-2 mb-1">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#C0392B] flex-shrink-0 mt-2" />
+          <span className="text-sm leading-relaxed">{formatInline(bulletMatch[1])}</span>
+        </div>
+      )
+      continue
+    }
+
+    // Heading: "**something**" on its own line or "### something"
+    var headingMatch = line.match(/^#{1,3}\s+(.+)/) || line.match(/^\*\*([^*]+)\*\*$/)
+    if (headingMatch) {
+      elements.push(
+        <div key={key++} className="text-sm font-black text-[#1C0A08] mt-2 mb-1">
+          {headingMatch[1]}
+        </div>
+      )
+      continue
+    }
+
+    // Regular paragraph
+    elements.push(
+      <p key={key++} className="text-sm leading-relaxed mb-1">
+        {formatInline(line)}
+      </p>
+    )
+  }
+
+  return <div className="flex flex-col">{elements}</div>
+}
+
+// Format inline bold: **text**
+function formatInline(text) {
+  if (!text.includes('**')) return text
+  var parts = text.split('**')
+  return parts.map(function(part, i) {
+    if (i % 2 === 1) {
+      return <strong key={i} className="font-bold text-[#1C0A08]">{part}</strong>
+    }
+    return part
+  })
+}
 
 export default function ChatPage() {
   var location = useLocation()
@@ -45,7 +123,6 @@ export default function ChatPage() {
   var conversationId = convState[0]
   var setConversationId = convState[1]
 
-  // Store the initial message to send AFTER mount
   var pendingState = useState(null)
   var pendingInitialMessage = pendingState[0]
   var setPendingInitialMessage = pendingState[1]
@@ -53,8 +130,6 @@ export default function ChatPage() {
   var messagesEndRef = useRef(null)
   var isMounted = useRef(false)
 
-  // Step 1 — On mount, just grab the initial message from nav state
-  // Do NOT call sendMessage here — mutation not ready yet
   useEffect(function() {
     if (location.state && location.state.initialMessage) {
       var message = location.state.initialMessage
@@ -63,13 +138,10 @@ export default function ChatPage() {
     }
   }, [])
 
-  // Step 2 — After first render, isMounted becomes true
   useEffect(function() {
     isMounted.current = true
   }, [])
 
-  // Step 3 — Once pendingInitialMessage is set AND component is mounted,
-  // fire the message for real
   useEffect(function() {
     if (pendingInitialMessage && isMounted.current && !isPending) {
       setPendingInitialMessage(null)
@@ -78,7 +150,6 @@ export default function ChatPage() {
   }, [pendingInitialMessage])
 
   function doSend(message) {
-    // Add to UI
     setMessages(function(prev) {
       return prev.concat([{
         id: 'user-' + Date.now(),
@@ -87,7 +158,6 @@ export default function ChatPage() {
       }])
     })
 
-    // Call API
     sendMessage(
       { message: message, conversationId: conversationId },
       {
@@ -122,7 +192,6 @@ export default function ChatPage() {
     doSend(msg)
   }
 
-  // Auto scroll
   useEffect(function() {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
@@ -181,11 +250,14 @@ export default function ChatPage() {
               <div
                 className={
                   isUser
-                    ? 'max-w-[78%] rounded-2xl rounded-tr-sm px-4 py-3 text-sm leading-relaxed bg-[#C0392B] text-white'
-                    : 'max-w-[78%] rounded-2xl rounded-tl-sm px-4 py-3 text-sm leading-relaxed bg-white border border-[#EAE4DC] text-[#1C0A08]'
+                    ? 'max-w-[78%] rounded-2xl rounded-tr-sm px-4 py-3 bg-[#C0392B] text-white text-sm leading-relaxed'
+                    : 'max-w-[85%] rounded-2xl rounded-tl-sm px-4 py-3 bg-white border border-[#EAE4DC] text-[#1C0A08]'
                 }
               >
-                {msg.text}
+                {isUser
+                  ? msg.text
+                  : <FormattedMessage text={msg.text} />
+                }
               </div>
             </div>
           )
@@ -231,7 +303,6 @@ export default function ChatPage() {
           ^
         </button>
       </div>
-
     </div>
   )
 }

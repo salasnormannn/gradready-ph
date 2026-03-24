@@ -2,8 +2,9 @@ import { useState } from 'react'
 import PageLayout from '../../components/ui/PageLayout'
 import { useNavigate } from 'react-router-dom'
 import { useJobs } from '../../hooks/useJobs'
+import RedFlagChecker from '../../components/ui/RedFlagChecker'
 
-const JOB_SITES = [
+var JOB_SITES = [
   {
     name: 'Kalibrr',
     desc: 'Best for fresh grads',
@@ -80,14 +81,13 @@ function TagPill(props) {
 function JobCard(props) {
   var job = props.job
   var navigate = props.navigate
-
   var initial = job.company ? job.company.charAt(0).toUpperCase() : 'J'
 
   function handleCoverLetter() {
     navigate('/dashboard/chat', {
       state: {
         initialMessage: 'Write a short cover letter (3 paragraphs, under 200 words) for '
-          + job.title + ' at ' + job.company + '.',
+          + job.title + ' at ' + job.company + '. Make it professional, warm, and tailored for a Filipino fresh graduate.',
       },
     })
   }
@@ -127,7 +127,7 @@ function JobCard(props) {
           <TagPill label={job.employmentType} />
         )}
         {job.salaryMin && job.salaryMax && (
-          <TagPill label={'P' + Number(job.salaryMin).toLocaleString() + '-' + Number(job.salaryMax).toLocaleString()} />
+          <TagPill label={'P' + Number(job.salaryMin).toLocaleString() + ' - P' + Number(job.salaryMax).toLocaleString()} />
         )}
         {job.salaryMin && !job.salaryMax && (
           <TagPill label={'From P' + Number(job.salaryMin).toLocaleString()} />
@@ -181,13 +181,14 @@ function SkeletonCard() {
 
 export default function JobsPage() {
   var navigate = useNavigate()
-  var searchState = useState('')
-  var searchInput = searchState[0]
-  var setSearchInput = searchState[1]
 
-  var queryState = useState('')
-  var activeQuery = queryState[0]
-  var setActiveQuery = queryState[1]
+  var searchInputState = useState('')
+  var searchInput = searchInputState[0]
+  var setSearchInput = searchInputState[1]
+
+  var activeQueryState = useState('')
+  var activeQuery = activeQueryState[0]
+  var setActiveQuery = activeQueryState[1]
 
   var jobsResult = useJobs(activeQuery)
   var jobs = jobsResult.data && jobsResult.data.jobs ? jobsResult.data.jobs : []
@@ -197,14 +198,6 @@ export default function JobsPage() {
   function handleSearch(e) {
     e.preventDefault()
     setActiveQuery(searchInput.trim())
-  }
-
-  function handleRedFlagCheck() {
-    navigate('/dashboard/chat', {
-      state: {
-        initialMessage: 'Can you check this job posting for red flags?',
-      },
-    })
   }
 
   return (
@@ -235,7 +228,7 @@ export default function JobsPage() {
           type="text"
           value={searchInput}
           onChange={function(e) { setSearchInput(e.target.value) }}
-          placeholder="Search jobs e.g. nurse Metro Manila..."
+          placeholder="Search e.g. nurse Metro Manila, software engineer..."
           className="flex-1 bg-white border border-[#EAE4DC] rounded-xl px-4 py-2.5 text-sm text-[#1C0A08] outline-none focus:border-[#C0392B] placeholder:text-gray-300"
         />
         <button
@@ -247,7 +240,7 @@ export default function JobsPage() {
       </form>
 
       <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">
-        {activeQuery ? 'Search results for "' + activeQuery + '"' : 'AI matches for you'}
+        {activeQuery ? 'Results for "' + activeQuery + '"' : 'AI matches for you'}
       </p>
 
       {isLoading && (
@@ -291,19 +284,8 @@ export default function JobsPage() {
         </div>
       )}
 
-      <div className="bg-red-50 border border-red-100 rounded-2xl p-4">
-        <div className="text-sm font-bold text-red-800 mb-1">Red flag checker</div>
-        <div className="text-xs text-red-600 mb-3 leading-relaxed">
-          Paste a job posting and Kuya AI will check for red flags — no salary disclosure,
-          vague roles, or suspicious requirements.
-        </div>
-        <button
-          onClick={handleRedFlagCheck}
-          className="bg-red-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl"
-        >
-          Check a job posting
-        </button>
-      </div>
+      {/* Red Flag Checker — now with URL and text input */}
+      <RedFlagChecker />
 
     </PageLayout>
   )
