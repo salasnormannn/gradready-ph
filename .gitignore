@@ -68,3 +68,6 @@ logging:
 frontend/.env
 .env
 *.env
+frontend/.env
+frontend/.env.local
+frontend/.env.production

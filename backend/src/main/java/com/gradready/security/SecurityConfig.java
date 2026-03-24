@@ -41,6 +41,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/roadmap/**").authenticated()
                         .requestMatchers("/api/chat/**").authenticated()
                         .requestMatchers("/api/users/**").authenticated()
+                        .requestMatchers("/api/finance/**").authenticated()
+                        .requestMatchers("/api/board-exam/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)

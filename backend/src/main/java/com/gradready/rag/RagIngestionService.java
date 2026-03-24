@@ -28,6 +28,8 @@ public class RagIngestionService {
         docs.addAll(getPrcDocuments());
         docs.addAll(getPhilSysDocuments());
         docs.addAll(getGeneralFinanceDocuments());
+        docs.addAll(getFinancialLiteracyDocuments());
+        docs.addAll(getBoardExamDocuments());
         vectorStore.add(docs);
         log.info("RAG ingestion complete. Ingested {} documents.", docs.size());
     }
@@ -496,6 +498,265 @@ public class RagIngestionService {
                 - Promises unrealistic salary for entry-level role
                 """,
                         Map.of("source", "Career", "topic", "job application guide", "category", "career"))
+        );
+    }
+
+    private List<Document> getFinancialLiteracyDocuments() {
+        return List.of(
+                new Document("""
+            Understanding Your First Payslip in the Philippines
+
+            When you receive your first salary, these deductions will appear:
+
+            SSS Contribution (2024):
+            - Employee share: 4.5% of monthly salary credit
+            - For P25,000 salary: P1,125/month deducted
+            - Employer also pays 9.5% on your behalf
+
+            PhilHealth Contribution (2024):
+            - 5% of basic monthly salary total
+            - Employee share: 2.5% (you pay half)
+            - For P25,000 salary: P625/month deducted
+
+            Pag-IBIG Contribution:
+            - Employee share: 2% of salary, maximum P100/month
+            - Most employees pay exactly P100/month
+
+            Withholding Tax (TRAIN Law):
+            - Annual income up to P250,000: ZERO tax (tax exempt)
+            - P250,001 to P400,000: 15% on excess over P250,000
+            - P400,001 to P800,000: P22,500 + 20% on excess over P400,000
+            - Fresh grads earning P25,000/month (P300,000/year): pay small withholding tax
+
+            Example take-home for P25,000 gross salary:
+            - SSS: -P1,125
+            - PhilHealth: -P625
+            - Pag-IBIG: -P100
+            - Withholding tax: approximately -P208/month
+            - Take-home pay: approximately P22,942/month
+
+            13th Month Pay:
+            - Mandatory for all rank-and-file employees
+            - Equal to 1/12 of total basic salary earned in a year
+            - Tax-exempt up to P90,000
+            - Must be paid on or before December 24
+
+            Other common benefits:
+            - Rice subsidy allowance: P2,000/month (tax-exempt)
+            - Transportation allowance: often P1,500-P3,000/month
+            - HMO coverage: company-paid health insurance
+            """,
+                        Map.of("source", "Finance", "topic", "payslip guide", "category", "finance")),
+
+                new Document("""
+            Budgeting Guide for Filipino Fresh Graduates
+
+            The 50/30/20 Rule adapted for Philippines:
+
+            50% — Needs (Essential expenses):
+            - Rent: P5,000-P8,000 (boarding house/condo in Metro Manila)
+            - Food: P3,000-P5,000/month (home cooking + occasional dining)
+            - Transportation: P2,000-P3,000/month (commute)
+            - Utilities: P500-P1,000/month (electric, water, internet share)
+            - Total needs for P22,942 take-home: aim for P11,471
+
+            30% — Wants (Discretionary):
+            - Dining out, entertainment, subscriptions
+            - Shopping, personal care
+            - Aim for P6,882/month
+
+            20% — Savings and Investments:
+            - Emergency fund first: save P500-P2,000/month until 3-6 months expenses saved
+            - Then invest: Pag-IBIG MP2 minimum P500/month
+            - Target: P4,588/month saved/invested
+
+            Banking recommendations for fresh graduates:
+            Best for savings:
+            - Maya Savings: 3.5% interest per year, no maintaining balance
+            - GCash GSave: 5% interest per year (powered by CIMB Bank)
+            - Tonik Bank: up to 6% interest per year
+
+            Best traditional banks:
+            - BPI: best mobile app, nationwide ATM
+            - BDO: most branches, good for salary accounts
+            - UnionBank: best digital features among traditional banks
+
+            Emergency fund target: 3-6 months of expenses
+            For P22,942 take-home, emergency fund target = P68,826-P137,652
+            Start with P1,000/month if you can't save more yet
+            """,
+                        Map.of("source", "Finance", "topic", "budgeting guide", "category", "finance")),
+
+                new Document("""
+            Investment Guide for Filipino Fresh Graduates
+
+            Start investing as early as possible — time in market beats timing the market.
+
+            Beginner investments (start here):
+
+            1. Pag-IBIG MP2 (Modified Pag-IBIG 2) — SAFEST
+            - Government-backed, zero risk of losing principal
+            - Average dividend: 6-7% per year (beats most banks)
+            - Minimum: P500/month
+            - Maturity: 5 years (can withdraw after)
+            - How to open: pagibigfund.gov.ph → MP2 enrollment
+            - Best for: emergency fund parking, conservative investors
+
+            2. UITF (Unit Investment Trust Fund) — LOW RISK
+            - Managed by banks (BPI, BDO, Metrobank)
+            - Types: Money Market (safest), Bond Fund, Equity Fund (highest return/risk)
+            - Minimum investment: P1,000 (BPI/BDO)
+            - For fresh grads: start with Money Market UITF
+            - Returns: 4-8% per year depending on fund type
+
+            3. GInvest via GCash — BEGINNER FRIENDLY
+            - Start with P50 minimum
+            - Choose from mutual funds: ATRAM, BPI, Philam
+            - Easy to monitor via GCash app
+            - Good for: testing investing without big commitment
+
+            4. COL Financial — STOCKS
+            - Philippine Stock Exchange (PSE) access
+            - Minimum account opening: P1,000
+            - For beginners: start with index fund (COL Fund)
+            - Only invest what you can leave for 5+ years
+            - Risk: can go down short-term
+
+            Investment priority for fresh grads:
+            1. Build emergency fund first (3 months expenses in Maya/GCash)
+            2. Start Pag-IBIG MP2 (P500/month minimum)
+            3. Open UITF at your bank (P1,000 to start)
+            4. After 6 months: explore stocks via COL Financial
+            """,
+                        Map.of("source", "Finance", "topic", "investment guide", "category", "finance")),
+
+                new Document("""
+            Income Tax Filing Guide for Fresh Graduates in the Philippines
+
+            Who needs to file Income Tax Return (ITR):
+            - Employees with ONLY ONE employer: employer files on your behalf (BIR Form 2316)
+              You do NOT need to file your own ITR
+            - Employees with TWO OR MORE employers in a year: must file ITR
+            - Freelancers/self-employed: must file quarterly and annual ITR
+            - Mixed income earners (employed + freelance): must file ITR
+
+            BIR Forms to know:
+            - Form 2316: Certificate of Compensation Payment (from employer)
+            - Form 1700: Annual ITR for pure compensation income earners
+            - Form 1701: Annual ITR for self-employed/mixed income
+            - Form 1701Q: Quarterly ITR for self-employed
+
+            ITR Filing Deadlines:
+            - Annual ITR: April 15 every year (for previous year income)
+            - Q1 (Jan-Mar): May 15
+            - Q2 (Apr-Jun): August 15
+            - Q3 (Jul-Sep): November 15
+
+            How to file online (eBIRForms):
+            1. Download eBIRForms from bir.gov.ph
+            2. Fill out appropriate form (1700 or 1701)
+            3. Submit electronically
+            4. Pay any tax due via GCash, Maya, or authorized banks
+
+            TRAIN Law Tax Exemption (good news for fresh grads):
+            - Annual income of P250,000 and below: ZERO income tax
+            - Fresh grad earning P20,000/month = P240,000/year = TAX EXEMPT!
+            - Fresh grad earning P25,000/month = P300,000/year = pays small tax only
+            """,
+                        Map.of("source", "Finance", "topic", "ITR filing", "category", "finance"))
+        );
+    }
+
+    private List<Document> getBoardExamDocuments() {
+        return List.of(
+                new Document("""
+            PRC Licensure Examination Complete Guide
+
+            The Professional Regulation Commission (PRC) administers all professional
+            licensure exams in the Philippines.
+
+            Exam Schedules (approximate — verify at prc.gov.ph):
+
+            Nursing (NLE):
+            - June and December each year
+            - Covers: Fundamentals, Medical-Surgical, Community Health,
+              Maternal & Child, Psychiatric Nursing
+            - Passing rate: 50% and above
+
+            CPA Board Exam (CPALE):
+            - May and October each year
+            - 6 subjects: FAR, AFAR, MAS, AT, Tax, RFBT
+            - Must pass all 6 subjects with average of 75%, no subject below 65%
+
+            Engineering Board Exams:
+            - Civil Engineering: May and November
+            - Electrical Engineering: April and September
+            - Mechanical Engineering: May and November
+            - Electronics Engineering: April and October
+            - Chemical Engineering: April and October
+
+            Architecture (ARE):
+            - June and December each year
+
+            Teachers (LET):
+            - March and September each year
+            - Elementary and Secondary levels separate
+
+            How to register for PRC board exam:
+            1. Create account at prc.gov.ph
+            2. Click Register for Examination
+            3. Select profession and exam schedule
+            4. Upload requirements: TOR, birth certificate, good moral certificate, photos
+            5. Pay examination fee (P900-P1,500 depending on profession)
+            6. Print Notice of Admission (NOA)
+
+            After passing the board exam:
+            1. Check results at prc.gov.ph (2-5 days after exam)
+            2. Register for Certificate of Registration
+            3. Attend oath-taking ceremony
+            4. Receive PRC Professional ID Card
+            5. Renew PRC ID every 3 years (P450 renewal fee)
+            """,
+                        Map.of("source", "PRC", "topic", "board exam guide", "category", "board_exam")),
+
+                new Document("""
+            Board Exam Review Tips for Filipino Professionals
+
+            General study strategies:
+            - Start reviewing 3-6 months before the exam date
+            - Create a weekly study schedule and stick to it
+            - Focus on past board exam questions (available from PRC and review centers)
+            - Join study groups with fellow examinees
+
+            For Nursing (NLE):
+            Top review centers: Kaplan, R.N. Heals, UERM Review Center
+            Key topics: Prioritization questions, Maslow's hierarchy, ABC (Airway, Breathing, Circulation)
+            Study tip: Focus on Medical-Surgical nursing (largest portion of the exam)
+            Average cost of review: P8,000-P15,000
+
+            For CPA (CPALE):
+            Top review centers: Villanueva CPA Review, Manila Review Institute, Asian Institute of CPA
+            Key topics: Financial Accounting is foundation — master it first
+            Study tip: Do at least 1,000 practice problems per subject
+            Average cost of review: P15,000-P30,000
+
+            For Civil Engineering:
+            Top review centers: Excel Review Center, MERIT Review Center
+            Key topics: Math, Structural Analysis, Hydraulics, Geotechnical Engineering
+            Study tip: Time management during exam is crucial — practice under timed conditions
+            Average cost of review: P8,000-P15,000
+
+            For LET (Teachers):
+            Top review centers: PRTC, LET Review Manila
+            Key topics: Professional Education subjects have highest weight
+            Study tip: Focus on Child Development and Teaching Strategies
+
+            CHED Scholarships for review center:
+            - Some LGUs offer free review programs
+            - Check with your school's alumni office for scholarship partnerships
+            - CHED UniFAST program may cover review costs
+            """,
+                        Map.of("source", "PRC", "topic", "board exam review tips", "category", "board_exam"))
         );
     }
 }
