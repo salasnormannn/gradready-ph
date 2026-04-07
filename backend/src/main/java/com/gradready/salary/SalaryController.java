@@ -40,4 +40,4 @@ public class SalaryController {
     public ResponseEntity<List<String>> industries() {
         return ResponseEntity.ok(service.getIndustries());
     }
-}git checkoutgit add .git commit -Mm "Front end adjustments"git push origin featrure/
+}
