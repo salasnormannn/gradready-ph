@@ -4,252 +4,511 @@ import useAuthStore from '../../store/authStore'
 import { useRoadmapProgress } from '../../hooks/useRoadmap'
 import { useProfile } from '../../hooks/useProfile'
 
-var NAV_ITEMS = [
-  { icon: '🗺️', label: 'My roadmap', to: '/dashboard/roadmap', desc: 'Week-by-week checklist', color: 'bg-red-50' },
-  { icon: '🏛️', label: 'Gov regs', to: '/dashboard/gov', desc: 'TIN, SSS, PhilHealth and more', color: 'bg-green-50' },
-  { icon: '🤙', label: 'Kuya AI', to: '/dashboard/chat', desc: 'Ask anything, anytime', color: 'bg-[#1C0A08]', dark: true },
-  { icon: '💼', label: 'Job search', to: '/dashboard/jobs', desc: 'AI-matched jobs for you', color: 'bg-blue-50' },
-  { icon: '💰', label: 'Finance guide', to: '/dashboard/finance', desc: 'Budgeting and investing PH', color: 'bg-amber-50' },
-  { icon: '🎓', label: 'Board exams', to: '/dashboard/board', desc: 'PRC schedules and study plans', color: 'bg-purple-50' },
-]
+const MONO = 'Share Tech Mono, monospace'
 
-var QUICK_ASKS = [
-  'Paano mag-register sa PhilHealth?',
-  'What do I need for NBI clearance?',
-  'How do I negotiate my first salary?',
-  'How to open a savings account in PH?',
-]
+const CSS = `
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#3C091E; font-family:'Share Tech Mono',monospace; overflow-x:hidden; }
+  ::-webkit-scrollbar { width:2px; }
+  ::-webkit-scrollbar-thumb { background:#BE473D; }
+  ::selection { background:rgba(190,71,61,0.4); }
 
-var GOV_TOTAL = 6
-var GOV_STORAGE_KEY = 'gradready-gov-statuses'
+  @keyframes floatA { 0%,100%{transform:translateY(0)rotate(0deg)} 50%{transform:translateY(-16px)rotate(4deg)} }
+  @keyframes floatB { 0%,100%{transform:translateY(0)rotate(0deg)} 50%{transform:translateY(-10px)rotate(-3deg)} }
+  @keyframes floatC { 0%,100%{transform:translateY(0)rotate(0deg)} 50%{transform:translateY(-22px)rotate(6deg)} }
+  @keyframes mq     { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+  @keyframes blink  { 0%,100%{opacity:1} 50%{opacity:0} }
+  @keyframes glow   { 0%,100%{opacity:0.18} 50%{opacity:0.28} }
+  @keyframes scan   { from{top:-2px} to{top:100%} }
+  @keyframes upIn   { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
 
-function getGovDoneCount() {
-  try {
-    var saved = localStorage.getItem(GOV_STORAGE_KEY)
-    if (!saved) return 0
-    var statuses = JSON.parse(saved)
-    return Object.values(statuses).filter(function(s) { return s === 'done' }).length
-  } catch (e) {
-    return 0
+  .u1{animation:upIn .8s cubic-bezier(.16,1,.3,1) .08s both}
+  .u2{animation:upIn .8s cubic-bezier(.16,1,.3,1) .18s both}
+  .u3{animation:upIn .8s cubic-bezier(.16,1,.3,1) .28s both}
+  .u4{animation:upIn .8s cubic-bezier(.16,1,.3,1) .38s both}
+  .u5{animation:upIn .8s cubic-bezier(.16,1,.3,1) .48s both}
+  .u6{animation:upIn .8s cubic-bezier(.16,1,.3,1) .58s both}
+  .u7{animation:fadeIn .8s ease .7s both}
+
+  /* ─── Hero layout: mobile = single col centered, desktop = 3-col ─── */
+  .hero-grid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 0 20px;
+    gap: 0;
   }
+  .hero-left  { display: none; }
+  .hero-right { display: none; }
+  .hero-center { width: 100%; }
+
+  /* mobile: name font size scales with vw */
+  .hero-name {
+    font-size: clamp(56px, 18vw, 120px);
+    letter-spacing: -3px;
+    line-height: 0.88;
+  }
+  .hero-mood {
+    font-size: clamp(56px, 18vw, 120px);
+    letter-spacing: -3px;
+    line-height: 0.88;
+  }
+
+  /* mobile stats row — inline below progress */
+  .stats-mobile {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 12px;
+  }
+  .stats-desktop { display: none; }
+
+  /* mobile CTAs — stack nicely */
+  .cta-row {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 24px;
+  }
+
+  /* ─── DESKTOP (≥ 700px) ─── */
+  @media (min-width: 700px) {
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr minmax(0, 580px) 1fr;
+      text-align: center;
+      padding: 0;
+      gap: 0;
+    }
+    .hero-left {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 0 0 0 40px;
+    }
+    .hero-right {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-end;
+      padding: 0 40px 0 0;
+    }
+    .hero-name { font-size: clamp(80px, 14vw, 148px); letter-spacing: -4px; }
+    .hero-mood { font-size: clamp(80px, 14vw, 148px); letter-spacing: -4px; }
+    .stats-mobile  { display: none; }
+    .stats-desktop { display: flex; flex-direction: column; align-items: flex-end; gap: 0; }
+    .cta-row { margin-top: 28px; }
+  }
+
+  /* feature rows */
+  .feat-row { transition: all .18s ease; border-left: 2px solid transparent; }
+  .feat-row:hover { background:rgba(240,237,232,0.04) !important; border-left-color:#BE473D !important; }
+  .feat-row:hover .fnum { color:#BE473D !important; }
+  .feat-row:hover .flbl { color:#F0EDE8 !important; }
+  .feat-row:hover .farr { opacity:1 !important; transform:translateX(4px) !important; }
+
+  /* quick ask */
+  .qrow { transition: all .18s; border-left: 2px solid transparent; }
+  .qrow:hover { background:rgba(190,71,61,0.06) !important; border-left-color:#BE473D !important; }
+  .qrow:hover .qarr { opacity:1 !important; }
+
+  /* CTA buttons */
+  .cta-a { transition: all .2s; }
+  .cta-a:hover { background:#BE473D !important; border-color:#BE473D !important; color:#F0EDE8 !important; }
+  .cta-b { transition: all .2s; }
+  .cta-b:hover { color:#F0EDE8 !important; border-color:rgba(240,237,232,0.4) !important; }
+  .kuya-link { transition: all .2s; }
+  .kuya-link:hover { background:rgba(60,9,30,0.08) !important; border-color:rgba(60,9,30,0.25) !important; }
+`
+
+function govDoneCount(email) {
+  try {
+    var s = localStorage.getItem('gradready-gov-statuses-' + (email || 'guest'))
+    return s ? Object.values(JSON.parse(s)).filter(function(v) { return v === 'done' }).length : 0
+  } catch(e) { return 0 }
 }
 
-function StatCard(props) {
+var FEATURES = [
+  { n:'01', label:'MY ROADMAP',   sub:'Week-by-week checklist for your journey',      to:'/dashboard/roadmap' },
+  { n:'02', label:'GOV REGS',     sub:'TIN · SSS · PhilHealth · Pag-IBIG · NBI',     to:'/dashboard/gov'     },
+  { n:'03', label:'KUYA AI',      sub:'Your post-grad big brother — always online',   to:'/dashboard/chat',  hot:true },
+  { n:'04', label:'JOB SEARCH',   sub:'AI-matched openings from PH job boards',       to:'/dashboard/jobs'    },
+  { n:'05', label:'FINANCE',      sub:'Salary calculator · 50/30/20 · Investing PH',  to:'/dashboard/finance' },
+  { n:'06', label:'BOARD EXAMS',  sub:'PRC schedules + AI-generated study plans',     to:'/dashboard/board'   },
+  { n:'07', label:'JOB TRACKER',  sub:'Track every application in one place',         to:'/dashboard/tracker' },
+  { n:'08', label:'SALARY BOARD', sub:'Real anonymous salaries from PH companies',    to:'/dashboard/salary'  },
+]
+
+var QUICK = [
+  'Paano mag-register sa PhilHealth?',
+  'What do I need for NBI clearance?',
+  'How to negotiate my first salary?',
+  'What is Pag-IBIG MP2?',
+]
+
+function Cube({ x, y, s, r, a, d, light }) {
   return (
-    <div className="bg-white border border-[#EAE4DC] rounded-2xl p-4 relative overflow-hidden">
-      <div
-        className="absolute bottom-0 left-0 h-1 rounded-full transition-all duration-500"
-        style={{ width: props.pct + '%', background: props.accent }}
-      />
-      <div className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-1">{props.label}</div>
-      <div className="text-2xl font-black text-[#1C0A08]">{props.value}</div>
-      <div className="text-xs text-gray-400 mt-0.5">{props.sub}</div>
+    <div style={{ position:'absolute', left:x+'%', top:y+'%', pointerEvents:'none',
+      animation:a+' '+(7+d)+'s ease-in-out infinite', animationDelay:d+'s' }}>
+      <div style={{ width:s, height:s,
+        background: light ? 'rgba(60,9,30,0.055)' : 'rgba(240,237,232,0.035)',
+        border:'1px solid '+(light ? 'rgba(60,9,30,0.075)' : 'rgba(240,237,232,0.055)'),
+        borderRadius:7, transform:'rotate('+r+'deg)' }} />
     </div>
   )
 }
 
 export default function DashboardPage() {
-  var authStore = useAuthStore()
-  var user = authStore.user
-  var navigate = useNavigate()
+  const { user } = useAuthStore()
+  const navigate  = useNavigate()
+  const { data: progress } = useRoadmapProgress()
+  const { data: profile }  = useProfile()
 
-  var progressResult = useRoadmapProgress()
-  var progress = progressResult.data
-  var progressLoading = progressResult.isLoading
-
-  var profileResult = useProfile()
-  var profile = profileResult.data
-
-  var govCountState = useState(getGovDoneCount())
-  var govDoneCount = govCountState[0]
-  var setGovDoneCount = govCountState[1]
-
-  var userId = user && user.userId ? user.userId : 'guest'
-  var GOV_STORAGE_KEY = 'gradready-gov-statuses-' + userId
-
-  // Listen for gov status updates from GovPage
+  var email = user ? (user.email || user.username || '') : ''
+  var [gov, setGov] = useState(function(){ return govDoneCount(email) })
   useEffect(function() {
-    function handleGovUpdate() {
-      setGovDoneCount(getGovDoneCount())
-    }
-    window.addEventListener('gov-status-updated', handleGovUpdate)
-    // Also refresh when page becomes visible (user navigates back from GovPage)
+    function upd() { setGov(govDoneCount(email)) }
+    window.addEventListener('gov-status-updated', upd)
     document.addEventListener('visibilitychange', function() {
-      if (document.visibilityState === 'visible') {
-        setGovDoneCount(getGovDoneCount())
-      }
+      if (document.visibilityState === 'visible') upd()
     })
-    return function() {
-      window.removeEventListener('gov-status-updated', handleGovUpdate)
-    }
-  }, [])
+    return function() { window.removeEventListener('gov-status-updated', upd) }
+  }, [email])
 
-  var firstName = (profile && profile.fullName ? profile.fullName : (user && user.fullName ? user.fullName : 'Ka-grad')).split(' ')[0]
-  var pct = progress && progress.percentage ? progress.percentage : 0
-  var completed = progress && progress.completed ? progress.completed : 0
-  var total = progress && progress.total ? progress.total : 0
+  var name  = (profile?.fullName || user?.fullName || 'KA-GRAD').split(' ')[0].toUpperCase()
+  var pct   = progress?.percentage ?? 0
+  var done  = progress?.completed  ?? 0
+  var total = progress?.total      ?? 0
+  var init  = name.charAt(0)
+  var region = (profile?.region || 'PHILIPPINES').split('(')[0].trim()
 
-  function getGreeting() {
+  var hi = (function(){
     var h = new Date().getHours()
-    if (h < 12) return 'Magandang umaga'
-    if (h < 18) return 'Magandang hapon'
-    return 'Magandang gabi'
-  }
-
-  function getWeekMessage() {
-    if (pct === 0) return "Let's start your journey!"
-    if (pct < 25) return "You're just getting started — keep going!"
-    if (pct < 50) return 'Ahead of ' + Math.round(pct * 1.5) + '% of fresh grads!'
-    if (pct < 75) return "You're doing great, keep it up!"
-    return 'Almost done — you are crushing it!'
-  }
-
-  var initials = firstName ? firstName[0].toUpperCase() : 'G'
+    return h < 12 ? 'MAGANDANG UMAGA' : h < 18 ? 'MAGANDANG HAPON' : 'MAGANDANG GABI'
+  })()
+  var mood = pct===0?"LET'S BEGIN.":pct<30?'KEEP GOING.':pct<60?'HALFWAY THERE.':pct<90?'ALMOST DONE.':'COMPLETED.'
 
   return (
-    <div className="min-h-screen bg-[#F7F3EE]">
+    <div style={{ minHeight:'100vh', background:'#3C091E', fontFamily:MONO, color:'#F0EDE8', paddingBottom:72 }}>
+      <style>{CSS}</style>
 
-      <nav className="sticky top-0 z-50 bg-[#F7F3EE] border-b border-[#EAE4DC] px-5 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-[#C0392B] rounded-xl flex items-center justify-center">
-            <span className="text-[#F4C430] font-black text-sm">G</span>
+      {/* NAV */}
+      <nav style={{
+        position:'fixed', top:0, left:0, right:0, zIndex:200,
+        height:52, padding:'0 20px',
+        display:'flex', alignItems:'center', justifyContent:'space-between',
+        background:'rgba(42,5,21,0.92)', backdropFilter:'blur(28px)',
+        borderBottom:'1px solid rgba(240,237,232,0.055)',
+      }}>
+        <Link to="/" style={{ textDecoration:'none', display:'flex', alignItems:'center', gap:10 }}>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:2.5 }}>
+            {[0,1,2,3].map(function(i){ return <div key={i} style={{ width:7, height:7, borderRadius:1, background:i<2?'#BE473D':'#C8A84B' }} /> })}
           </div>
-          <span className="font-black text-[#1C0A08] text-sm">GradReady PH</span>
-        </div>
-        <Link
-          to="/dashboard/profile"
-          className="w-8 h-8 rounded-full bg-[#F4C430] flex items-center justify-center text-xs font-black text-[#1C0A08]"
-        >
-          {initials}
+          <span style={{ fontSize:11, letterSpacing:4, color:'rgba(240,237,232,0.85)' }}>GRADREADY</span>
         </Link>
+        <div style={{ display:'flex', alignItems:'center', gap:14 }}>
+          <span style={{ fontSize:8, letterSpacing:2, color:'rgba(240,237,232,0.22)' }}>
+            <span style={{ color:'#1E8449' }}>●</span> ONLINE
+          </span>
+          <Link to="/dashboard/profile" style={{
+            textDecoration:'none', width:28, height:28,
+            background:'#BE473D', display:'flex', alignItems:'center', justifyContent:'center',
+            fontFamily:MONO, fontSize:12, color:'#F0EDE8',
+          }}>{init}</Link>
+        </div>
       </nav>
 
-      <div className="max-w-2xl mx-auto px-5 py-6 pb-24">
+      {/* ══ HERO — 100vh, responsive ══ */}
+      <section style={{
+        height:'100vh', position:'relative', overflow:'hidden',
+        display:'flex', alignItems:'center', justifyContent:'center',
+        paddingTop:52,
+      }}>
+        {/* Grid */}
+        <div style={{ position:'absolute', inset:0, pointerEvents:'none',
+          backgroundImage:'linear-gradient(rgba(240,237,232,0.048) 1px,transparent 1px),linear-gradient(90deg,rgba(240,237,232,0.048) 1px,transparent 1px)',
+          backgroundSize:'52px 52px' }} />
+        {/* Scanline */}
+        <div style={{ position:'absolute', left:0, right:0, height:2, zIndex:1, pointerEvents:'none',
+          background:'linear-gradient(90deg,transparent,rgba(190,71,61,0.16),transparent)',
+          animation:'scan 9s linear infinite' }} />
+        {/* Central glow */}
+        <div style={{ position:'absolute', top:'50%', left:'50%', transform:'translate(-50%,-50%)',
+          width:'min(88vw,700px)', height:'min(88vw,700px)', borderRadius:'50%', pointerEvents:'none',
+          background:'radial-gradient(circle,rgba(190,71,61,0.22) 0%,rgba(190,71,61,0.07) 38%,transparent 68%)',
+          animation:'glow 5s ease-in-out infinite' }} />
+        <div style={{ position:'absolute', top:'50%', left:'50%', transform:'translate(-50%,-50%)',
+          width:'min(44vw,340px)', height:'min(44vw,340px)', borderRadius:'50%', pointerEvents:'none',
+          background:'radial-gradient(circle,rgba(200,138,75,0.09) 0%,transparent 70%)' }} />
 
-        <div className="bg-[#1C0A08] rounded-2xl p-5 mb-5 relative overflow-hidden">
-          <div className="absolute right-[-20px] top-[-20px] w-28 h-28 rounded-full bg-[#C0392B] opacity-30" />
-          <div className="absolute right-8 bottom-[-20px] w-16 h-16 rounded-full bg-[#F4C430] opacity-15" />
-          <div className="inline-block bg-[#C0392B] text-white text-xs font-bold px-3 py-1 rounded-full mb-3 tracking-wide uppercase">
-            {(profile && profile.region) || 'Philippines'}
-          </div>
-          <h1 className="text-xl font-black text-white leading-tight mb-1">
-            {getGreeting()},
-            <span className="text-[#F4C430]"> {firstName}!</span>
-          </h1>
-          <p className="text-xs text-white/50 mb-4">{getWeekMessage()}</p>
-          <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-[#F4C430] rounded-full transition-all duration-700"
-              style={{ width: pct + '%' }}
-            />
-          </div>
-          <div className="flex justify-between mt-1.5">
-            <span className="text-xs text-white/40">Journey progress</span>
-            <span className="text-xs font-bold text-[#F4C430]">{pct}% complete</span>
+        {/* 3D blocks — only visible on wider screens */}
+        <div style={{ position:'absolute', top:64, right:-16, perspective:700, zIndex:3, pointerEvents:'none' }}>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:8,
+            transform:'rotateX(20deg) rotateY(-26deg)', transformStyle:'preserve-3d',
+            animation:'floatA 10s ease-in-out infinite' }}>
+            {Array(9).fill(0).map(function(_,i){
+              return <div key={i} style={{ width:44, height:28,
+                background:'linear-gradient(135deg,rgba(139,26,42,'+(0.38+(i%3)*0.14)+') 0%,rgba(60,9,30,0.9) 100%)',
+                borderRadius:5, boxShadow:'0 4px 12px rgba(0,0,0,0.5)', transform:'translateZ('+(i*3.5)+'px)' }} />
+            })}
           </div>
         </div>
 
-        {!progressLoading && (
-          <div className="grid grid-cols-3 gap-3 mb-5">
-            <StatCard
-              label="Roadmap"
-              value={completed + '/' + total}
-              sub="tasks done"
-              accent="#C0392B"
-              pct={pct}
-            />
-            <StatCard
-              label="Gov regs"
-              value={govDoneCount + '/' + GOV_TOTAL}
-              sub="registered"
-              accent="#1E8449"
-              pct={Math.round((govDoneCount / GOV_TOTAL) * 100)}
-            />
-            <StatCard
-              label="Profile"
-              value={pct + '%'}
-              sub="complete"
-              accent="#F4C430"
-              pct={pct}
-            />
-          </div>
-        )}
+        {/* Cubes */}
+        <Cube x={2}  y={12} s={52} r={15}  a="floatA" d={0}   />
+        <Cube x={88} y={16} s={34} r={-20} a="floatB" d={1.8} />
+        <Cube x={5}  y={72} s={28} r={20}  a="floatC" d={2.4} />
+        <Cube x={91} y={66} s={56} r={-8}  a="floatA" d={0.9} />
+        <Cube x={44} y={5}  s={18} r={35}  a="floatB" d={3.1} />
+        <Cube x={1}  y={44} s={14} r={-16} a="floatB" d={3.6} />
 
-        <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">
-          What do you want to do?
-        </p>
-        <div className="grid grid-cols-2 gap-3 mb-5">
-          {NAV_ITEMS.map(function(item) {
-            return (
-              <Link
-                key={item.to}
-                to={item.to}
-                className={item.color + ' rounded-2xl p-4 border border-[#EAE4DC] hover:scale-[1.02] active:scale-[0.98] transition-transform'}
-              >
-                <div className="text-2xl mb-3">{item.icon}</div>
-                <div className={'text-sm font-bold mb-1 ' + (item.dark ? 'text-[#F4C430]' : 'text-[#1C0A08]')}>
-                  {item.label}
-                </div>
-                <div className={'text-xs leading-relaxed ' + (item.dark ? 'text-white/50' : 'text-gray-400')}>
-                  {item.desc}
-                </div>
+        {/* Diagonals */}
+        {[{l:'6%',t:'22%',a:-26,w:220},{l:'54%',t:'8%',a:14,w:170},{l:'0',t:'74%',a:-10,w:300},{l:'66%',t:'72%',a:20,w:160}].map(function(d,i){
+          return <div key={i} style={{ position:'absolute', left:d.l, top:d.t, width:d.w, height:1,
+            background:'rgba(240,237,232,0.05)', transform:'rotate('+d.a+'deg)', transformOrigin:'left center', pointerEvents:'none' }} />
+        })}
+
+        {/* Binary */}
+        {[['6%','15%','10100110_'],['70%','28%','01001101_'],['12%','80%','00110101_'],['80%','50%','01010011_']].map(function(d,i){
+          return <div key={i} style={{ position:'absolute', left:d[0], top:d[1], pointerEvents:'none',
+            fontFamily:'monospace', fontSize:9, color:'rgba(240,237,232,0.09)', letterSpacing:2, userSelect:'none' }}>{d[2]}</div>
+        })}
+
+        {/* Plus markers */}
+        {[[28,40],[72,16],[56,62],[18,88],[84,76]].map(function(p,i){
+          return <div key={i} style={{ position:'absolute', left:p[0]+'%', top:p[1]+'%',
+            color:'rgba(240,237,232,0.1)', fontSize:14, pointerEvents:'none', userSelect:'none' }}>+</div>
+        })}
+
+        {/* Targeting reticles */}
+        {[280,180,100].map(function(sz,i){
+          return <div key={i} style={{ position:'absolute', top:'50%', left:'50%', transform:'translate(-50%,-50%)',
+            width:sz, height:sz, borderRadius:'50%', border:'1px solid rgba(190,71,61,'+(0.07-i*0.018)+')', pointerEvents:'none' }} />
+        })}
+        <div style={{ position:'absolute', top:'50%', left:'50%', transform:'translate(-50%,-50%)', width:320, height:1, background:'linear-gradient(90deg,transparent,rgba(190,71,61,0.07),transparent)', pointerEvents:'none' }} />
+        <div style={{ position:'absolute', top:'50%', left:'50%', transform:'translate(-50%,-50%)', width:1, height:320, background:'linear-gradient(to bottom,transparent,rgba(190,71,61,0.07),transparent)', pointerEvents:'none' }} />
+
+        {/* Ambient data labels — only show on desktop via media query trick: use tiny text */}
+        <div style={{ position:'absolute', left:'3%', top:'18%', fontFamily:'monospace', fontSize:8, color:'rgba(240,237,232,0.08)', letterSpacing:1.5, lineHeight:1.8, pointerEvents:'none' }}>// TIN REGISTRATION<br/><span style={{ fontSize:7 }}>IS · 01 · 02 · 03</span></div>
+        <div style={{ position:'absolute', right:'3%', bottom:'14%', fontFamily:'monospace', fontSize:8, color:'rgba(240,237,232,0.07)', letterSpacing:1.5, lineHeight:1.8, textAlign:'right', pointerEvents:'none' }}>// BOARD EXAM PREP<br/><span style={{ fontSize:7 }}>IS · 01 · 02 · 03</span></div>
+
+        {/* ══ HERO CONTENT GRID ══ */}
+        <div className="hero-grid" style={{ position:'relative', zIndex:10, width:'100%', height:'100%' }}>
+
+          {/* LEFT — region tag + vertical text (desktop only) */}
+          <div className="hero-left">
+            <div className="u1" style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'5px 14px 5px 10px', border:'1px solid rgba(190,71,61,0.38)', marginBottom:24 }}>
+              <span style={{ fontSize:9, color:'#BE473D' }}>00</span>
+              <span style={{ fontSize:9, letterSpacing:2, color:'rgba(240,237,232,0.55)' }}>{region}</span>
+            </div>
+            <div style={{ width:1, height:56, background:'linear-gradient(to bottom,rgba(240,237,232,0.18),transparent)', marginBottom:20 }} />
+            <div style={{ fontFamily:MONO, fontSize:9, color:'rgba(240,237,232,0.25)', letterSpacing:3, writingMode:'vertical-rl', transform:'rotate(180deg)' }}>{hi}</div>
+          </div>
+
+          {/* CENTER — name + status + progress + CTAs */}
+          <div className="hero-center" style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center' }}>
+
+            {/* Mobile-only region tag */}
+            <div className="u1" style={{ marginBottom:16 }}>
+              <div style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'4px 12px 4px 8px', border:'1px solid rgba(190,71,61,0.35)' }}>
+                <span style={{ fontSize:9, color:'#BE473D' }}>00</span>
+                <span style={{ fontSize:9, letterSpacing:2, color:'rgba(240,237,232,0.5)' }}>{region}</span>
+              </div>
+            </div>
+
+            {/* Greeting */}
+            <div className="u2" style={{ fontFamily:MONO, fontSize:11, color:'rgba(240,237,232,0.3)', letterSpacing:3, marginBottom:6 }}>
+              {hi},<span style={{ animation:'blink 1.2s infinite', marginLeft:3 }}>_</span>
+            </div>
+
+            {/* NAME */}
+            <div className="u3 hero-name" style={{ fontFamily:MONO, color:'#F0EDE8', fontWeight:'normal' }}>
+              {name}
+            </div>
+
+            {/* STATUS WORD — red + glowing underline */}
+            <div className="u4" style={{ marginBottom:32 }}>
+              <div style={{ position:'relative', display:'inline-block' }}>
+                <div style={{ position:'absolute', bottom:4, left:0, right:0, height:3, background:'#BE473D', boxShadow:'0 0 18px rgba(190,71,61,0.85), 0 0 36px rgba(190,71,61,0.35)' }} />
+                <div className="hero-mood" style={{ fontFamily:MONO, color:'#BE473D', fontWeight:'normal' }}>{mood}</div>
+              </div>
+            </div>
+
+            {/* Progress bar */}
+            <div className="u5" style={{ width:'min(360px,84vw)' }}>
+              <div style={{ display:'flex', justifyContent:'space-between', marginBottom:6 }}>
+                <span style={{ fontFamily:MONO, fontSize:9, color:'rgba(240,237,232,0.28)', letterSpacing:2 }}>// JOURNEY PROGRESS</span>
+                <span style={{ fontFamily:MONO, fontSize:9, color:'#BE473D' }}>{pct}%</span>
+              </div>
+              <div style={{ height:2, background:'rgba(240,237,232,0.07)', position:'relative', overflow:'hidden' }}>
+                <div style={{ position:'absolute', inset:0, width:pct+'%', background:'linear-gradient(90deg,#BE473D,#C8A84B)', boxShadow:'0 0 12px rgba(190,71,61,0.8)', transition:'width 1.4s cubic-bezier(.16,1,.3,1)' }} />
+              </div>
+              <div style={{ display:'flex', justifyContent:'space-between', marginTop:6 }}>
+                <span style={{ fontFamily:MONO, fontSize:8, color:'rgba(240,237,232,0.18)' }}>{done}/{total} TASKS</span>
+                <span style={{ fontFamily:MONO, fontSize:8, color:'rgba(240,237,232,0.18)' }}>GOV {gov}/6 DONE</span>
+              </div>
+            </div>
+
+            {/* Mobile stats */}
+            <div className="u5 stats-mobile">
+              {[{l:'TASKS',v:done+'/'+total},{l:'GOV REGS',v:gov+'/6'},{l:'PROGRESS',v:pct+'%'}].map(function(s){
+                return (
+                  <div key={s.l} style={{ textAlign:'center' }}>
+                    <div style={{ fontFamily:MONO, fontSize:7, color:'rgba(240,237,232,0.22)', letterSpacing:1.5, marginBottom:2 }}>{s.l}</div>
+                    <div style={{ fontFamily:MONO, fontSize:18, color:'#F0EDE8', letterSpacing:'-1px' }}>{s.v}</div>
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* CTA buttons */}
+            <div className="u6 cta-row">
+              <Link to="/dashboard/roadmap" className="cta-a" style={{ textDecoration:'none', padding:'12px 26px', border:'1px solid rgba(240,237,232,0.28)', background:'transparent', fontFamily:MONO, fontSize:10, color:'rgba(240,237,232,0.8)', letterSpacing:2.5 }}>
+                VIEW ROADMAP
               </Link>
-            )
-          })}
-        </div>
-
-        <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">
-          Ask Kuya AI
-        </p>
-        <div className="flex gap-2 overflow-x-auto pb-2 mb-5">
-          {QUICK_ASKS.map(function(q) {
-            return (
-              <button
-                key={q}
-                onClick={function() {
-                  navigate('/dashboard/chat', { state: { initialMessage: q } })
-                }}
-                className="bg-white border border-[#EAE4DC] rounded-full px-4 py-2 text-xs font-medium text-[#1C0A08] whitespace-nowrap hover:border-[#C0392B] transition-colors flex-shrink-0"
-              >
-                {q}
-              </button>
-            )
-          })}
-        </div>
-
-        <Link
-          to="/dashboard/chat"
-          className="bg-[#1C0A08] rounded-2xl p-4 flex items-center gap-3 hover:opacity-90 transition-opacity"
-        >
-          <div className="w-12 h-12 rounded-full bg-[#F4C430] flex items-center justify-center text-2xl flex-shrink-0">
-            🤙
-          </div>
-          <div>
-            <div className="text-sm font-bold text-[#F4C430]">Kuya AI is ready</div>
-            <div className="text-xs text-white/50 mt-0.5 leading-relaxed">
-              Uy {firstName}! May tanong ka ba? Nandito ako para tulungan ka!
+              <Link to="/dashboard/chat" className="cta-b" style={{ textDecoration:'none', padding:'12px 26px', border:'1px solid rgba(240,237,232,0.1)', background:'rgba(240,237,232,0.03)', fontFamily:MONO, fontSize:10, color:'rgba(240,237,232,0.4)', letterSpacing:2.5 }}>
+                ASK KUYA AI
+              </Link>
             </div>
           </div>
-          <div className="ml-auto text-white/30 text-xl flex-shrink-0">›</div>
-        </Link>
+
+          {/* RIGHT — desktop stats column */}
+          <div className="hero-right stats-desktop">
+            <div style={{ width:1, height:56, background:'linear-gradient(to bottom,rgba(240,237,232,0.18),transparent)', marginBottom:24 }} />
+            {[{l:'TASKS DONE',v:done+'/'+total},{l:'GOV REGS',v:gov+'/6'},{l:'PROGRESS',v:pct+'%'}].map(function(s,i){
+              return (
+                <div key={s.l} className="u1" style={{ textAlign:'right', marginBottom:i<2?22:0, borderRight:'2px solid rgba(190,71,61,'+(i===0?0.55:0.18)+')', paddingRight:14 }}>
+                  <div style={{ fontFamily:MONO, fontSize:8, color:'rgba(240,237,232,0.25)', letterSpacing:2, marginBottom:4 }}>{s.l}</div>
+                  <div style={{ fontFamily:MONO, fontSize:26, color:'#F0EDE8', letterSpacing:'-1px', lineHeight:1 }}>{s.v}</div>
+                </div>
+              )
+            })}
+            <div style={{ width:1, height:56, background:'linear-gradient(to top,rgba(240,237,232,0.18),transparent)', marginTop:24 }} />
+          </div>
+        </div>
+
+        {/* Scroll cue */}
+        <div className="u7" style={{ position:'absolute', bottom:20, left:'50%', transform:'translateX(-50%)', display:'flex', flexDirection:'column', alignItems:'center', gap:5, zIndex:10, cursor:'pointer', opacity:0.3 }}
+          onClick={function(){ document.getElementById('db-body')?.scrollIntoView({ behavior:'smooth' }) }}>
+          <span style={{ fontFamily:MONO, fontSize:8, letterSpacing:3 }}>EXPLORE</span>
+          <div style={{ width:1, height:28, background:'rgba(240,237,232,0.6)' }} />
+          <div style={{ width:7, height:7, border:'1px solid rgba(240,237,232,0.6)', transform:'rotate(45deg)', marginTop:-4 }} />
+        </div>
+      </section>
+
+      {/* MARQUEE */}
+      <div style={{ background:'#BE473D', borderTop:'1px solid rgba(60,9,30,0.3)', borderBottom:'1px solid rgba(60,9,30,0.3)', padding:'11px 0', overflow:'hidden' }}>
+        <div style={{ display:'flex', animation:'mq 30s linear infinite', whiteSpace:'nowrap' }}>
+          {Array(4).fill(['TIN REGISTRATION','·','SSS','·','PHILHEALTH','·','PAG-IBIG','·','NBI CLEARANCE','·','PHILSYS ID','·','PRC BOARD EXAM','·','KUYA AI','·','JOB TRACKER','·','SALARY BOARD','·']).flat().map(function(item,i){
+            return <span key={i} style={{ fontFamily:MONO, fontSize:10, letterSpacing:3, color:item==='·'?'rgba(240,237,232,0.45)':'#F0EDE8', marginRight:item==='·'?16:24 }}>{item}</span>
+          })}
+        </div>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#EAE4DC] flex items-center z-50">
-        {[
-          { icon: '🏠', label: 'Home', to: '/dashboard' },
-          { icon: '🗺️', label: 'Roadmap', to: '/dashboard/roadmap' },
-          { icon: '🤙', label: 'Kuya AI', to: '/dashboard/chat' },
-          { icon: '💼', label: 'Jobs', to: '/dashboard/jobs' },
-          { icon: '👤', label: 'Profile', to: '/dashboard/profile' },
-        ].map(function(item) {
+      {/* BODY */}
+      <div id="db-body">
+
+        {/* FEATURES */}
+        <section style={{ background:'#3C091E', position:'relative', overflow:'hidden' }}>
+          <div style={{ position:'absolute', inset:0, backgroundImage:'linear-gradient(rgba(240,237,232,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(240,237,232,0.03) 1px,transparent 1px)', backgroundSize:'52px 52px', pointerEvents:'none' }} />
+          <div style={{ position:'absolute', top:0, right:0, width:250, height:250, borderRadius:'50%', background:'radial-gradient(circle,rgba(190,71,61,0.07) 0%,transparent 70%)', pointerEvents:'none' }} />
+          {[['4%','8%','10100110_'],['78%','30%','01001101_']].map(function(d,i){ return <div key={i} style={{ position:'absolute', left:d[0], top:d[1], fontFamily:'monospace', fontSize:8.5, color:'rgba(240,237,232,0.07)', letterSpacing:2, pointerEvents:'none' }}>{d[2]}</div> })}
+
+          <div style={{ maxWidth:600, margin:'0 auto', padding:'32px 20px 0', position:'relative', zIndex:2 }}>
+            <div style={{ display:'inline-flex', alignItems:'center', gap:10, marginBottom:22 }}>
+              <div style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'5px 14px 5px 10px', border:'1px solid rgba(240,237,232,0.1)' }}>
+                <span style={{ fontSize:9, color:'#BE473D' }}>02</span>
+                <span style={{ fontSize:9, letterSpacing:2.5, color:'rgba(240,237,232,0.38)' }}>FEATURES</span>
+              </div>
+              <div style={{ display:'flex', gap:3 }}>
+                <div style={{ width:2, height:16, background:'rgba(240,237,232,0.14)' }} />
+                <div style={{ width:2, height:16, background:'rgba(240,237,232,0.14)' }} />
+              </div>
+            </div>
+
+            <div style={{ borderTop:'1px solid rgba(240,237,232,0.07)' }}>
+              {FEATURES.map(function(f){
+                return (
+                  <Link key={f.to} to={f.to} className="feat-row" style={{ textDecoration:'none', display:'flex', alignItems:'center', gap:16, padding:'16px 12px 16px 14px', borderBottom:'1px solid rgba(240,237,232,0.06)', background:'transparent' }}>
+                    <span className="fnum" style={{ fontFamily:MONO, fontSize:9, color:'rgba(240,237,232,0.18)', letterSpacing:1, flexShrink:0, width:22, transition:'color .18s' }}>{f.n}</span>
+                    <div style={{ flex:1, minWidth:0 }}>
+                      <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:3 }}>
+                        <span className="flbl" style={{ fontFamily:MONO, fontSize:12, color:'rgba(240,237,232,0.65)', letterSpacing:.5, transition:'color .18s' }}>{f.label}</span>
+                        {f.hot && <span style={{ fontFamily:'monospace', fontSize:7, color:'#BE473D', padding:'2px 6px', border:'1px solid rgba(190,71,61,0.4)', letterSpacing:1, flexShrink:0 }}>AI</span>}
+                      </div>
+                      <div style={{ fontFamily:'monospace', fontSize:9.5, color:'rgba(240,237,232,0.22)', letterSpacing:.3 }}>{f.sub}</div>
+                    </div>
+                    <span className="farr" style={{ fontFamily:MONO, fontSize:18, color:'rgba(240,237,232,0.18)', flexShrink:0, opacity:0.3, transition:'all .18s' }}>›</span>
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+          <div style={{ height:32 }} />
+        </section>
+
+        {/* QUICK ASK + KUYA — light section */}
+        <section style={{ background:'#F0EDE8', position:'relative', overflow:'hidden', padding:'32px 20px' }}>
+          <Cube x={2} y={8} s={48} r={14} a="floatA" d={0} light />
+          <Cube x={90} y={6} s={34} r={-20} a="floatB" d={1.5} light />
+          <Cube x={4} y={74} s={40} r={20} a="floatC" d={0.8} light />
+          <Cube x={88} y={70} s={50} r={-12} a="floatA" d={2.1} light />
+          <div style={{ position:'absolute', left:0, top:'42%', width:'55%', height:1, background:'rgba(60,9,30,0.05)', transform:'rotate(-9deg)', transformOrigin:'left', pointerEvents:'none' }} />
+          <div style={{ position:'absolute', right:0, top:'68%', width:'42%', height:1, background:'rgba(60,9,30,0.04)', transform:'rotate(14deg)', transformOrigin:'right', pointerEvents:'none' }} />
+          <div style={{ position:'absolute', left:'3%', bottom:'5%', fontFamily:'monospace', fontSize:8, color:'rgba(60,9,30,0.13)', letterSpacing:1.5, lineHeight:1.8, pointerEvents:'none' }}>// CAREER DATA<br/><span style={{ fontSize:7 }}>IS · 01 · 02 · 03</span></div>
+
+          <div style={{ maxWidth:560, margin:'0 auto', position:'relative', zIndex:2 }}>
+            <div style={{ display:'inline-flex', alignItems:'center', gap:10, marginBottom:18 }}>
+              <div style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'5px 14px 5px 10px', border:'1px solid rgba(60,9,30,0.14)' }}>
+                <span style={{ fontSize:9, color:'#BE473D' }}>03</span>
+                <span style={{ fontSize:9, letterSpacing:2.5, color:'rgba(60,9,30,0.42)' }}>ASK KUYA AI</span>
+              </div>
+              <div style={{ display:'flex', gap:3 }}>
+                <div style={{ width:2, height:16, background:'rgba(60,9,30,0.18)' }} />
+                <div style={{ width:2, height:16, background:'rgba(60,9,30,0.18)' }} />
+              </div>
+            </div>
+
+            <div style={{ borderTop:'1px solid rgba(60,9,30,0.08)', marginBottom:16 }}>
+              {QUICK.map(function(q){
+                return (
+                  <button key={q} className="qrow" onClick={function(){ navigate('/dashboard/chat', { state:{ initialMessage:q } }) }}
+                    style={{ width:'100%', padding:'14px 16px', border:'none', borderBottom:'1px solid rgba(60,9,30,0.07)', background:'transparent', cursor:'pointer', fontFamily:MONO, fontSize:10, color:'rgba(60,9,30,0.5)', letterSpacing:.5, textAlign:'left', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+                    {q}
+                    <span className="qarr" style={{ fontFamily:MONO, fontSize:16, color:'#BE473D', opacity:0, transition:'opacity .18s', flexShrink:0 }}>›</span>
+                  </button>
+                )
+              })}
+            </div>
+
+            <Link to="/dashboard/chat" className="kuya-link" style={{ textDecoration:'none', display:'flex', alignItems:'center', gap:16, padding:'16px 18px', border:'1px solid rgba(60,9,30,0.1)', background:'rgba(60,9,30,0.035)' }}>
+              <div style={{ width:40, height:40, background:'#BE473D', display:'flex', alignItems:'center', justifyContent:'center', fontSize:20, flexShrink:0 }}>🤙</div>
+              <div style={{ flex:1, minWidth:0 }}>
+                <div style={{ fontFamily:MONO, fontSize:11, color:'#3C091E', letterSpacing:1.5, marginBottom:2 }}>KUYA AI IS READY</div>
+                <div style={{ fontFamily:'monospace', fontSize:9, color:'rgba(60,9,30,0.38)', lineHeight:1.6 }}>
+                  <span style={{ color:'#1E8449' }}>●</span> ONLINE · UY {name}! ANONG TANONG MO?
+                </div>
+              </div>
+              <div style={{ fontFamily:MONO, fontSize:20, color:'rgba(60,9,30,0.18)', flexShrink:0 }}>›</div>
+            </Link>
+          </div>
+        </section>
+      </div>
+
+      {/* BOTTOM NAV */}
+      <div style={{ position:'fixed', bottom:0, left:0, right:0, zIndex:200, background:'rgba(42,5,21,0.97)', backdropFilter:'blur(24px)', borderTop:'1px solid rgba(240,237,232,0.055)', display:'flex' }}>
+        {[{icon:'⌂',label:'HOME',to:'/dashboard'},{icon:'◈',label:'ROADMAP',to:'/dashboard/roadmap'},{icon:'⊕',label:'KUYA AI',to:'/dashboard/chat'},{icon:'◧',label:'TRACKER',to:'/dashboard/tracker'},{icon:'◌',label:'PROFILE',to:'/dashboard/profile'}].map(function(item){
+          var active = typeof window !== 'undefined' && window.location.pathname === item.to
           return (
-            <Link
-              key={item.to}
-              to={item.to}
-              className="flex-1 flex flex-col items-center gap-1 py-3 text-gray-400 hover:text-[#C0392B] transition-colors"
-            >
-              <span className="text-xl">{item.icon}</span>
-              <span className="text-xs font-semibold">{item.label}</span>
+            <Link key={item.to} to={item.to} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:3, padding:'10px 0 8px', textDecoration:'none', color:active?'#BE473D':'rgba(240,237,232,0.28)', borderTop:active?'1px solid #BE473D':'1px solid transparent', marginTop:-1, transition:'color .15s' }}>
+              <span style={{ fontSize:14 }}>{item.icon}</span>
+              <span style={{ fontFamily:MONO, fontSize:8, letterSpacing:1.5 }}>{item.label}</span>
             </Link>
           )
         })}

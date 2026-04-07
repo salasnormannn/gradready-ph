@@ -4,22 +4,37 @@ import { useProfile } from '../../hooks/useProfile'
 import useAuthStore from '../../store/authStore'
 import { useQueryClient } from '@tanstack/react-query'
 
-const STATUS_LABELS = {
-  job_hunting: { label: 'Job hunting', emoji: '🔍' },
-  employed: { label: 'Employed', emoji: '💼' },
-  freelancing: { label: 'Freelancing', emoji: '💻' },
-  board_exam: { label: 'Board exam prep', emoji: '📚' },
-  further_studies: { label: 'Further studies', emoji: '🎓' },
+const MONO = 'Share Tech Mono, monospace'
+
+var STATUS_MAP = {
+  job_hunting:     { label:'JOB HUNTING',     n:'01' },
+  employed:        { label:'EMPLOYED',         n:'02' },
+  freelancing:     { label:'FREELANCING',      n:'03' },
+  board_exam:      { label:'BOARD EXAM PREP', n:'04' },
+  further_studies: { label:'FURTHER STUDIES', n:'05' },
 }
 
-function Field({ label, value, placeholder = 'Not set' }) {
+function Row(props) {
   return (
-    <div className="bg-white border border-[#EAE4DC] rounded-2xl px-4 py-3">
-      <div className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-1">
-        {label}
+    <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:16, padding:'11px 0', borderBottom:'1px solid rgba(240,237,232,0.05)' }}>
+      <span style={{ fontFamily:MONO, fontSize:9, color:'rgba(240,237,232,0.28)', letterSpacing:2, flexShrink:0, paddingTop:1 }}>{props.label}</span>
+      <span style={{ fontFamily:'monospace', fontSize:11, color: props.value ? '#F0EDE8' : 'rgba(240,237,232,0.18)', letterSpacing:.3, textAlign:'right', lineHeight:1.5 }}>
+        {props.value || '—'}
+      </span>
+    </div>
+  )
+}
+
+function SectionTag(props) {
+  return (
+    <div style={{ display:'inline-flex', alignItems:'center', gap:10, marginBottom:14, marginTop: props.mt || 0 }}>
+      <div style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'4px 12px 4px 8px', border:'1px solid rgba(240,237,232,0.1)' }}>
+        <span style={{ fontSize:9, color:'#BE473D' }}>{props.n}</span>
+        <span style={{ fontSize:9, letterSpacing:2, color:'rgba(240,237,232,0.4)' }}>{props.label}</span>
       </div>
-      <div className={`text-sm font-semibold ${value ? 'text-[#1C0A08]' : 'text-gray-300'}`}>
-        {value || placeholder}
+      <div style={{ display:'flex', gap:3 }}>
+        <div style={{ width:2, height:13, background:'rgba(240,237,232,0.15)' }} />
+        <div style={{ width:2, height:13, background:'rgba(240,237,232,0.15)' }} />
       </div>
     </div>
   )
@@ -31,91 +46,109 @@ export default function ProfilePage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
 
-  const firstName = profile?.fullName?.split(' ')[0] ?? '?'
-  const initials = profile?.fullName
-    ?.split(' ')
-    .map(n => n[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase() ?? '?'
+  var initials = profile?.fullName?.split(' ').map(function(n) { return n[0] }).slice(0,2).join('').toUpperCase() ?? '?'
+  var status = STATUS_MAP[profile?.status]
 
-  const status = STATUS_LABELS[profile?.status]
-
-  const handleLogout = () => {
+  function handleLogout() {
     queryClient.clear()
     logout()
     navigate('/')
   }
 
   return (
-    <PageLayout title="My profile">
+    <PageLayout title="PROFILE" subtitle="// YOUR DETAILS">
+
       {isLoading ? (
-        <div className="flex flex-col gap-3">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="h-16 bg-white rounded-2xl animate-pulse
-              border border-[#EAE4DC]" />
-          ))}
+        <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+          {[1,2,3,4,5].map(function(i) {
+            return <div key={i} style={{ height:44, border:'1px solid rgba(240,237,232,0.05)', background:'rgba(240,237,232,0.02)' }} />
+          })}
         </div>
       ) : (
-        <div className="flex flex-col gap-3">
+        <div>
 
-          {/* Avatar hero */}
-          <div className="bg-[#1C0A08] rounded-2xl p-6 flex flex-col
-            items-center text-center mb-2">
-            <div className="w-20 h-20 rounded-full bg-[#F4C430] flex items-center
-              justify-center text-2xl font-black text-[#1C0A08] mb-4">
+          {/* ── AVATAR HERO — like landing dark info card ── */}
+          <div style={{ padding:'24px 20px', border:'1px solid rgba(240,237,232,0.08)', background:'rgba(240,237,232,0.03)', marginBottom:24, position:'relative', overflow:'hidden', textAlign:'center' }}>
+            {/* Corner brackets — like landing loader */}
+            {[{top:8,left:8},{top:8,right:8},{bottom:8,left:8},{bottom:8,right:8}].map(function(pos, i) {
+              return (
+                <div key={i} style={{ position:'absolute', ...pos, width:14, height:14,
+                  borderTop: pos.top !== undefined ? '1px solid rgba(190,71,61,0.35)' : 'none',
+                  borderBottom: pos.bottom !== undefined ? '1px solid rgba(190,71,61,0.35)' : 'none',
+                  borderLeft: pos.left !== undefined ? '1px solid rgba(190,71,61,0.35)' : 'none',
+                  borderRight: pos.right !== undefined ? '1px solid rgba(190,71,61,0.35)' : 'none',
+                }} />
+              )
+            })}
+            {/* Grid bg */}
+            <div style={{ position:'absolute', inset:0, backgroundImage:'linear-gradient(rgba(240,237,232,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(240,237,232,0.025) 1px,transparent 1px)', backgroundSize:'28px 28px', pointerEvents:'none' }} />
+            {/* Radial glow */}
+            <div style={{ position:'absolute', top:'30%', right:'10%', width:120, height:120, borderRadius:'50%', background:'radial-gradient(circle,rgba(190,71,61,0.12) 0%,transparent 70%)', pointerEvents:'none' }} />
+
+            {/* Avatar */}
+            <div style={{ width:56, height:56, background:'#BE473D', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:MONO, fontSize:20, color:'#F0EDE8', margin:'0 auto 14px', position:'relative', zIndex:1 }}>
               {initials}
             </div>
-            <div className="text-xl font-black text-white">{profile?.fullName}</div>
-            <div className="text-sm text-white/50 mt-1">{profile?.email}</div>
+
+            {/* Name */}
+            <div style={{ fontFamily:MONO, fontSize:'clamp(18px,5vw,26px)', color:'#F0EDE8', letterSpacing:'-0.5px', lineHeight:.95, marginBottom:4, position:'relative', zIndex:1 }}>
+              {profile?.fullName?.toUpperCase()}
+            </div>
+            <div style={{ position:'relative', display:'inline-block', zIndex:1 }}>
+              <div style={{ position:'absolute', bottom:1, left:'50%', transform:'translateX(-50%)', width:36, height:2, background:'#BE473D' }} />
+              <div style={{ fontFamily:'monospace', fontSize:10, color:'rgba(240,237,232,0.3)', letterSpacing:1, paddingTop:2 }}>{profile?.email}</div>
+            </div>
+
+            {/* Status tag */}
             {status && (
-              <div className="mt-3 inline-flex items-center gap-1.5 bg-white/10
-                px-3 py-1.5 rounded-full">
-                <span>{status.emoji}</span>
-                <span className="text-xs font-semibold text-white/70">{status.label}</span>
+              <div style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'5px 14px 5px 10px', border:'1px solid rgba(190,71,61,0.3)', background:'rgba(190,71,61,0.07)', marginTop:14, position:'relative', zIndex:1 }}>
+                <span style={{ fontSize:9, color:'#BE473D' }}>{status.n}</span>
+                <span style={{ fontFamily:MONO, fontSize:9, color:'rgba(240,237,232,0.55)', letterSpacing:2 }}>{status.label}</span>
               </div>
             )}
           </div>
 
-          <p className="text-xs font-bold uppercase tracking-widest text-gray-400">
-            Education
-          </p>
-          <Field label="Course" value={profile?.course} />
-          <Field label="School" value={profile?.school} />
-          <Field label="Graduation year" value={profile?.graduationYear} />
+          {/* ── EDUCATION ── */}
+          <SectionTag n="01" label="EDUCATION" />
+          <div style={{ border:'1px solid rgba(240,237,232,0.07)', padding:'0 14px', marginBottom:20 }}>
+            <Row label="COURSE"    value={profile?.course?.toUpperCase()} />
+            <Row label="SCHOOL"    value={profile?.school?.toUpperCase()} />
+            <Row label="GRAD YEAR" value={profile?.graduationYear?.toString()} />
+          </div>
 
-          <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mt-2">
-            Location
-          </p>
-          <Field label="Region" value={profile?.region} />
+          {/* ── LOCATION ── */}
+          <SectionTag n="02" label="LOCATION" />
+          <div style={{ border:'1px solid rgba(240,237,232,0.07)', padding:'0 14px', marginBottom:20 }}>
+            <Row label="REGION" value={profile?.region?.toUpperCase()} />
+          </div>
 
-          <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mt-2">
-            Account
-          </p>
-          <Field label="Email" value={profile?.email} />
-          <Field label="Member since" value={
-            profile?.createdAt
-              ? new Date(profile.createdAt).toLocaleDateString('en-PH',
-                  { year: 'numeric', month: 'long', day: 'numeric' })
-              : null
-          } />
+          {/* ── ACCOUNT ── */}
+          <SectionTag n="03" label="ACCOUNT" />
+          <div style={{ border:'1px solid rgba(240,237,232,0.07)', padding:'0 14px', marginBottom:28 }}>
+            <Row label="EMAIL" value={profile?.email} />
+            <Row label="MEMBER SINCE" value={
+              profile?.createdAt
+                ? new Date(profile.createdAt).toLocaleDateString('en-PH', { year:'numeric', month:'long', day:'numeric' }).toUpperCase()
+                : null
+            } />
+          </div>
 
-          {/* Actions */}
-          <div className="flex flex-col gap-2 mt-4">
-            <button
-              onClick={() => navigate('/dashboard/profile/edit')}
-              className="w-full bg-[#1C0A08] text-white font-bold py-3 rounded-2xl text-sm"
-            >
-              Edit profile
+          {/* ── ACTIONS — like landing CTA buttons ── */}
+          <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+            <button onClick={function() { navigate('/dashboard/profile/edit') }}
+              style={{ width:'100%', padding:'14px', background:'rgba(240,237,232,0.04)', border:'1px solid rgba(240,237,232,0.1)', fontFamily:MONO, fontSize:11, color:'#F0EDE8', letterSpacing:3, cursor:'pointer', transition:'all .2s' }}
+              onMouseEnter={function(e) { e.currentTarget.style.background='rgba(190,71,61,0.1)'; e.currentTarget.style.borderColor='rgba(190,71,61,0.4)' }}
+              onMouseLeave={function(e) { e.currentTarget.style.background='rgba(240,237,232,0.04)'; e.currentTarget.style.borderColor='rgba(240,237,232,0.1)' }}>
+              EDIT PROFILE
             </button>
-            <button
-              onClick={handleLogout}
-              className="w-full bg-white text-[#C0392B] font-bold py-3
-                rounded-2xl text-sm border border-[#C0392B]/20"
-            >
-              Sign out
+            <button onClick={handleLogout}
+              style={{ width:'100%', padding:'14px', background:'transparent', border:'1px solid rgba(190,71,61,0.2)', fontFamily:MONO, fontSize:11, color:'#BE473D', letterSpacing:3, cursor:'pointer', transition:'all .2s' }}
+              onMouseEnter={function(e) { e.currentTarget.style.background='rgba(190,71,61,0.08)'; e.currentTarget.style.borderColor='rgba(190,71,61,0.5)' }}
+              onMouseLeave={function(e) { e.currentTarget.style.background='transparent'; e.currentTarget.style.borderColor='rgba(190,71,61,0.2)' }}>
+              SIGN OUT
             </button>
           </div>
+
         </div>
       )}
     </PageLayout>

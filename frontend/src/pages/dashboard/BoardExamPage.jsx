@@ -1,361 +1,196 @@
 import { useState } from 'react'
 import PageLayout from '../../components/ui/PageLayout'
 import { useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation } from '@tanstack/react-query'
 import useAuthStore from '../../store/authStore'
 import api from '../../services/api'
 
-// ALL courses that require PRC board exam in the Philippines
-var BOARD_EXAM_KEYWORDS = [
-  'nursing',
-  'accountancy',
-  'accounting',
-  'civil engineering',
-  'electrical engineering',
-  'mechanical engineering',
-  'chemical engineering',
-  'electronics engineering',
-  'computer engineering',
-  'geodetic engineering',
-  'sanitary engineering',
-  'metallurgical engineering',
-  'ceramics engineering',
-  'architecture',
-  'medicine',
-  'pharmacy',
-  'education',
-  'dentistry',
-  'criminology',
-  'psychology',
-  'physical therapy',
-  'occupational therapy',
-  'radiologic technology',
-  'respiratory therapy',
-  'medical technology',
-  'nutrition',
-  'dietetics',
-  'social work',
-  'real estate',
-  'interior design',
-  'landscape architecture',
-  'naval architecture',
-  'master plumber',
-  'master electrician',
-  'electronics technician',
+const MONO = 'Share Tech Mono, monospace'
+const CSS = `
+  input::placeholder{color:rgba(240,237,232,0.2);}
+  input:focus,select:focus{outline:none;border-color:rgba(190,71,61,0.5)!important;}
+  select{font-family:'Share Tech Mono',monospace!important;}
+  .sched-row{transition:all .18s;border-left:2px solid transparent;}
+  .sched-row:hover{background:rgba(240,237,232,0.04)!important;border-left-color:#BE473D!important;}
+  .sched-row:hover .sched-name{color:#F0EDE8!important;}
+  .tip-row{transition:all .18s;}
+  .tip-row:hover{background:rgba(240,237,232,0.04)!important;}
+`
+
+function useBoardExams(){
+  return useQuery({queryKey:['board-exams'],queryFn:async function(){var r=await api.get('/api/board-exams');return r.data}})
+}
+
+function useStudyPlan(){
+  return useMutation({mutationFn:async function(data){var r=await api.post('/api/board-exams/study-plan',data);return r.data}})
+}
+
+var TIPS=[
+  {n:'01',title:'START 6 MONTHS BEFORE',sub:'Most reviewers recommend 6 months minimum for PRC board exams'},
+  {n:'02',title:'GET OFFICIAL REVIEWERS',sub:'Buy PRC-accredited review materials — not random online summaries'},
+  {n:'03',title:'DO PAST EXAM QUESTIONS',sub:'PRC releases past board exam questions — practice these religiously'},
+  {n:'04',title:'JOIN A REVIEW CENTER',sub:'Structured review centers give you accountability and peer pressure'},
+  {n:'05',title:'REGISTER EARLY',sub:'PRC opens registration months before the exam — don\'t miss the deadline'},
+  {n:'06',title:'PREPARE VALID IDs',sub:'You need government-issued IDs on exam day — expired IDs are rejected'},
 ]
 
-function isBoardExamCourse(course) {
-  if (!course) return false
-  var lower = course.toLowerCase()
-  // Check if any board exam keyword is in the course name
-  return BOARD_EXAM_KEYWORDS.some(function(keyword) {
-    return lower.includes(keyword)
-  })
+function daysUntil(dateStr){
+  if(!dateStr)return null
+  var target=new Date(dateStr)
+  var now=new Date()
+  var diff=Math.ceil((target-now)/(1000*60*60*24))
+  return diff
 }
 
-var WITTY_MESSAGES = [
-  {
-    emoji: '🎉',
-    title: 'Lucky you — no boards!',
-    message: "Congrats! Your course doesn't require a PRC licensure exam. While your batchmates are memorizing 10,000 practice questions and stress-eating review materials, you can focus 100% on landing your dream job. You are already ahead of the game!",
-    tip: 'Pro tip: Get industry certifications instead — AWS, Google, PMP, or CFA can boost your salary just as much as a board rating.',
-  },
-  {
-    emoji: '😌',
-    title: 'Board exam? Not your problem.',
-    message: "No PRC exam for you, friend! While nursing and engineering students are paying P15,000-P30,000 for review centers, you are out here living your best life. Channel that energy into polishing your resume and crushing job interviews instead.",
-    tip: 'Use Kuya AI to prep for job interviews instead — same nervous energy, way less paperwork and review books.',
-  },
-  {
-    emoji: '🏖️',
-    title: 'Free from the board exam grind!',
-    message: "Your diploma is your license. No oath-taking ceremony, no PRC ID renewal every 3 years, no review center fees. That is P15,000-P30,000 you get to keep. Maybe treat yourself — you deserve it for surviving college.",
-    tip: 'Invest that review center money instead. P20,000 in Pag-IBIG MP2 for 5 years = roughly P28,000+ with dividends.',
-  },
-]
-
-function useSchedules() {
-  return useQuery({
-    queryKey: ['board-exam-schedules'],
-    queryFn: async function() {
-      var res = await api.get('/api/board-exam/schedules')
-      return res.data
-    },
-  })
+function urgencyColor(days){
+  if(days===null)return 'rgba(240,237,232,0.25)'
+  if(days<0)return 'rgba(240,237,232,0.18)'
+  if(days<30)return '#BE473D'
+  if(days<90)return '#FBBF24'
+  return '#34D399'
 }
 
-function NotBoardExamUser(props) {
-  var navigate = props.navigate
-  var course = props.course
+export default function BoardExamPage(){
+  var {user}=useAuthStore()
+  var navigate=useNavigate()
+  var {data:exams=[],isLoading}=useBoardExams()
+  var studyPlan=useStudyPlan()
 
-  // Pick a consistent witty message based on course string
-  var msgIndex = course ? (course.length % WITTY_MESSAGES.length) : 0
-  var msg = WITTY_MESSAGES[msgIndex]
+  var [examDate,setExamDate]=useState('')
+  var [profession,setProfession]=useState(user?.course||'')
+  var [planResult,setPlanResult]=useState(null)
+  var [generating,setGenerating]=useState(false)
 
-  function handleJobSearch() {
-    navigate('/dashboard/jobs')
+  async function handleGenerate(e){
+    e.preventDefault()
+    if(!examDate||!profession)return
+    setGenerating(true)
+    try{
+      var result=await studyPlan.mutateAsync({examDate,profession})
+      setPlanResult(result)
+    }catch(err){
+      navigate('/dashboard/chat',{state:{initialMessage:'Create a board exam study plan for '+profession+' with exam date on '+examDate+'. Give me a week-by-week schedule.'}})
+    }finally{setGenerating(false)}
   }
 
-  function handleInterviewPrep() {
-    navigate('/dashboard/chat', {
-      state: {
-        initialMessage: 'Give me job interview tips and common interview questions for a fresh ' + (course || 'graduate') + ' in the Philippines.',
-      },
-    })
-  }
+  return(
+    <PageLayout title="BOARD EXAMS" subtitle="// PRC SCHEDULES + AI STUDY PLANS">
+      <style>{CSS}</style>
 
-  function handleCertifications() {
-    navigate('/dashboard/chat', {
-      state: {
-        initialMessage: 'What industry certifications should I get to boost my career as a ' + (course || 'fresh graduate') + ' in the Philippines? Rank them by ROI and cost.',
-      },
-    })
-  }
-
-  return (
-    <div className="flex flex-col gap-4">
-      <div className="bg-[#1C0A08] rounded-2xl p-5 text-center">
-        <div className="text-4xl mb-3">{msg.emoji}</div>
-        <div className="text-lg font-black text-[#F4C430] mb-2">{msg.title}</div>
-        <div className="text-sm text-white/70 leading-relaxed mb-4">{msg.message}</div>
-        <div className="bg-white/10 rounded-xl p-3 text-xs text-white/50 leading-relaxed italic">
-          {msg.tip}
+      {/* Intro */}
+      <div style={{padding:'16px',border:'1px solid rgba(240,237,232,0.08)',background:'rgba(240,237,232,0.02)',marginBottom:20,position:'relative',overflow:'hidden'}}>
+        <div style={{position:'absolute',top:-20,right:-20,width:100,height:100,borderRadius:'50%',background:'radial-gradient(circle,rgba(190,71,61,0.1) 0%,transparent 70%)',pointerEvents:'none'}}/>
+        <div style={{fontFamily:MONO,fontSize:9,color:'rgba(240,237,232,0.3)',letterSpacing:2,marginBottom:4}}>// PRC BOARD EXAM TRACKER</div>
+        <div style={{fontFamily:'monospace',fontSize:10,color:'rgba(240,237,232,0.4)',lineHeight:1.7}}>
+          Check upcoming PRC schedules and generate an AI study plan tailored to your exam date.
         </div>
       </div>
 
-      <div className="bg-white border border-[#EAE4DC] rounded-2xl p-4">
-        <div className="text-sm font-black text-[#1C0A08] mb-1">
-          Focus on these instead
-        </div>
-        <div className="text-xs text-gray-400 mb-3 leading-relaxed">
-          No boards? No problem. Here is what matters most for your career right now.
-        </div>
-        <div className="flex flex-col gap-2">
-          <button
-            onClick={handleJobSearch}
-            className="w-full bg-[#C0392B] text-white text-xs font-bold py-3 rounded-xl"
-          >
-            Find jobs matched to my course
-          </button>
-          <button
-            onClick={handleInterviewPrep}
-            className="w-full bg-[#1C0A08] text-[#F4C430] text-xs font-bold py-3 rounded-xl"
-          >
-            Prepare for job interviews
-          </button>
-          <button
-            onClick={handleCertifications}
-            className="w-full bg-[#F7F3EE] text-[#1C0A08] text-xs font-bold py-3 rounded-xl border border-[#EAE4DC]"
-          >
-            What certifications should I get?
-          </button>
-        </div>
+      {/* AI Study Plan Generator */}
+      <div style={{display:'inline-flex',alignItems:'center',gap:8,padding:'4px 12px 4px 8px',border:'1px solid rgba(240,237,232,0.1)',marginBottom:14}}>
+        <span style={{fontSize:9,color:'#BE473D'}}>01</span>
+        <span style={{fontSize:9,letterSpacing:2,color:'rgba(240,237,232,0.38)'}}>AI STUDY PLAN GENERATOR</span>
       </div>
 
-      <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4">
-        <div className="text-sm font-bold text-amber-800 mb-1">
-          Wait — are you sure?
+      <form onSubmit={handleGenerate}>
+        <div style={{marginBottom:12}}>
+          <div style={{fontFamily:MONO,fontSize:9,color:'rgba(240,237,232,0.3)',letterSpacing:2,marginBottom:6}}>// YOUR PROFESSION / COURSE</div>
+          <input type="text" value={profession} onChange={function(e){setProfession(e.target.value)}} placeholder="e.g. Nursing, Civil Engineering, CPA"
+            style={{width:'100%',padding:'12px 14px',background:'rgba(240,237,232,0.05)',border:'1px solid rgba(240,237,232,0.1)',color:'#F0EDE8',fontFamily:MONO,fontSize:12,letterSpacing:.5,transition:'border-color .18s'}}
+            onFocus={function(e){e.target.style.borderColor='rgba(190,71,61,0.5)'}}
+            onBlur={function(e){e.target.style.borderColor='rgba(240,237,232,0.1)'}}/>
         </div>
-        <div className="text-xs text-amber-700 mb-3 leading-relaxed">
-          Some courses have optional PRC exams or industry certifications.
-          Ask Kuya AI if there is anything specific for your field.
+        <div style={{marginBottom:16}}>
+          <div style={{fontFamily:MONO,fontSize:9,color:'rgba(240,237,232,0.3)',letterSpacing:2,marginBottom:6}}>// EXAM DATE</div>
+          <input type="date" value={examDate} onChange={function(e){setExamDate(e.target.value)}}
+            style={{width:'100%',padding:'12px 14px',background:'rgba(240,237,232,0.05)',border:'1px solid rgba(240,237,232,0.1)',color:'#F0EDE8',fontFamily:MONO,fontSize:12,letterSpacing:.5,transition:'border-color .18s',colorScheme:'dark'}}
+            onFocus={function(e){e.target.style.borderColor='rgba(190,71,61,0.5)'}}
+            onBlur={function(e){e.target.style.borderColor='rgba(240,237,232,0.1)'}}/>
         </div>
-        <button
-          onClick={function() {
-            navigate('/dashboard/chat', {
-              state: {
-                initialMessage: 'Do I need any PRC licensure exam or government certification for a ' + (course || 'fresh graduate') + ' in the Philippines?',
-              },
-            })
-          }}
-          className="bg-amber-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl"
-        >
-          Ask Kuya AI to double check
+        <button type="submit" disabled={generating||!examDate||!profession}
+          style={{width:'100%',padding:'13px',background:generating||!examDate||!profession?'rgba(190,71,61,0.3)':'#BE473D',border:'none',cursor:generating||!examDate||!profession?'not-allowed':'pointer',fontFamily:MONO,fontSize:10,color:'#F0EDE8',letterSpacing:3,marginBottom:20,transition:'opacity .18s'}}
+          onMouseEnter={function(e){if(!generating&&examDate&&profession)e.currentTarget.style.opacity='.85'}}
+          onMouseLeave={function(e){e.currentTarget.style.opacity='1'}}>
+          {generating?'GENERATING PLAN...':'GENERATE AI STUDY PLAN'}
         </button>
-      </div>
-    </div>
-  )
-}
+      </form>
 
-function ScheduleCard(props) {
-  var s = props.schedule
-
-  return (
-    <div className="bg-white border border-[#EAE4DC] rounded-2xl p-4">
-      <div className="text-sm font-black text-[#1C0A08] mb-2">{s.exam}</div>
-      <div className="flex flex-col gap-1 mb-3">
-        <div className="flex gap-2 text-xs">
-          <span className="text-gray-400 w-20 flex-shrink-0">Schedule</span>
-          <span className="text-[#1C0A08] font-medium">{s.schedule}</span>
-        </div>
-        <div className="flex gap-2 text-xs">
-          <span className="text-gray-400 w-20 flex-shrink-0">Fee</span>
-          <span className="text-[#1C0A08] font-medium">{s.fee}</span>
-        </div>
-        <div className="flex gap-2 text-xs">
-          <span className="text-gray-400 w-20 flex-shrink-0">Subjects</span>
-          <span className="text-[#1C0A08] font-medium">{s.subjects}</span>
-        </div>
-      </div>
-      <button
-        onClick={function() { window.open('https://www.prc.gov.ph', '_blank') }}
-        className="w-full text-center bg-[#F7F3EE] text-[#1C0A08] text-xs font-bold py-2 rounded-xl border border-[#EAE4DC]"
-      >
-        Register at prc.gov.ph
-      </button>
-    </div>
-  )
-}
-
-function StudyPlanGenerator() {
-  var navigate = useNavigate()
-
-  var examDateState = useState('')
-  var examDate = examDateState[0]
-  var setExamDate = examDateState[1]
-
-  var weakState = useState('')
-  var weakSubjects = weakState[0]
-  var setWeakSubjects = weakState[1]
-
-  var planState = useState('')
-  var studyPlan = planState[0]
-  var setStudyPlan = planState[1]
-
-  var loadingState = useState(false)
-  var loading = loadingState[0]
-  var setLoading = loadingState[1]
-
-  async function handleGenerate() {
-    if (!examDate) return
-    setLoading(true)
-    try {
-      var res = await api.post('/api/board-exam/study-plan', {
-        examDate: examDate,
-        weakSubjects: weakSubjects,
-      })
-      setStudyPlan(res.data.studyPlan)
-    } catch (e) {
-      console.error(e)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  return (
-    <div className="bg-white border border-[#EAE4DC] rounded-2xl p-4">
-      <div className="text-sm font-black text-[#1C0A08] mb-3">Generate AI study plan</div>
-      <div className="flex flex-col gap-3">
-        <div>
-          <label className="text-xs text-gray-400 block mb-1">Exam date</label>
-          <input
-            type="date"
-            value={examDate}
-            onChange={function(e) { setExamDate(e.target.value) }}
-            className="w-full px-3 py-2.5 rounded-xl border border-[#EAE4DC] text-sm text-[#1C0A08] outline-none focus:border-[#C0392B]"
-          />
-        </div>
-        <div>
-          <label className="text-xs text-gray-400 block mb-1">Weak subjects (optional)</label>
-          <input
-            type="text"
-            value={weakSubjects}
-            onChange={function(e) { setWeakSubjects(e.target.value) }}
-            placeholder="e.g. Circuit Analysis, Power Systems"
-            className="w-full px-3 py-2.5 rounded-xl border border-[#EAE4DC] text-sm text-[#1C0A08] outline-none focus:border-[#C0392B] placeholder:text-gray-300"
-          />
-        </div>
-        <button
-          onClick={handleGenerate}
-          disabled={loading || !examDate}
-          className="w-full bg-[#C0392B] text-white text-xs font-bold py-3 rounded-xl disabled:opacity-50"
-        >
-          {loading ? 'Generating your study plan...' : 'Generate AI study plan'}
-        </button>
-      </div>
-
-      {studyPlan && (
-        <div className="mt-4 p-3 bg-[#F7F3EE] rounded-xl">
-          <div className="text-xs font-bold text-[#1C0A08] mb-2">Your personalized study plan</div>
-          <div className="text-xs text-gray-600 leading-relaxed whitespace-pre-line">{studyPlan}</div>
+      {/* Plan result */}
+      {planResult&&(
+        <div style={{padding:'16px',border:'1px solid rgba(190,71,61,0.25)',background:'rgba(190,71,61,0.05)',marginBottom:20}}>
+          <div style={{fontFamily:MONO,fontSize:9,color:'#BE473D',letterSpacing:2,marginBottom:10}}>// YOUR STUDY PLAN</div>
+          <div style={{fontFamily:'monospace',fontSize:11,color:'rgba(240,237,232,0.55)',lineHeight:1.8,whiteSpace:'pre-wrap'}}>{typeof planResult==='string'?planResult:planResult.plan||JSON.stringify(planResult)}</div>
         </div>
       )}
-    </div>
-  )
-}
 
-export default function BoardExamPage() {
-  var navigate = useNavigate()
-  var authStore = useAuthStore()
-  var user = authStore.user
-  var course = user && user.course ? user.course : ''
+      {/* Upcoming schedules */}
+      <div style={{display:'inline-flex',alignItems:'center',gap:8,padding:'4px 12px 4px 8px',border:'1px solid rgba(240,237,232,0.1)',marginBottom:14}}>
+        <span style={{fontSize:9,color:'#BE473D'}}>02</span>
+        <span style={{fontSize:9,letterSpacing:2,color:'rgba(240,237,232,0.38)'}}>UPCOMING PRC SCHEDULES</span>
+      </div>
 
-  var schedulesResult = useSchedules()
-  var schedules = schedulesResult.data || []
-  var isBoard = isBoardExamCourse(course)
+      {isLoading&&<div style={{border:'1px solid rgba(240,237,232,0.06)',padding:24,textAlign:'center',fontFamily:MONO,fontSize:9,color:'rgba(240,237,232,0.2)',letterSpacing:2,marginBottom:20}}>LOADING SCHEDULES...</div>}
 
-  return (
-    <PageLayout title="Board exam tracker">
+      {!isLoading&&exams.length===0&&(
+        <div style={{border:'1px solid rgba(240,237,232,0.06)',padding:24,marginBottom:20}}>
+          <div style={{fontFamily:MONO,fontSize:9,color:'rgba(240,237,232,0.25)',letterSpacing:1,marginBottom:6}}>NO SCHEDULES LOADED</div>
+          <div style={{fontFamily:'monospace',fontSize:10,color:'rgba(240,237,232,0.18)',lineHeight:1.6}}>Check the official PRC website for the latest board exam schedules.</div>
+          <button onClick={function(){window.open('https://www.prc.gov.ph','_blank','noopener,noreferrer')}}
+            style={{marginTop:12,padding:'9px 16px',background:'transparent',border:'1px solid rgba(240,237,232,0.1)',cursor:'pointer',fontFamily:MONO,fontSize:9,color:'rgba(240,237,232,0.4)',letterSpacing:1,transition:'all .18s'}}
+            onMouseEnter={function(e){e.currentTarget.style.color='#F0EDE8';e.currentTarget.style.borderColor='rgba(240,237,232,0.3)'}}
+            onMouseLeave={function(e){e.currentTarget.style.color='rgba(240,237,232,0.4)';e.currentTarget.style.borderColor='rgba(240,237,232,0.1)'}}>
+            VISIT PRC.GOV.PH
+          </button>
+        </div>
+      )}
 
-      {!isBoard ? (
-        <NotBoardExamUser navigate={navigate} course={course} />
-      ) : (
-        <div className="flex flex-col gap-4">
-
-          <div className="bg-[#1C0A08] rounded-2xl p-4">
-            <div className="text-xs font-bold text-[#F4C430] uppercase tracking-wide mb-1">
-              Your course
-            </div>
-            <div className="text-lg font-black text-white">{course}</div>
-            <div className="text-xs text-white/40 mt-1">
-              Requires PRC licensure exam
-            </div>
-          </div>
-
-          <p className="text-xs font-bold uppercase tracking-widest text-gray-400">
-            Exam schedules
-          </p>
-
-          {schedulesResult.isLoading && (
-            <div className="flex flex-col gap-3">
-              <div className="h-24 bg-white rounded-2xl animate-pulse border border-[#EAE4DC]" />
-              <div className="h-24 bg-white rounded-2xl animate-pulse border border-[#EAE4DC]" />
-            </div>
-          )}
-
-          {!schedulesResult.isLoading && schedules.map(function(s, i) {
-            return <ScheduleCard key={i} schedule={s} />
+      {!isLoading&&exams.length>0&&(
+        <div style={{border:'1px solid rgba(240,237,232,0.07)',borderBottom:'none',marginBottom:20}}>
+          {exams.map(function(exam,i){
+            var days=daysUntil(exam.examDate||exam.date)
+            var color=urgencyColor(days)
+            return(
+              <div key={exam.id||i} className="sched-row"
+                style={{display:'flex',alignItems:'center',gap:14,padding:'14px 12px 14px 14px',borderBottom:'1px solid rgba(240,237,232,0.06)',background:'transparent'}}>
+                <div style={{width:32,height:32,background:'rgba(190,71,61,0.1)',border:'1px solid rgba(190,71,61,0.18)',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:MONO,fontSize:10,color:'#BE473D',flexShrink:0,letterSpacing:0}}>
+                  PRC
+                </div>
+                <div style={{flex:1,minWidth:0}}>
+                  <div className="sched-name" style={{fontFamily:MONO,fontSize:11,color:'rgba(240,237,232,0.65)',letterSpacing:.3,marginBottom:2,transition:'color .18s'}}>{exam.profession||exam.examName}</div>
+                  <div style={{fontFamily:'monospace',fontSize:9,color:'rgba(240,237,232,0.28)'}}>{exam.examDate||exam.date}{exam.venue?' · '+exam.venue:''}</div>
+                </div>
+                {days!==null&&(
+                  <div style={{textAlign:'right',flexShrink:0}}>
+                    <div style={{fontFamily:MONO,fontSize:14,color:color,letterSpacing:'-0.5px',lineHeight:1}}>{days<0?'DONE':days}</div>
+                    <div style={{fontFamily:MONO,fontSize:8,color:'rgba(240,237,232,0.2)',marginTop:2}}>{days<0?'PASSED':'DAYS LEFT'}</div>
+                  </div>
+                )}
+              </div>
+            )
           })}
-
-          <p className="text-xs font-bold uppercase tracking-widest text-gray-400">
-            Study tools
-          </p>
-
-          <StudyPlanGenerator />
-
-          <div className="bg-[#1C0A08] rounded-2xl p-4">
-            <div className="text-sm font-black text-[#F4C430] mb-1">
-              Ask Kuya AI for review tips
-            </div>
-            <div className="text-xs text-white/50 mb-3">
-              Specific advice on review strategies, materials, and mindset tips
-            </div>
-            <button
-              onClick={function() {
-                navigate('/dashboard/chat', {
-                  state: {
-                    initialMessage: 'Give me board exam review tips and strategies for ' + course + '. What are the best review centers, study materials, and how many months should I prepare?',
-                  },
-                })
-              }}
-              className="w-full bg-[#F4C430] text-[#1C0A08] text-xs font-bold py-2.5 rounded-xl"
-            >
-              Ask Kuya AI for review tips
-            </button>
-          </div>
-
         </div>
       )}
+
+      {/* Tips */}
+      <div style={{display:'inline-flex',alignItems:'center',gap:8,padding:'4px 12px 4px 8px',border:'1px solid rgba(240,237,232,0.1)',marginBottom:14}}>
+        <span style={{fontSize:9,color:'#BE473D'}}>03</span>
+        <span style={{fontSize:9,letterSpacing:2,color:'rgba(240,237,232,0.38)'}}>EXAM TIPS</span>
+      </div>
+
+      <div style={{border:'1px solid rgba(240,237,232,0.07)',borderBottom:'none'}}>
+        {TIPS.map(function(t){
+          return(
+            <div key={t.n} className="tip-row" style={{display:'flex',alignItems:'center',gap:14,padding:'13px 12px 13px 14px',borderBottom:'1px solid rgba(240,237,232,0.06)',background:'transparent'}}>
+              <span style={{fontFamily:MONO,fontSize:9,color:'rgba(240,237,232,0.18)',letterSpacing:1,flexShrink:0,width:22}}>{t.n}</span>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontFamily:MONO,fontSize:11,color:'rgba(240,237,232,0.6)',letterSpacing:.3,marginBottom:2}}>{t.title}</div>
+                <div style={{fontFamily:'monospace',fontSize:9.5,color:'rgba(240,237,232,0.22)',lineHeight:1.5}}>{t.sub}</div>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
     </PageLayout>
   )
 }

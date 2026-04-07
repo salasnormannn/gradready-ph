@@ -5,35 +5,45 @@ import useAuthStore from '../../store/authStore'
 import { useProfile } from '../../hooks/useProfile'
 import { useQueryClient } from '@tanstack/react-query'
 import PageLayout from '../../components/ui/PageLayout'
-import Button from '../../components/ui/Button'
 
 const COURSES = [
-  'BS Computer Science', 'BS Information Technology',
+  'BS Computer Science', 'BS Information Technology', 'BS Computer Engineering',
   'BS Nursing', 'BS Accountancy', 'BS Business Administration',
-  'BS Engineering (Civil)', 'BS Engineering (Electrical)',
-  'BS Engineering (Mechanical)', 'BS Architecture',
-  'AB Communication', 'BS Education', 'BS Psychology',
-  'BS Medicine', 'BS Pharmacy', 'Other',
+  'BS Civil Engineering', 'BS Electrical Engineering', 'BS Mechanical Engineering',
+  'BS Chemical Engineering', 'BS Electronics Engineering',
+  'BS Architecture', 'AB Communication', 'BS Education',
+  'BS Psychology', 'BS Medicine', 'BS Pharmacy',
+  'BS Criminology', 'BS Physical Therapy', 'BS Medical Technology', 'Other',
 ]
 
 const REGIONS = [
   'NCR (Metro Manila)', 'Region I (Ilocos)', 'Region II (Cagayan Valley)',
-  'Region III (Central Luzon)', 'Region IV-A (CALABARZON)',
-  'Region IV-B (MIMAROPA)', 'Region V (Bicol)',
-  'Region VI (Western Visayas)', 'Region VII (Central Visayas)',
-  'Region VIII (Eastern Visayas)', 'Region IX (Zamboanga)',
-  'Region X (Northern Mindanao)', 'Region XI (Davao)',
-  'Region XII (SOCCSKSARGEN)', 'Region XIII (Caraga)',
-  'BARMM', 'CAR',
+  'Region III (Central Luzon)', 'Region IV-A (CALABARZON)', 'Region IV-B (MIMAROPA)',
+  'Region V (Bicol)', 'Region VI (Western Visayas)', 'Region VII (Central Visayas)',
+  'Region VIII (Eastern Visayas)', 'Region IX (Zamboanga Peninsula)',
+  'Region X (Northern Mindanao)', 'Region XI (Davao)', 'Region XII (SOCCSKSARGEN)',
+  'Region XIII (Caraga)', 'BARMM', 'CAR',
 ]
 
 const STATUSES = [
-  { value: 'job_hunting', label: 'Job hunting', emoji: '🔍' },
-  { value: 'employed', label: 'Employed', emoji: '💼' },
-  { value: 'freelancing', label: 'Freelancing', emoji: '💻' },
-  { value: 'board_exam', label: 'Board exam prep', emoji: '📚' },
-  { value: 'further_studies', label: 'Further studies', emoji: '🎓' },
+  { value: 'job_hunting',     label: 'Job hunting',      icon: '◉' },
+  { value: 'employed',        label: 'Employed',          icon: '◈' },
+  { value: 'freelancing',     label: 'Freelancing',       icon: '◎' },
+  { value: 'board_exam',      label: 'Board exam prep',   icon: '✚' },
+  { value: 'further_studies', label: 'Further studies',   icon: '✦' },
 ]
+
+function Section({ title, children }) {
+  return (
+    <div style={{ marginBottom: 40 }}>
+      <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 500, letterSpacing: 2.5, textTransform: 'uppercase', color: 'rgba(242,237,232,0.25)', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ width: 3, height: 12, background: '#C0392B' }} />
+        {title}
+      </div>
+      {children}
+    </div>
+  )
+}
 
 export default function EditProfilePage() {
   const navigate = useNavigate()
@@ -51,9 +61,7 @@ export default function EditProfilePage() {
     status: profile?.status || '',
   })
 
-  function update(key, val) {
-    setForm(prev => ({ ...prev, [key]: val }))
-  }
+  function update(key, val) { setForm(prev => ({ ...prev, [key]: val })) }
 
   async function handleSave() {
     setLoading(true)
@@ -65,155 +73,104 @@ export default function EditProfilePage() {
       queryClient.invalidateQueries({ queryKey: ['roadmap-progress'] })
       setSaved(true)
       setTimeout(() => navigate('/dashboard/profile'), 1500)
-    } catch (err) {
-      console.error(err)
-    } finally {
-      setLoading(false)
-    }
+    } catch (e) { console.error(e) }
+    finally { setLoading(false) }
   }
+
+  const optBtn = (selected) => ({
+    width: '100%', textAlign: 'left', background: selected ? 'rgba(192,57,43,0.1)' : 'rgba(255,255,255,0.03)',
+    border: '1px solid ' + (selected ? '#C0392B' : 'rgba(242,237,232,0.08)'),
+    color: selected ? '#F2EDE8' : 'rgba(242,237,232,0.6)',
+    padding: '13px 18px', fontFamily: "'DM Sans', sans-serif", fontSize: 14,
+    cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6,
+  })
 
   if (isLoading) {
     return (
       <PageLayout title="Edit profile" backTo="/dashboard/profile">
-        <div className="flex flex-col gap-3">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="h-16 bg-white rounded-2xl animate-pulse border border-[#EAE4DC]" />
-          ))}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {[...Array(6)].map((_, i) => <div key={i} style={{ height: 48, background: 'rgba(255,255,255,0.03)', animation: 'pulse 2s ease infinite' }} />)}
+          <style>{`@keyframes pulse{0%,100%{opacity:.6}50%{opacity:.3}}`}</style>
         </div>
       </PageLayout>
     )
   }
 
   return (
-    <PageLayout title="Edit profile" backTo="/dashboard/profile">
-      <div className="flex flex-col gap-4">
+    <PageLayout title="Edit profile" backTo="/dashboard/profile" accentColor="#C0392B">
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900&family=DM+Sans:opsz,wght@9..40,400;9..40,500&display=swap');`}</style>
 
-        {saved && (
-          <div className="bg-green-50 border border-green-200 rounded-2xl px-4 py-3">
-            <p className="text-sm text-green-700 font-semibold">
-              Profile saved successfully!
-            </p>
+      {saved && (
+        <div style={{ border: '1px solid rgba(30,132,73,0.3)', background: 'rgba(30,132,73,0.08)', padding: '14px 20px', marginBottom: 32, fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#1E8449', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span>✓</span> Profile saved — redirecting...
+        </div>
+      )}
+
+      {/* Course */}
+      <Section title="Course">
+        <div style={{ maxHeight: 380, overflowY: 'auto' }}>
+          {COURSES.map(c => (
+            <button key={c} style={optBtn(form.course === c)} onClick={() => update('course', c)}>
+              {form.course === c && <span style={{ color: '#C0392B', fontSize: 14 }}>✓</span>}
+              {c}
+            </button>
+          ))}
+        </div>
+      </Section>
+
+      {/* School + Year */}
+      <Section title="Education details">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div>
+            <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 500, letterSpacing: 2, textTransform: 'uppercase', color: 'rgba(242,237,232,0.3)', display: 'block', marginBottom: 8 }}>School / University</label>
+            <input type="text" value={form.school} onChange={e => update('school', e.target.value)} placeholder="e.g. University of Santo Tomas"
+              style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(242,237,232,0.12)', color: '#F2EDE8', padding: '13px 16px', fontFamily: "'DM Sans', sans-serif", fontSize: 14, outline: 'none', transition: 'border-color 0.2s' }}
+              onFocus={e => { e.currentTarget.style.borderColor = '#C0392B' }}
+              onBlur={e => { e.currentTarget.style.borderColor = 'rgba(242,237,232,0.12)' }}
+            />
           </div>
-        )}
-
-        {/* Course */}
-        <div>
-          <label className="text-xs font-bold uppercase tracking-wide text-[#888] block mb-2">
-            Course
-          </label>
-          <div className="flex flex-col gap-2">
-            {COURSES.map(c => (
-              <button
-                key={c}
-                onClick={() => update('course', c)}
-                className={
-                  'w-full text-left px-4 py-3 rounded-xl border text-sm font-medium transition-all ' +
-                  (form.course === c
-                    ? 'bg-[#C0392B] text-white border-[#C0392B]'
-                    : 'bg-white text-[#1C0A08] border-[#EAE4DC] hover:border-[#C0392B]')
-                }
-              >
-                {c}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* School */}
-        <div>
-          <label className="text-xs font-bold uppercase tracking-wide text-[#888] block mb-2">
-            School / University
-          </label>
-          <input
-            type="text"
-            value={form.school}
-            onChange={e => update('school', e.target.value)}
-            placeholder="e.g. University of Santo Tomas"
-            className="w-full px-4 py-3 rounded-xl border border-[#EAE4DC] bg-white
-              text-sm text-[#1C0A08] outline-none focus:border-[#C0392B] placeholder:text-gray-300"
-          />
-        </div>
-
-        {/* Graduation year */}
-        <div>
-          <label className="text-xs font-bold uppercase tracking-wide text-[#888] block mb-2">
-            Graduation year
-          </label>
-          <input
-            type="number"
-            value={form.graduationYear}
-            onChange={e => update('graduationYear', e.target.value)}
-            placeholder="e.g. 2024"
-            min="2000"
-            max="2030"
-            className="w-full px-4 py-3 rounded-xl border border-[#EAE4DC] bg-white
-              text-sm text-[#1C0A08] outline-none focus:border-[#C0392B] placeholder:text-gray-300"
-          />
-        </div>
-
-        {/* Region */}
-        <div>
-          <label className="text-xs font-bold uppercase tracking-wide text-[#888] block mb-2">
-            Region
-          </label>
-          <div className="flex flex-col gap-2 max-h-48 overflow-y-auto">
-            {REGIONS.map(r => (
-              <button
-                key={r}
-                onClick={() => update('region', r)}
-                className={
-                  'w-full text-left px-4 py-3 rounded-xl border text-sm font-medium transition-all ' +
-                  (form.region === r
-                    ? 'bg-[#C0392B] text-white border-[#C0392B]'
-                    : 'bg-white text-[#1C0A08] border-[#EAE4DC] hover:border-[#C0392B]')
-                }
-              >
-                {r}
-              </button>
-            ))}
+          <div>
+            <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 500, letterSpacing: 2, textTransform: 'uppercase', color: 'rgba(242,237,232,0.3)', display: 'block', marginBottom: 8 }}>Graduation year</label>
+            <input type="number" value={form.graduationYear} onChange={e => update('graduationYear', e.target.value)} placeholder="e.g. 2024" min="1990" max="2030"
+              style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(242,237,232,0.12)', color: '#F2EDE8', padding: '13px 16px', fontFamily: "'DM Sans', sans-serif", fontSize: 14, outline: 'none', transition: 'border-color 0.2s' }}
+              onFocus={e => { e.currentTarget.style.borderColor = '#C0392B' }}
+              onBlur={e => { e.currentTarget.style.borderColor = 'rgba(242,237,232,0.12)' }}
+            />
           </div>
         </div>
+      </Section>
 
-        {/* Status */}
-        <div>
-          <label className="text-xs font-bold uppercase tracking-wide text-[#888] block mb-2">
-            Current status
-          </label>
-          <div className="flex flex-col gap-2">
-            {STATUSES.map(s => (
-              <button
-                key={s.value}
-                onClick={() => update('status', s.value)}
-                className={
-                  'w-full text-left px-4 py-4 rounded-xl border transition-all ' +
-                  (form.status === s.value
-                    ? 'bg-[#1C0A08] border-[#1C0A08]'
-                    : 'bg-white border-[#EAE4DC] hover:border-[#C0392B]')
-                }
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-xl">{s.emoji}</span>
-                  <span className={
-                    'text-sm font-bold ' +
-                    (form.status === s.value ? 'text-[#F4C430]' : 'text-[#1C0A08]')
-                  }>
-                    {s.label}
-                  </span>
-                </div>
-              </button>
-            ))}
-          </div>
+      {/* Region */}
+      <Section title="Region">
+        <div style={{ maxHeight: 380, overflowY: 'auto' }}>
+          {REGIONS.map(r => (
+            <button key={r} style={optBtn(form.region === r)} onClick={() => update('region', r)}>
+              {form.region === r && <span style={{ color: '#C0392B', fontSize: 14 }}>✓</span>}
+              {r}
+            </button>
+          ))}
         </div>
+      </Section>
 
-        <Button
-          onClick={handleSave}
-          disabled={loading}
-          className="mt-4"
-        >
-          {loading ? 'Saving...' : 'Save changes'}
-        </Button>
+      {/* Status */}
+      <Section title="Current status">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {STATUSES.map(s => (
+            <button key={s.value} style={{ ...optBtn(form.status === s.value), padding: '16px 18px' }} onClick={() => update('status', s.value)}>
+              <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: form.status === s.value ? '#C0392B' : 'rgba(242,237,232,0.25)', flexShrink: 0 }}>{s.icon}</span>
+              <span style={{ fontWeight: 500 }}>{s.label}</span>
+            </button>
+          ))}
+        </div>
+      </Section>
 
-      </div>
+      {/* Save */}
+      <button onClick={handleSave} disabled={loading}
+        style={{ width: '100%', background: loading ? 'rgba(192,57,43,0.5)' : '#C0392B', border: 'none', color: '#F2EDE8', padding: '16px', fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 500, cursor: loading ? 'not-allowed' : 'pointer', transition: 'background 0.2s', clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))' }}
+        onMouseEnter={e => { if (!loading) e.currentTarget.style.background = '#E74C3C' }}
+        onMouseLeave={e => { if (!loading) e.currentTarget.style.background = '#C0392B' }}>
+        {loading ? 'Saving changes...' : 'Save changes'}
+      </button>
     </PageLayout>
   )
 }
