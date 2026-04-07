@@ -24,3 +24,5 @@ dist-ssr
 *.sw?
 frontend/.env
 frontend/.env.production
+.DS_Store
+**/.DS_Store
