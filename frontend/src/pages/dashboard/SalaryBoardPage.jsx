@@ -1,198 +1,266 @@
-import {useEffect, useState} from 'react'
+import { useState, useEffect } from 'react'
 import PageLayout from '../../components/ui/PageLayout'
-import { useNavigate } from 'react-router-dom'
-import { useQuery, useMutation } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import useAuthStore from '../../store/authStore'
 import api from '../../services/api'
 
 const MONO = 'Share Tech Mono, monospace'
 const CSS = `
   input::placeholder{color:rgba(240,237,232,0.2);}
-  input:focus,select:focus{outline:none;border-color:rgba(190,71,61,0.5)!important;}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:rgba(190,71,61,0.5)!important;}
   select{font-family:'Share Tech Mono',monospace!important;}
-  .sched-row{transition:all .18s;border-left:2px solid transparent;}
-  .sched-row:hover{background:rgba(240,237,232,0.06)!important;border-left-color:#BE473D!important;}
-  .sched-row:hover .sched-name{color:#F0EDE8!important;}
-  .tip-row{transition:all .18s;}
-  .tip-row:hover{background:rgba(240,237,232,0.06)!important;}
+  .sal-row{transition:all .18s;border-left:2px solid transparent;}
+  .sal-row:hover{background:rgba(240,237,232,0.03)!important;border-left-color:#BE473D!important;}
+  .modal-sheet::-webkit-scrollbar{width:2px;}
+  .modal-sheet::-webkit-scrollbar-thumb{background:#BE473D;}
 `
+var INDUSTRIES=['Technology','Banking','BPO','Healthcare','Pharmaceutical','Audit','Engineering','Manufacturing','FMCG','Telecommunications','E-commerce','Fintech','Real Estate','IT Services','Retail','Food and Beverage','Aviation','Semiconductor','Conglomerate','Other']
+var WORK_SETUPS=['Hybrid','WFH','Onsite','Field']
 
-function useBoardExams(){
-  return useQuery({queryKey:['board-exams'],queryFn:async function(){var r=await api.get('/api/board-exams');return r.data}})
+function useSearch(params){
+  return useQuery({queryKey:['salary-search',params],queryFn:async function(){
+      var q=[]
+      if(params.industry)q.push('industry='+encodeURIComponent(params.industry))
+      if(params.company)q.push('company='+encodeURIComponent(params.company))
+      if(params.jobTitle)q.push('jobTitle='+encodeURIComponent(params.jobTitle))
+      var r=await api.get('/api/salary/search'+(q.length?'?'+q.join('&'):''))
+      return r.data
+    }})
+}
+function useIndustries(){
+  return useQuery({queryKey:['salary-industries'],queryFn:async function(){var r=await api.get('/api/salary/industries');return r.data}})
 }
 
-function useStudyPlan(){
-  return useMutation({mutationFn:async function(data){var r=await api.post('/api/board-exams/study-plan',data);return r.data}})
+function Inp({value,onChange,placeholder,type='text'}){
+  return(
+      <input type={type} value={value} onChange={onChange} placeholder={placeholder}
+             style={{width:'100%',padding:'12px 14px',background:'rgba(240,237,232,0.05)',border:'1px solid rgba(240,237,232,0.07)',color:'#F0EDE8',fontFamily:MONO,fontSize:12,letterSpacing:.5,transition:'border-color .18s'}}
+             onFocus={function(e){e.target.style.borderColor='rgba(190,71,61,0.5)'}}
+             onBlur={function(e){e.target.style.borderColor='rgba(240,237,232,0.1)'}} />
+  )
 }
 
-var TIPS=[
-  {n:'01',title:'START 6 MONTHS BEFORE',sub:'Most reviewers recommend 6 months minimum for PRC board exams'},
-  {n:'02',title:'GET OFFICIAL REVIEWERS',sub:'Buy PRC-accredited review materials — not random online summaries'},
-  {n:'03',title:'DO PAST EXAM QUESTIONS',sub:'PRC releases past board exam questions — practice these religiously'},
-  {n:'04',title:'JOIN A REVIEW CENTER',sub:'Structured review centers give you accountability and peer pressure'},
-  {n:'05',title:'REGISTER EARLY',sub:'PRC opens registration months before the exam — don\'t miss the deadline'},
-  {n:'06',title:'PREPARE VALID IDs',sub:'You need government-issued IDs on exam day — expired IDs are rejected'},
-]
+function SubmitModal({onClose,onSave,user}){
+  var [f,setF]=useState({jobTitle:'',company:'',industry:'',monthlySalary:'',yearsExp:'0',region:user?.region||'',workSetup:'',isAnonymous:true})
+  var [loading,setLoading]=useState(false)
+  function u(k,v){setF(function(p){return Object.assign({},p,{[k]:v})})}
 
-function daysUntil(dateStr){
-  if(!dateStr)return null
-  var target=new Date(dateStr)
-  var now=new Date()
-  var diff=Math.ceil((target-now)/(1000*60*60*24))
-  return diff
-}
-
-function urgencyColor(days){
-  if(days===null)return 'rgba(240,237,232,0.25)'
-  if(days<0)return 'rgba(240,237,232,0.18)'
-  if(days<30)return '#BE473D'
-  if(days<90)return '#FBBF24'
-  return '#34D399'
-}
-
-export default function BoardExamPage(){
-  var {user}=useAuthStore()
-  var navigate=useNavigate()
-  var {data:exams=[],isLoading}=useBoardExams()
-  var studyPlan=useStudyPlan()
-
-  var [examDate,setExamDate]=useState('')
-  var [profession,setProfession]=useState(user?.course||'')
-  var [planResult,setPlanResult]=useState(null)
-  var [generating,setGenerating]=useState(false)
-
-  useEffect(function(){ window.scrollTo(0, 0) }, [])
-
-  async function handleGenerate(e){
-    e.preventDefault()
-    if(!examDate||!profession)return
-    setGenerating(true)
+  async function submit(){
+    if(!f.jobTitle||!f.company||!f.industry||!f.monthlySalary)return
+    setLoading(true)
     try{
-      var result=await studyPlan.mutateAsync({examDate,profession})
-      setPlanResult(result)
-    }catch(err){
-      navigate('/dashboard/chat',{state:{initialMessage:'Create a board exam study plan for '+profession+' with exam date on '+examDate+'. Give me a week-by-week schedule.'}})
-    }finally{setGenerating(false)}
+      await api.post('/api/salary',{jobTitle:f.jobTitle,company:f.company,industry:f.industry,monthlySalary:parseInt(f.monthlySalary),yearsExp:parseInt(f.yearsExp)||0,region:f.region||null,workSetup:f.workSetup||null,isAnonymous:f.isAnonymous})
+      onSave();onClose()
+    }catch(e){console.error(e)}finally{setLoading(false)}
   }
 
+  var can=f.jobTitle&&f.company&&f.industry&&f.monthlySalary
+
   return(
-      <PageLayout title="BOARD EXAMS" subtitle="// PRC SCHEDULES + AI STUDY PLANS">
-        <style>{CSS}</style>
+      /* zIndex 600 — above bottom nav (zIndex 200) */
+      <div style={{position:'fixed',inset:0,background:'rgba(28,5,18,0.88)',zIndex:600,display:'flex',alignItems:'flex-end',justifyContent:'center'}}
+           onClick={function(e){if(e.target===e.currentTarget)onClose()}}>
 
-        {/* Intro */}
-        <div style={{padding:'16px',border:'1px solid rgba(240,237,232,0.07)',background:'rgba(240,237,232,0.02)',marginBottom:20,position:'relative',overflow:'hidden'}}>
-          <div style={{position:'absolute',top:-20,right:-20,width:100,height:100,borderRadius:'50%',background:'radial-gradient(circle,rgba(190,71,61,0.1) 0%,transparent 70%)',pointerEvents:'none'}}/>
-          <div style={{fontFamily:MONO,fontSize:10,color:'rgba(240,237,232,0.42)',letterSpacing:2,marginBottom:4}}>// PRC BOARD EXAM TRACKER</div>
-          <div style={{fontFamily:'monospace',fontSize:12,color:'rgba(240,237,232,0.52)',lineHeight:1.7}}>
-            Check upcoming PRC schedules and generate an AI study plan tailored to your exam date.
+        <div className="modal-sheet" style={{
+          background:'#2A0515',border:'1px solid rgba(240,237,232,0.07)',borderBottom:'none',
+          width:'100%',maxWidth:560,maxHeight:'88vh',overflowY:'auto',
+          padding:24,
+          paddingBottom:'calc(72px + 32px)',  /* ← KEY FIX: clears the bottom nav */
+        }}>
+          <style>{CSS}</style>
+
+          {/* Header */}
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}}>
+            <div style={{display:'inline-flex',alignItems:'center',gap:8,padding:'4px 12px 4px 8px',border:'1px solid rgba(240,237,232,0.07)'}}>
+              <span style={{fontSize:11,color:'#BE473D'}}>NEW</span>
+              <span style={{fontSize:11,letterSpacing:2,color:'rgba(240,237,232,0.55)'}}>SALARY ENTRY</span>
+            </div>
+            <button onClick={onClose} style={{background:'transparent',border:'1px solid rgba(240,237,232,0.07)',color:'rgba(240,237,232,0.4)',width:32,height:32,cursor:'pointer',fontFamily:MONO,fontSize:12,display:'flex',alignItems:'center',justifyContent:'center'}}>✕</button>
           </div>
-        </div>
 
-        {/* AI Study Plan Generator */}
-        <div style={{display:'inline-flex',alignItems:'center',gap:8,padding:'4px 12px 4px 8px',border:'1px solid rgba(240,237,232,0.07)',marginBottom:14}}>
-          <span style={{fontSize:11,color:'#BE473D'}}>01</span>
-          <span style={{fontSize:11,letterSpacing:2,color:'rgba(240,237,232,0.5)'}}>AI STUDY PLAN GENERATOR</span>
-        </div>
+          {/* Anonymous toggle */}
+          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'14px',background:'rgba(240,237,232,0.04)',border:'1px solid rgba(240,237,232,0.07)',marginBottom:18}}>
+            <div>
+              <div style={{fontFamily:MONO,fontSize:12,color:'#F0EDE8',letterSpacing:.5,marginBottom:3}}>POST ANONYMOUSLY</div>
+              <div style={{fontFamily:'monospace',fontSize:11,color:'rgba(240,237,232,0.42)'}}>Your name won't appear publicly</div>
+            </div>
+            <button onClick={function(){u('isAnonymous',!f.isAnonymous)}}
+                    style={{width:44,height:24,borderRadius:12,border:'none',cursor:'pointer',background:f.isAnonymous?'#BE473D':'rgba(240,237,232,0.12)',position:'relative',transition:'background .2s',flexShrink:0}}>
+              <span style={{position:'absolute',top:3,left:f.isAnonymous?23:3,width:18,height:18,background:'#F0EDE8',borderRadius:'50%',transition:'left .2s',display:'block'}}/>
+            </button>
+          </div>
 
-        <form onSubmit={handleGenerate}>
+          {/* Text fields */}
+          {[{k:'jobTitle',l:'JOB TITLE *',p:'e.g. Junior Software Engineer'},{k:'company',l:'COMPANY *',p:'e.g. GCash'}].map(function(fi){
+            return(
+                <div key={fi.k} style={{marginBottom:12}}>
+                  <div style={{fontFamily:MONO,fontSize:10,color:'rgba(240,237,232,0.42)',letterSpacing:2,marginBottom:6}}>// {fi.l}</div>
+                  <Inp value={f[fi.k]} onChange={function(e){u(fi.k,e.target.value)}} placeholder={fi.p}/>
+                </div>
+            )
+          })}
+
+          {/* Industry */}
           <div style={{marginBottom:12}}>
-            <div style={{fontFamily:MONO,fontSize:10,color:'rgba(240,237,232,0.42)',letterSpacing:2,marginBottom:6}}>// YOUR PROFESSION / COURSE</div>
-            <input type="text" value={profession} onChange={function(e){setProfession(e.target.value)}} placeholder="e.g. Nursing, Civil Engineering, CPA"
-                   style={{width:'100%',padding:'12px 14px',background:'rgba(240,237,232,0.05)',border:'1px solid rgba(240,237,232,0.07)',color:'#F0EDE8',fontFamily:MONO,fontSize:14,letterSpacing:.5,transition:'border-color .18s'}}
-                   onFocus={function(e){e.target.style.borderColor='rgba(190,71,61,0.5)'}}
-                   onBlur={function(e){e.target.style.borderColor='rgba(240,237,232,0.1)'}}/>
+            <div style={{fontFamily:MONO,fontSize:10,color:'rgba(240,237,232,0.42)',letterSpacing:2,marginBottom:6}}>// INDUSTRY *</div>
+            <select value={f.industry} onChange={function(e){u('industry',e.target.value)}}
+                    style={{width:'100%',padding:'12px 14px',background:'rgba(240,237,232,0.05)',border:'1px solid rgba(240,237,232,0.07)',color:f.industry?'#F0EDE8':'rgba(240,237,232,0.25)',fontFamily:MONO,fontSize:12,appearance:'auto',transition:'border-color .18s'}}
+                    onFocus={function(e){e.target.style.borderColor='rgba(190,71,61,0.5)'}}
+                    onBlur={function(e){e.target.style.borderColor='rgba(240,237,232,0.1)'}}>
+              <option value="">Select industry</option>
+              {INDUSTRIES.map(function(i){return<option key={i} value={i}>{i}</option>})}
+            </select>
           </div>
-          <div style={{marginBottom:16}}>
-            <div style={{fontFamily:MONO,fontSize:10,color:'rgba(240,237,232,0.42)',letterSpacing:2,marginBottom:6}}>// EXAM DATE</div>
-            <input type="date" value={examDate} onChange={function(e){setExamDate(e.target.value)}}
-                   style={{width:'100%',padding:'12px 14px',background:'rgba(240,237,232,0.05)',border:'1px solid rgba(240,237,232,0.07)',color:'#F0EDE8',fontFamily:MONO,fontSize:12,letterSpacing:.5,transition:'border-color .18s',colorScheme:'dark'}}
-                   onFocus={function(e){e.target.style.borderColor='rgba(190,71,61,0.5)'}}
-                   onBlur={function(e){e.target.style.borderColor='rgba(240,237,232,0.1)'}}/>
+
+          {/* Salary + exp */}
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:14}}>
+            <div>
+              <div style={{fontFamily:MONO,fontSize:10,color:'rgba(240,237,232,0.42)',letterSpacing:2,marginBottom:6}}>// MONTHLY SALARY *</div>
+              <Inp type="number" value={f.monthlySalary} onChange={function(e){u('monthlySalary',e.target.value)}} placeholder="e.g. 35000"/>
+            </div>
+            <div>
+              <div style={{fontFamily:MONO,fontSize:10,color:'rgba(240,237,232,0.42)',letterSpacing:2,marginBottom:6}}>// YEARS EXP</div>
+              <Inp type="number" value={f.yearsExp} onChange={function(e){u('yearsExp',e.target.value)}} placeholder="0"/>
+            </div>
           </div>
-          <button type="submit" disabled={generating||!examDate||!profession}
-                  style={{width:'100%',padding:'13px',background:generating||!examDate||!profession?'rgba(190,71,61,0.3)':'#BE473D',border:'none',cursor:generating||!examDate||!profession?'not-allowed':'pointer',fontFamily:MONO,fontSize:10,color:'#F0EDE8',letterSpacing:3,marginBottom:20,transition:'opacity .18s'}}
-                  onMouseEnter={function(e){if(!generating&&examDate&&profession)e.currentTarget.style.opacity='.85'}}
-                  onMouseLeave={function(e){e.currentTarget.style.opacity='1'}}>
-            {generating?'GENERATING PLAN...':'GENERATE AI STUDY PLAN'}
-          </button>
-        </form>
 
-        {/* Plan result */}
-        {planResult&&(
-            <div style={{padding:'16px',border:'1px solid rgba(190,71,61,0.25)',background:'rgba(190,71,61,0.05)',marginBottom:20}}>
-              <div style={{fontFamily:MONO,fontSize:9,color:'#BE473D',letterSpacing:2,marginBottom:10}}>// YOUR STUDY PLAN</div>
-              <div style={{fontFamily:'monospace',fontSize:13,color:'rgba(240,237,232,0.65)',lineHeight:1.8,whiteSpace:'pre-wrap'}}>{typeof planResult==='string'?planResult:planResult.plan||JSON.stringify(planResult)}</div>
-            </div>
-        )}
-
-        {/* Upcoming schedules */}
-        <div style={{display:'inline-flex',alignItems:'center',gap:8,padding:'4px 12px 4px 8px',border:'1px solid rgba(240,237,232,0.07)',marginBottom:14}}>
-          <span style={{fontSize:11,color:'#BE473D'}}>02</span>
-          <span style={{fontSize:11,letterSpacing:2,color:'rgba(240,237,232,0.5)'}}>UPCOMING PRC SCHEDULES</span>
-        </div>
-
-        {isLoading&&<div style={{border:'1px solid rgba(240,237,232,0.05)',padding:24,textAlign:'center',fontFamily:MONO,fontSize:9,color:'rgba(240,237,232,0.2)',letterSpacing:2,marginBottom:20}}>LOADING SCHEDULES...</div>}
-
-        {!isLoading&&exams.length===0&&(
-            <div style={{border:'1px solid rgba(240,237,232,0.05)',padding:24,marginBottom:20}}>
-              <div style={{fontFamily:MONO,fontSize:9,color:'rgba(240,237,232,0.25)',letterSpacing:1,marginBottom:6}}>NO SCHEDULES LOADED</div>
-              <div style={{fontFamily:'monospace',fontSize:10,color:'rgba(240,237,232,0.18)',lineHeight:1.6}}>Check the official PRC website for the latest board exam schedules.</div>
-              <button onClick={function(){window.open('https://www.prc.gov.ph','_blank','noopener,noreferrer')}}
-                      style={{marginTop:12,padding:'9px 16px',background:'transparent',border:'1px solid rgba(240,237,232,0.07)',cursor:'pointer',fontFamily:MONO,fontSize:9,color:'rgba(240,237,232,0.4)',letterSpacing:1,transition:'all .18s'}}
-                      onMouseEnter={function(e){e.currentTarget.style.color='#F0EDE8';e.currentTarget.style.borderColor='rgba(240,237,232,0.3)'}}
-                      onMouseLeave={function(e){e.currentTarget.style.color='rgba(240,237,232,0.4)';e.currentTarget.style.borderColor='rgba(240,237,232,0.1)'}}>
-                VISIT PRC.GOV.PH
-              </button>
-            </div>
-        )}
-
-        {!isLoading&&exams.length>0&&(
-            <div style={{border:'1px solid rgba(240,237,232,0.07)',borderBottom:'none',marginBottom:20}}>
-              {exams.map(function(exam,i){
-                var days=daysUntil(exam.examDate||exam.date)
-                var color=urgencyColor(days)
+          {/* Work setup */}
+          <div style={{marginBottom:20}}>
+            <div style={{fontFamily:MONO,fontSize:10,color:'rgba(240,237,232,0.42)',letterSpacing:2,marginBottom:8}}>// WORK SETUP</div>
+            <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+              {WORK_SETUPS.map(function(ws){
+                var a=f.workSetup===ws
                 return(
-                    <div key={exam.id||i} className="sched-row"
-                         style={{display:'flex',alignItems:'center',gap:14,padding:'14px 12px 14px 14px',borderBottom:'1px solid rgba(240,237,232,0.05)',background:'transparent'}}>
-                      <div style={{width:32,height:32,background:'rgba(190,71,61,0.1)',border:'1px solid rgba(190,71,61,0.18)',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:MONO,fontSize:10,color:'#BE473D',flexShrink:0,letterSpacing:0}}>
-                        PRC
-                      </div>
-                      <div style={{flex:1,minWidth:0}}>
-                        <div className="sched-name" style={{fontFamily:MONO,fontSize:14,color:'rgba(240,237,232,0.85)',letterSpacing:.3,marginBottom:3,transition:'color .18s'}}>{exam.profession||exam.examName}</div>
-                        <div style={{fontFamily:'monospace',fontSize:11,color:'rgba(240,237,232,0.42)'}}>{exam.examDate||exam.date}{exam.venue?' · '+exam.venue:''}</div>
-                      </div>
-                      {days!==null&&(
-                          <div style={{textAlign:'right',flexShrink:0}}>
-                            <div style={{fontFamily:MONO,fontSize:14,color:color,letterSpacing:'-0.5px',lineHeight:1}}>{days<0?'DONE':days}</div>
-                            <div style={{fontFamily:MONO,fontSize:10,color:'rgba(240,237,232,0.35)',marginTop:2}}>{days<0?'PASSED':'DAYS LEFT'}</div>
-                          </div>
-                      )}
-                    </div>
+                    <button key={ws} onClick={function(){u('workSetup',a?'':ws)}}
+                            style={{padding:'5px 12px',border:'1px solid',borderColor:a?'#BE473D':'rgba(240,237,232,0.1)',background:a?'rgba(190,71,61,0.1)':'transparent',color:a?'#BE473D':'rgba(240,237,232,0.3)',fontFamily:MONO,fontSize:9,letterSpacing:1,cursor:'pointer',transition:'all .15s'}}>
+                      {ws}
+                    </button>
                 )
               })}
             </div>
-        )}
+          </div>
 
-        {/* Tips */}
-        <div style={{display:'inline-flex',alignItems:'center',gap:8,padding:'4px 12px 4px 8px',border:'1px solid rgba(240,237,232,0.07)',marginBottom:14}}>
-          <span style={{fontSize:11,color:'#BE473D'}}>03</span>
-          <span style={{fontSize:11,letterSpacing:2,color:'rgba(240,237,232,0.5)'}}>EXAM TIPS</span>
+          {/* Submit — always accessible */}
+          <button onClick={submit} disabled={loading||!can}
+                  style={{width:'100%',padding:'16px',background:loading||!can?'rgba(190,71,61,0.3)':'#BE473D',border:'none',cursor:loading||!can?'not-allowed':'pointer',fontFamily:MONO,fontSize:11,color:'#F0EDE8',letterSpacing:3,transition:'opacity .18s'}}
+                  onMouseEnter={function(e){if(!loading&&can)e.currentTarget.style.opacity='.85'}}
+                  onMouseLeave={function(e){e.currentTarget.style.opacity='1'}}>
+            {loading?'SUBMITTING...':'SHARE ANONYMOUSLY'}
+          </button>
+        </div>
+      </div>
+  )
+}
+
+function SalaryRow({s}){
+  var expLabel=s.yearsExp===0?'Fresh grad':s.yearsExp+' yr'+(s.yearsExp>1?'s':'')+' exp'
+  return(
+      <div className="sal-row" style={{display:'flex',alignItems:'flex-start',gap:14,padding:'16px 12px 16px 14px',borderBottom:'1px solid rgba(240,237,232,0.05)',background:'transparent'}}>
+        <div style={{width:32,height:32,background:'rgba(190,71,61,0.12)',border:'1px solid rgba(190,71,61,0.22)',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:MONO,fontSize:13,color:'#BE473D',flexShrink:0}}>
+          {s.company?s.company.charAt(0).toUpperCase():'C'}
+        </div>
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{fontFamily:MONO,fontSize:14,color:'rgba(240,237,232,0.85)',letterSpacing:.5,marginBottom:3}}>{s.jobTitle}</div>
+          <div style={{fontFamily:'monospace',fontSize:11,color:'rgba(240,237,232,0.42)',marginBottom:6}}>{s.company}{s.industry?' · '+s.industry:''}</div>
+          <div style={{display:'flex',gap:5,flexWrap:'wrap'}}>
+            {s.workSetup&&<span style={{fontFamily:MONO,fontSize:10,color:'rgba(240,237,232,0.42)',padding:'3px 8px',border:'1px solid rgba(240,237,232,0.07)'}}>{s.workSetup}</span>}
+            <span style={{fontFamily:MONO,fontSize:10,color:'rgba(240,237,232,0.42)',padding:'3px 8px',border:'1px solid rgba(240,237,232,0.07)'}}>{expLabel}</span>
+            {s.region&&<span style={{fontFamily:MONO,fontSize:10,color:'rgba(240,237,232,0.35)',padding:'3px 8px',border:'1px solid rgba(240,237,232,0.05)'}}>{s.region.split('(')[0].trim()}</span>}
+          </div>
+        </div>
+        <div style={{textAlign:'right',flexShrink:0}}>
+          <div style={{fontFamily:MONO,fontSize:16,color:'#BE473D',letterSpacing:'-0.5px',lineHeight:1}}>₱{Number(s.monthlySalary).toLocaleString()}</div>
+          <div style={{fontFamily:MONO,fontSize:10,color:'rgba(240,237,232,0.35)',marginTop:2}}>/ MONTH</div>
+        </div>
+      </div>
+  )
+}
+
+export default function SalaryBoardPage(){
+  var {user}=useAuthStore()
+  useEffect(function(){ window.scrollTo(0, 0) }, [])
+  var [showModal,setShowModal]=useState(false)
+  var [search,setSearch]=useState({industry:'',company:'',jobTitle:''})
+  var [active,setActive]=useState({industry:'',company:'',jobTitle:''})
+  var [indFilter,setIndFilter]=useState('')
+  var {data:salaries=[],isLoading,refetch}=useSearch(active)
+  var {data:industries=[]}=useIndustries()
+
+  function doSearch(e){e.preventDefault();setActive(Object.assign({},search))}
+  function setInd(ind){setIndFilter(ind);var next=Object.assign({},search,{industry:ind});setSearch(next);setActive(next)}
+
+  var avg=salaries.length>0?Math.round(salaries.reduce(function(s,x){return s+x.monthlySalary},0)/salaries.length):null
+  var fresh=salaries.filter(function(s){return s.yearsExp===0})
+  var freshAvg=fresh.length>0?Math.round(fresh.reduce(function(s,x){return s+x.monthlySalary},0)/fresh.length):null
+
+  return(
+      <PageLayout title="SALARY BOARD" subtitle="// REAL ANONYMOUS PH SALARIES">
+        <style>{CSS}</style>
+
+        {/* Summary */}
+        <div style={{padding:'16px',border:'1px solid rgba(240,237,232,0.07)',background:'rgba(240,237,232,0.02)',marginBottom:16,position:'relative',overflow:'hidden'}}>
+          <div style={{position:'absolute',top:-20,right:-20,width:100,height:100,borderRadius:'50%',background:'radial-gradient(circle,rgba(190,71,61,0.1) 0%,transparent 70%)',pointerEvents:'none'}}/>
+          <div style={{fontFamily:MONO,fontSize:9,color:'rgba(240,237,232,0.3)',letterSpacing:2,marginBottom:4}}>// COMMUNITY-POWERED · ANONYMOUS</div>
+          <div style={{fontFamily:'monospace',fontSize:12,color:'rgba(240,237,232,0.5)',marginBottom:avg?14:0}}>{salaries.length} salary records in the database</div>
+          {avg&&(
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:1,background:'rgba(240,237,232,0.05)'}}>
+                <div style={{padding:'12px',background:'#3C091E'}}>
+                  <div style={{fontFamily:MONO,fontSize:9,color:'rgba(240,237,232,0.32)',letterSpacing:2,marginBottom:4}}>AVG SALARY</div>
+                  <div style={{fontFamily:MONO,fontSize:20,color:'#BE473D',letterSpacing:'-1px'}}>₱{Number(avg).toLocaleString()}</div>
+                  <div style={{fontFamily:MONO,fontSize:9,color:'rgba(240,237,232,0.28)',marginTop:2}}>{salaries.length} ENTRIES</div>
+                </div>
+                {freshAvg&&(
+                    <div style={{padding:'12px',background:'#3C091E'}}>
+                      <div style={{fontFamily:MONO,fontSize:9,color:'rgba(240,237,232,0.32)',letterSpacing:2,marginBottom:4}}>FRESH GRAD AVG</div>
+                      <div style={{fontFamily:MONO,fontSize:20,color:'#F0EDE8',letterSpacing:'-1px'}}>₱{Number(freshAvg).toLocaleString()}</div>
+                      <div style={{fontFamily:MONO,fontSize:9,color:'rgba(240,237,232,0.28)',marginTop:2}}>{fresh.length} ENTRIES</div>
+                    </div>
+                )}
+              </div>
+          )}
         </div>
 
-        <div style={{border:'1px solid rgba(240,237,232,0.07)',borderBottom:'none'}}>
-          {TIPS.map(function(t){
+        {/* Share CTA */}
+        <button onClick={function(){setShowModal(true)}}
+                style={{width:'100%',padding:'12px',background:'transparent',border:'1px solid rgba(190,71,61,0.35)',cursor:'pointer',fontFamily:MONO,fontSize:10,color:'#BE473D',letterSpacing:3,marginBottom:14,transition:'all .18s'}}
+                onMouseEnter={function(e){e.currentTarget.style.background='rgba(190,71,61,0.08)'}}
+                onMouseLeave={function(e){e.currentTarget.style.background='transparent'}}>
+          + SHARE YOUR SALARY
+        </button>
+
+        {/* Search */}
+        <form onSubmit={doSearch} style={{display:'flex',gap:8,marginBottom:10}}>
+          <input type="text" value={search.jobTitle} onChange={function(e){setSearch(Object.assign({},search,{jobTitle:e.target.value}))}} placeholder="Search role or company..."
+                 style={{flex:1,padding:'10px 14px',background:'rgba(240,237,232,0.05)',border:'1px solid rgba(240,237,232,0.07)',color:'#F0EDE8',fontFamily:MONO,fontSize:11,letterSpacing:.5,transition:'border-color .18s'}}
+                 onFocus={function(e){e.target.style.borderColor='rgba(190,71,61,0.5)'}}
+                 onBlur={function(e){e.target.style.borderColor='rgba(240,237,232,0.1)'}}/>
+          <button type="submit" style={{padding:'10px 16px',background:'#BE473D',border:'none',cursor:'pointer',fontFamily:MONO,fontSize:11,color:'#F0EDE8',letterSpacing:1,flexShrink:0}}>SEARCH</button>
+        </form>
+
+        {/* Industry tabs */}
+        <div style={{display:'flex',gap:6,overflowX:'auto',marginBottom:16,paddingBottom:4}}>
+          {['All'].concat(industries).map(function(ind){
+            var key=ind==='All'?'':ind
+            var isActive=indFilter===key
             return(
-                <div key={t.n} className="tip-row" style={{display:'flex',alignItems:'center',gap:14,padding:'18px 14px 18px 16px',borderBottom:'1px solid rgba(240,237,232,0.05)',background:'transparent'}}>
-                  <span style={{fontFamily:MONO,fontSize:11,color:'rgba(240,237,232,0.32)',letterSpacing:1,flexShrink:0,width:26}}>{t.n}</span>
-                  <div style={{flex:1,minWidth:0}}>
-                    <div style={{fontFamily:MONO,fontSize:15,color:'rgba(240,237,232,0.85)',letterSpacing:.3,marginBottom:4}}>{t.title}</div>
-                    <div style={{fontFamily:'monospace',fontSize:12,color:'rgba(240,237,232,0.42)',lineHeight:1.5}}>{t.sub}</div>
-                  </div>
-                </div>
+                <button key={ind} onClick={function(){setInd(key)}}
+                        style={{flexShrink:0,padding:'4px 10px',border:'1px solid',borderColor:isActive?'#BE473D':'rgba(240,237,232,0.1)',background:'transparent',color:isActive?'#BE473D':'rgba(240,237,232,0.3)',fontFamily:MONO,fontSize:10,letterSpacing:1,cursor:'pointer',whiteSpace:'nowrap',transition:'all .15s'}}>
+                  {ind}
+                </button>
             )
           })}
         </div>
 
+        {/* Results */}
+        {isLoading&&<div style={{border:'1px solid rgba(240,237,232,0.05)',padding:28,textAlign:'center',fontFamily:MONO,fontSize:11,color:'rgba(240,237,232,0.28)',letterSpacing:2}}>LOADING...</div>}
+        {!isLoading&&salaries.length===0&&<div style={{border:'1px solid rgba(240,237,232,0.05)',padding:28,textAlign:'center',fontFamily:MONO,fontSize:11,color:'rgba(240,237,232,0.38)',letterSpacing:1}}>NO RESULTS. TRY DIFFERENT FILTERS.</div>}
+        {!isLoading&&salaries.length>0&&(
+            <div style={{border:'1px solid rgba(240,237,232,0.07)',borderBottom:'none'}}>
+              {salaries.map(function(s){return<SalaryRow key={s.id} s={s}/>})}
+            </div>
+        )}
+
+        {showModal&&<SubmitModal onClose={function(){setShowModal(false)}} onSave={refetch} user={user}/>}
       </PageLayout>
   )
 }
