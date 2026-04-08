@@ -27,6 +27,16 @@ const S = `
   .su-d1{animation-delay:.1s}.su-d2{animation-delay:.2s}.su-d3{animation-delay:.3s}
   a{color:#BE473D;text-decoration:none}
   a:hover{color:#F0EDE8}
+  .auth-grid{display:grid;grid-template-columns:1fr 1fr;min-height:100vh}
+  .auth-left{position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;padding:48px;border-right:1px solid rgba(240,237,232,0.08)}
+  .auth-right{display:flex;align-items:center;justify-content:center;padding:60px 48px}
+  @media(max-width:700px){
+    .auth-grid{display:flex;flex-direction:column}
+    .auth-left{padding:28px 24px 32px;border-right:none;border-bottom:1px solid rgba(240,237,232,0.08);min-height:auto}
+    .auth-left-footer{display:none}
+    .auth-left-heading .hero-line{font-size:clamp(28px,9vw,44px)!important}
+    .auth-right{padding:32px 24px 48px;align-items:flex-start}
+  }
 `
 
 export default function LoginPage() {
@@ -52,74 +62,74 @@ export default function LoginPage() {
   const err = { fontFamily: 'monospace', fontSize: 11, color: '#BE473D', marginTop: 6, letterSpacing: 0.5 }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#3C091E', display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
-      <style>{S}</style>
+      <div className="auth-grid" style={{ background: '#3C091E' }}>
+        <style>{S}</style>
 
-      {/* Left — dark with grid */}
-      <div style={{ position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '48px', borderRight: '1px solid rgba(240,237,232,0.08)' }}>
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(240,237,232,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(240,237,232,0.03) 1px,transparent 1px)', backgroundSize: '60px 60px', pointerEvents: 'none' }} />
+        {/* Left — dark with grid */}
+        <div className="auth-left">
+          <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(240,237,232,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(240,237,232,0.03) 1px,transparent 1px)', backgroundSize: '60px 60px', pointerEvents: 'none' }} />
 
-        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', position: 'relative' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
-            {[0,1,2,3].map(i => <div key={i} style={{ width: 7, height: 7, background: i < 2 ? '#BE473D' : '#C8A84B', borderRadius: 1 }} />)}
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', position: 'relative' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+              {[0,1,2,3].map(i => <div key={i} style={{ width: 7, height: 7, background: i < 2 ? '#BE473D' : '#C8A84B', borderRadius: 1 }} />)}
+            </div>
+            <span style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: 16, color: '#F0EDE8', letterSpacing: 3 }}>GRADREADY</span>
+          </Link>
+
+          <div style={{ position: 'relative' }}>
+            <div style={{ fontFamily: 'monospace', fontSize: 10, letterSpacing: 3, color: 'rgba(240,237,232,0.3)', marginBottom: 20 }}>WELCOME BACK</div>
+            <div>
+              {['SIGN', 'IN TO YOUR', 'ACCOUNT.'].map((line, i) => (
+                  <div key={i} style={{ position: 'relative' }}>
+                    {i === 1 && <div style={{ position: 'absolute', bottom: -2, left: 0, width: 60, height: 2, background: '#BE473D' }} />}
+                    <span style={{ fontFamily: "'Share Tech Mono', monospace", fontWeight: 900, fontSize: 'clamp(32px,4vw,56px)', color: '#F0EDE8', letterSpacing: '-1px', lineHeight: 0.95, display: 'block', whiteSpace: 'nowrap' }}>{line}</span>
+                  </div>
+              ))}
+            </div>
+            <p style={{ fontFamily: 'monospace', fontSize: 12, color: 'rgba(240,237,232,0.35)', lineHeight: 1.9, marginTop: 24, letterSpacing: 0.5, maxWidth: 320 }}>
+              Your roadmap, gov registrations, and Kuya AI are waiting.
+            </p>
           </div>
-          <span style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: 16, color: '#F0EDE8', letterSpacing: 3 }}>GRADREADY</span>
-        </Link>
 
-        <div style={{ position: 'relative' }}>
-          <div style={{ fontFamily: 'monospace', fontSize: 10, letterSpacing: 3, color: 'rgba(240,237,232,0.3)', marginBottom: 20 }}>WELCOME BACK</div>
-          <div>
-            {['SIGN', 'IN TO YOUR', 'ACCOUNT.'].map((line, i) => (
-              <div key={i} style={{ position: 'relative' }}>
-                {i === 1 && <div style={{ position: 'absolute', bottom: -2, left: 0, width: 60, height: 2, background: '#BE473D' }} />}
-                <span style={{ fontFamily: "'Share Tech Mono', monospace", fontWeight: 900, fontSize: 'clamp(32px,4vw,56px)', color: '#F0EDE8', letterSpacing: '-1px', lineHeight: 0.95, display: 'block', whiteSpace: 'nowrap' }}>{line}</span>
-              </div>
-            ))}
+          <div className="auth-left-footer" style={{ fontFamily: 'monospace', fontSize: 11, color: 'rgba(240,237,232,0.2)', letterSpacing: 1 }}>
+            © 2025 GRADREADY PH 🇵🇭
           </div>
-          <p style={{ fontFamily: 'monospace', fontSize: 12, color: 'rgba(240,237,232,0.35)', lineHeight: 1.9, marginTop: 24, letterSpacing: 0.5, maxWidth: 320 }}>
-            Your roadmap, gov registrations, and Kuya AI are waiting.
-          </p>
         </div>
 
-        <div style={{ fontFamily: 'monospace', fontSize: 11, color: 'rgba(240,237,232,0.2)', letterSpacing: 1 }}>
-          © 2025 GRADREADY PH 🇵🇭
-        </div>
-      </div>
+        {/* Right — form */}
+        <div className="auth-right">
+          <div style={{ width: '100%', maxWidth: 400 }}>
 
-      {/* Right — form */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '60px 48px' }}>
-        <div style={{ width: '100%', maxWidth: 400 }}>
-
-          <div className="su" style={{ fontFamily: 'monospace', fontSize: 10, letterSpacing: 2.5, color: 'rgba(240,237,232,0.3)', marginBottom: 40 }}>
-            NO ACCOUNT? <Link to="/register" style={{ color: '#BE473D' }}>CREATE ONE</Link>
-          </div>
-
-          <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-
-            <div className="su su-d1">
-              <label style={label}>Email address</label>
-              <input {...register('email')} type="email" className="field" placeholder="juan@email.com" />
-              {errors.email && <p style={err}>{errors.email.message}</p>}
+            <div className="su" style={{ fontFamily: 'monospace', fontSize: 10, letterSpacing: 2.5, color: 'rgba(240,237,232,0.3)', marginBottom: 40 }}>
+              NO ACCOUNT? <Link to="/register" style={{ color: '#BE473D' }}>CREATE ONE</Link>
             </div>
 
-            <div className="su su-d2">
-              <label style={label}>Password</label>
-              <input {...register('password')} type="password" className="field" placeholder="••••••••" />
-              {errors.password && <p style={err}>{errors.password.message}</p>}
-            </div>
+            <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
-            {error && (
-              <div className="su" style={{ border: '1px solid rgba(190,71,61,0.3)', background: 'rgba(190,71,61,0.08)', padding: '12px 16px', fontFamily: 'monospace', fontSize: 12, color: '#BE473D', letterSpacing: 0.5 }}>
-                {error}
+              <div className="su su-d1">
+                <label style={label}>Email address</label>
+                <input {...register('email')} type="email" className="field" placeholder="juan@email.com" />
+                {errors.email && <p style={err}>{errors.email.message}</p>}
               </div>
-            )}
 
-            <button type="submit" className="btn-submit su su-d3" disabled={loading}>
-              {loading ? 'SIGNING IN...' : 'SIGN IN →'}
-            </button>
-          </form>
+              <div className="su su-d2">
+                <label style={label}>Password</label>
+                <input {...register('password')} type="password" className="field" placeholder="••••••••" />
+                {errors.password && <p style={err}>{errors.password.message}</p>}
+              </div>
+
+              {error && (
+                  <div className="su" style={{ border: '1px solid rgba(190,71,61,0.3)', background: 'rgba(190,71,61,0.08)', padding: '12px 16px', fontFamily: 'monospace', fontSize: 12, color: '#BE473D', letterSpacing: 0.5 }}>
+                    {error}
+                  </div>
+              )}
+
+              <button type="submit" className="btn-submit su su-d3" disabled={loading}>
+                {loading ? 'SIGNING IN...' : 'SIGN IN →'}
+              </button>
+            </form>
+          </div>
         </div>
       </div>
-    </div>
   )
 }
