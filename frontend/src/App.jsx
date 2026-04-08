@@ -13,6 +13,8 @@ import ProfilePage from './pages/dashboard/ProfilePage'
 import EditProfilePage from './pages/dashboard/EditProfilePage'
 import FinancePage from './pages/dashboard/FinancePage'
 import BoardExamPage from './pages/dashboard/BoardExamPage'
+import JobTrackerPage    from './pages/dashboard/JobTrackerPage'
+import SalaryBoardPage   from './pages/dashboard/SalaryBoardPage'
 
 function PrivateRoute({ children }) {
   const { token } = useAuthStore()
@@ -56,6 +58,9 @@ export default function App() {
         <Route path="/dashboard/board" element={<PrivateRoute><BoardExamPage /></PrivateRoute>} />
         <Route path="/dashboard/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
         <Route path="/dashboard/profile/edit" element={<PrivateRoute><EditProfilePage /></PrivateRoute>} />
+        <Route path="/dashboard/tracker"  element={<PrivateRoute><JobTrackerPage /></PrivateRoute>} />
+        <Route path="/dashboard/salary"   element={<PrivateRoute><SalaryBoardPage /></PrivateRoute>} />
+{/*         <Route path="/dashboard/reviews"  element={<PrivateRoute><CompanyReviewsPage /></PrivateRoute>} /> */}
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

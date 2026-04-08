@@ -1,292 +1,300 @@
-import { useState } from 'react'
+import {useEffect, useState} from 'react'
 import PageLayout from '../../components/ui/PageLayout'
 import { useNavigate } from 'react-router-dom'
 import { useJobs } from '../../hooks/useJobs'
-import RedFlagChecker from '../../components/ui/RedFlagChecker'
+
+const MONO = 'Share Tech Mono, monospace'
+
+const CSS = `
+  .job-row { transition: all .18s; border-left: 2px solid transparent; }
+  .job-row:hover { background: rgba(240,237,232,0.06) !important; border-left-color: #BE473D !important; }
+  .job-row:hover .job-title { color: #F0EDE8 !important; }
+  .site-card { transition: all .22s; border-top: 2px solid transparent; }
+  .site-card:hover { background: rgba(240,237,232,0.06) !important; }
+  .cta-gold:hover { background: rgba(200,168,75,0.14) !important; }
+  .cta-ghost:hover { border-color: rgba(240,237,232,0.35) !important; color: #F0EDE8 !important; }
+  input::placeholder, textarea::placeholder { color: rgba(240,237,232,0.2); }
+  input:focus, textarea:focus { outline: none; border-color: rgba(190,71,61,0.5) !important; }
+`
 
 var JOB_SITES = [
-  {
-    name: 'Kalibrr',
-    desc: 'Best for fresh grads',
-    url: 'https://kalibrr.com',
-    bg: 'bg-purple-50',
-    text: 'text-purple-800',
-  },
-  {
-    name: 'JobStreet',
-    desc: 'Largest PH job board',
-    url: 'https://jobstreet.com.ph',
-    bg: 'bg-blue-50',
-    text: 'text-blue-800',
-  },
-  {
-    name: 'LinkedIn',
-    desc: 'Corporate and networking',
-    url: 'https://linkedin.com/jobs',
-    bg: 'bg-sky-50',
-    text: 'text-sky-800',
-  },
-  {
-    name: 'Indeed PH',
-    desc: 'High volume listings',
-    url: 'https://ph.indeed.com',
-    bg: 'bg-indigo-50',
-    text: 'text-indigo-800',
-  },
-  {
-    name: 'OnlineJobs',
-    desc: 'Remote and freelance',
-    url: 'https://onlinejobs.ph',
-    bg: 'bg-green-50',
-    text: 'text-green-800',
-  },
-  {
-    name: 'BossJob',
-    desc: 'BPO and entry-level',
-    url: 'https://bossjob.ph',
-    bg: 'bg-orange-50',
-    text: 'text-orange-800',
-  },
+    { name:'KALIBRR',    desc:'Best for fresh grads',   url:'https://kalibrr.com',          accent:'#8E44AD' },
+    { name:'JOBSTREET',  desc:'Largest PH board',        url:'https://jobstreet.com.ph',     accent:'#60A5FA' },
+    { name:'LINKEDIN',   desc:'Corporate network',       url:'https://linkedin.com/jobs',    accent:'#0e76a8' },
+    { name:'INDEED PH',  desc:'High volume',             url:'https://ph.indeed.com',        accent:'#34D399' },
+    { name:'ONLINEJOBS', desc:'Remote / freelance',      url:'https://onlinejobs.ph',        accent:'#C8A84B' },
+    { name:'BOSSJOB',    desc:'BPO and entry-level',     url:'https://bossjob.ph',           accent:'#BE473D' },
 ]
 
-function getMatchStyle(match) {
-  if (!match) return 'bg-gray-100 text-gray-500'
-  if (match >= 85) return 'bg-green-50 text-green-700'
-  if (match >= 70) return 'bg-amber-50 text-amber-700'
-  return 'bg-gray-100 text-gray-500'
+function matchColor(score) {
+    if (!score) return 'rgba(240,237,232,0.2)'
+    if (score >= 85) return '#34D399'
+    if (score >= 70) return '#C8A84B'
+    return 'rgba(240,237,232,0.3)'
 }
 
-function SiteCard(props) {
-  return (
-    <a
-      href={props.url}
-      target="_blank"
-      rel="noreferrer"
-      className={props.bg + ' ' + props.text + ' rounded-xl p-3 text-center border border-[#EAE4DC] block hover:opacity-80 transition-opacity'}
-    >
-      <div className="text-xs font-black mb-1">{props.name}</div>
-      <div className="text-xs opacity-70 leading-tight">{props.desc}</div>
-    </a>
-  )
-}
+// ─── Job card ──────────────────────────────────────────────────────────────────
+function JobCard({ job, navigate }) {
+    var initial = job.company ? job.company.charAt(0).toUpperCase() : 'J'
+    var mc = matchColor(job.fitScore)
 
-function TagPill(props) {
-  return (
-    <span className="text-xs bg-[#F7F3EE] text-gray-500 font-semibold px-2 py-1 rounded-full">
-      {props.label}
-    </span>
-  )
-}
+    return (
+        <div className="job-row" style={{ background:'transparent', padding:'16px 14px 16px 16px' }}>
+            <div style={{ display:'flex', alignItems:'flex-start', gap:12, marginBottom:10 }}>
+                {/* Company initial */}
+                <div style={{ width:34, height:34, flexShrink:0, background:'rgba(190,71,61,0.12)', border:'1px solid rgba(190,71,61,0.22)', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:MONO, fontSize:14, color:'#BE473D' }}>
+                    {initial}
+                </div>
 
-function JobCard(props) {
-  var job = props.job
-  var navigate = props.navigate
-  var initial = job.company ? job.company.charAt(0).toUpperCase() : 'J'
-
-  function handleCoverLetter() {
-    navigate('/dashboard/chat', {
-      state: {
-        initialMessage: 'Write a short cover letter (3 paragraphs, under 200 words) for '
-          + job.title + ' at ' + job.company + '. Make it professional, warm, and tailored for a Filipino fresh graduate.',
-      },
-    })
-  }
-
-  function handleApply() {
-    if (job.applyLink) {
-      window.open(job.applyLink, '_blank')
-    }
-  }
-
-  return (
-    <div className="bg-white border border-[#EAE4DC] rounded-2xl p-4">
-      <div className="flex items-start gap-3 mb-3">
-        <div className="w-11 h-11 rounded-xl bg-[#F7F3EE] flex items-center justify-center text-base font-black text-[#C0392B] flex-shrink-0">
-          {initial}
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex-1 min-w-0">
-              <div className="text-sm font-bold text-[#1C0A08] leading-tight">{job.title}</div>
-              <div className="text-xs text-gray-400 mt-0.5">
-                {job.company}
-                {job.location ? ' · ' + job.location : ''}
-              </div>
+                <div style={{ flex:1, minWidth:0 }}>
+                    <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:8 }}>
+                        <div style={{ flex:1, minWidth:0 }}>
+                            <div className="job-title" style={{ fontFamily:MONO, fontSize:14, color:'rgba(240,237,232,0.85)', letterSpacing:.4, marginBottom:3, transition:'color .18s' }}>
+                                {job.title}
+                            </div>
+                            <div style={{ fontFamily:'monospace', fontSize:11, color:'rgba(240,237,232,0.42)' }}>
+                                {job.company}{job.location ? ' · ' + job.location : ''}
+                            </div>
+                        </div>
+                        {/* Fit score */}
+                        {job.fitScore != null && (
+                            <div style={{ textAlign:'right', flexShrink:0 }}>
+                                <div style={{ fontFamily:MONO, fontSize:18, color:mc, letterSpacing:'-1px', lineHeight:1 }}>{job.fitScore}</div>
+                                <div style={{ fontFamily:MONO, fontSize:8, color:'rgba(240,237,232,0.32)', letterSpacing:1 }}>MATCH%</div>
+                            </div>
+                        )}
+                    </div>
+                </div>
             </div>
-            {job.fitScore != null && (
-              <div className={'text-xs font-black px-2 py-1 rounded-full flex-shrink-0 ' + getMatchStyle(job.fitScore)}>
-                {job.fitScore}%
-              </div>
+
+            {/* Tags */}
+            <div style={{ display:'flex', gap:6, flexWrap:'wrap', marginBottom:10 }}>
+                {job.employmentType && (
+                    <span style={{ fontFamily:MONO, fontSize:9, color:'rgba(240,237,232,0.42)', padding:'3px 8px', border:'1px solid rgba(240,237,232,0.1)', letterSpacing:.5 }}>{job.employmentType}</span>
+                )}
+                {job.salaryMin && job.salaryMax && (
+                    <span style={{ fontFamily:MONO, fontSize:9, color:'rgba(240,237,232,0.42)', padding:'3px 8px', border:'1px solid rgba(240,237,232,0.1)', letterSpacing:.5 }}>
+            ₱{Number(job.salaryMin).toLocaleString()} – ₱{Number(job.salaryMax).toLocaleString()}
+          </span>
+                )}
+            </div>
+
+            {/* Description snippet */}
+            {job.description && (
+                <div style={{ fontFamily:'monospace', fontSize:12, color:'rgba(240,237,232,0.42)', lineHeight:1.7, marginBottom:12 }}>
+                    {job.description.substring(0, 110)}...
+                </div>
             )}
-          </div>
+
+            {/* Action buttons */}
+            <div style={{ display:'flex', gap:8 }}>
+                <button className="cta-gold"
+                        onClick={function() { navigate('/dashboard/chat', { state: { initialMessage: 'Write a short cover letter (3 paragraphs, under 200 words) for ' + job.title + ' at ' + job.company + '.' } }) }}
+                        style={{ flex:1, background:'rgba(200,168,75,0.07)', border:'1px solid rgba(200,168,75,0.28)', color:'#C8A84B', padding:'9px', fontFamily:MONO, fontSize:9, letterSpacing:1.5, cursor:'pointer', transition:'all .18s' }}>
+                    COVER LETTER
+                </button>
+                {job.applyLink && (
+                    <button className="cta-ghost"
+                            onClick={function() { window.open(job.applyLink, '_blank', 'noopener,noreferrer') }}
+                            style={{ flex:1, background:'transparent', border:'1px solid rgba(240,237,232,0.1)', color:'rgba(240,237,232,0.4)', padding:'9px', fontFamily:MONO, fontSize:9, letterSpacing:1.5, cursor:'pointer', transition:'all .18s' }}>
+                        APPLY NOW
+                    </button>
+                )}
+            </div>
         </div>
-      </div>
-
-      <div className="flex flex-wrap gap-1.5 mb-3">
-        {job.employmentType && (
-          <TagPill label={job.employmentType} />
-        )}
-        {job.salaryMin && job.salaryMax && (
-          <TagPill label={'P' + Number(job.salaryMin).toLocaleString() + ' - P' + Number(job.salaryMax).toLocaleString()} />
-        )}
-        {job.salaryMin && !job.salaryMax && (
-          <TagPill label={'From P' + Number(job.salaryMin).toLocaleString()} />
-        )}
-      </div>
-
-      {job.description && (
-        <p className="text-xs text-gray-400 mb-3 leading-relaxed line-clamp-2">
-          {job.description.substring(0, 120)}...
-        </p>
-      )}
-
-      <div className="flex gap-2">
-        <button
-          onClick={handleCoverLetter}
-          className="flex-1 bg-[#1C0A08] text-[#F4C430] text-xs font-bold py-2.5 rounded-xl"
-        >
-          Generate cover letter
-        </button>
-        {job.applyLink && (
-          <button
-            onClick={handleApply}
-            className="flex-1 bg-[#F7F3EE] text-[#1C0A08] text-xs font-bold py-2.5 rounded-xl border border-[#EAE4DC]"
-          >
-            Apply now
-          </button>
-        )}
-      </div>
-    </div>
-  )
+    )
 }
 
-function SkeletonCard() {
-  return (
-    <div className="bg-white border border-[#EAE4DC] rounded-2xl p-4 animate-pulse">
-      <div className="flex items-start gap-3 mb-3">
-        <div className="w-11 h-11 rounded-xl bg-gray-100 flex-shrink-0" />
-        <div className="flex-1">
-          <div className="h-4 bg-gray-100 rounded w-3/4 mb-2" />
-          <div className="h-3 bg-gray-100 rounded w-1/2" />
+// ─── Skeleton ──────────────────────────────────────────────────────────────────
+function SkeletonRow() {
+    return (
+        <div style={{ padding:'16px 14px', display:'flex', gap:12, alignItems:'flex-start', borderBottom:'1px solid rgba(240,237,232,0.05)' }}>
+            <div style={{ width:34, height:34, background:'rgba(240,237,232,0.04)', flexShrink:0 }} />
+            <div style={{ flex:1, display:'flex', flexDirection:'column', gap:7 }}>
+                <div style={{ height:11, background:'rgba(240,237,232,0.04)', width:'58%' }} />
+                <div style={{ height:9,  background:'rgba(240,237,232,0.03)', width:'38%' }} />
+                <div style={{ height:9,  background:'rgba(240,237,232,0.025)', width:'90%', marginTop:4 }} />
+            </div>
         </div>
-      </div>
-      <div className="flex gap-2 mb-3">
-        <div className="h-6 bg-gray-100 rounded-full w-16" />
-        <div className="h-6 bg-gray-100 rounded-full w-20" />
-      </div>
-      <div className="h-9 bg-gray-100 rounded-xl" />
-    </div>
-  )
+    )
 }
 
+// ─── Red flag checker ──────────────────────────────────────────────────────────
+function RedFlagChecker({ navigate }) {
+    var [mode, setMode]   = useState('text')
+    var [value, setValue] = useState('')
+
+    function handleCheck() {
+        if (!value.trim()) return
+        var isUrl = value.trim().startsWith('http')
+        var msg = isUrl
+            ? 'Can you check this job posting for red flags? Link: ' + value.trim() + '. List red flags and green flags, and give an overall verdict.'
+            : 'Can you check this job posting for red flags?\n\n' + value.trim() + '\n\nList any red flags, green flags, and give an overall assessment.'
+        navigate('/dashboard/chat', { state: { initialMessage: msg } })
+    }
+
+    return (
+        <div style={{ border:'1px solid rgba(190,71,61,0.22)', background:'rgba(190,71,61,0.04)', padding:'20px' }}>
+
+            {/* Header */}
+            <div style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'4px 12px 4px 8px', border:'1px solid rgba(190,71,61,0.3)', marginBottom:10 }}>
+                <span style={{ fontSize:11, color:'#BE473D' }}>⚠</span>
+                <span style={{ fontFamily:MONO, fontSize:11, letterSpacing:2, color:'rgba(240,237,232,0.62)' }}>RED FLAG CHECKER</span>
+            </div>
+
+            <p style={{ fontFamily:'monospace', fontSize:12, color:'rgba(240,237,232,0.48)', lineHeight:1.75, marginBottom:16 }}>
+                Paste a job posting URL or the full job description — Kuya AI will identify red flags, suspicious requirements, and salary law violations.
+            </p>
+
+            {/* Mode toggle */}
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:1, background:'rgba(240,237,232,0.05)', marginBottom:14 }}>
+                {[['text','PASTE JOB TEXT'],['url','PASTE JOB URL']].map(function(m) {
+                    var active = mode === m[0]
+                    return (
+                        <button key={m[0]} onClick={function() { setMode(m[0]); setValue('') }}
+                                style={{ padding:'10px', background:active?'#BE473D':'transparent', border:'none', color:active?'#F0EDE8':'rgba(240,237,232,0.45)', fontFamily:MONO, fontSize:10, letterSpacing:1.5, cursor:'pointer', transition:'all .18s' }}>
+                            {m[1]}
+                        </button>
+                    )
+                })}
+            </div>
+
+            {/* Input area */}
+            {mode === 'text' ? (
+                <textarea value={value} onChange={function(e) { setValue(e.target.value) }}
+                          placeholder="Paste the full job posting here..."
+                          rows={4}
+                          style={{ width:'100%', background:'rgba(240,237,232,0.05)', border:'1px solid rgba(240,237,232,0.1)', color:'#F0EDE8', padding:'12px 14px', fontFamily:'monospace', fontSize:11, outline:'none', resize:'none', marginBottom:12, letterSpacing:.3, transition:'border-color .18s', boxSizing:'border-box' }}
+                          onFocus={function(e) { e.currentTarget.style.borderColor='rgba(190,71,61,0.5)' }}
+                          onBlur={function(e) { e.currentTarget.style.borderColor='rgba(240,237,232,0.1)' }} />
+            ) : (
+                <input type="url" value={value} onChange={function(e) { setValue(e.target.value) }}
+                       placeholder="https://www.jobstreet.com.ph/job/..."
+                       style={{ width:'100%', background:'rgba(240,237,232,0.05)', border:'1px solid rgba(240,237,232,0.1)', color:'#F0EDE8', padding:'12px 14px', fontFamily:MONO, fontSize:11, outline:'none', marginBottom:12, letterSpacing:.5, transition:'border-color .18s', boxSizing:'border-box' }}
+                       onFocus={function(e) { e.currentTarget.style.borderColor='rgba(190,71,61,0.5)' }}
+                       onBlur={function(e) { e.currentTarget.style.borderColor='rgba(240,237,232,0.1)' }} />
+            )}
+
+            {/* Check button */}
+            <button onClick={handleCheck} disabled={!value.trim()}
+                    style={{ width:'100%', padding:'14px', background:value.trim()?'#BE473D':'rgba(190,71,61,0.3)', border:'none', color:'#F0EDE8', fontFamily:MONO, fontSize:10, letterSpacing:3, cursor:value.trim()?'pointer':'not-allowed', transition:'opacity .18s' }}
+                    onMouseEnter={function(e) { if (value.trim()) e.currentTarget.style.opacity='.85' }}
+                    onMouseLeave={function(e) { e.currentTarget.style.opacity='1' }}>
+                CHECK FOR RED FLAGS WITH KUYA AI
+            </button>
+        </div>
+    )
+}
+
+// ─── Main page ─────────────────────────────────────────────────────────────────
 export default function JobsPage() {
-  var navigate = useNavigate()
+    var navigate = useNavigate()
+    var [searchInput, setSearchInput] = useState('')
+    var [activeQuery, setActiveQuery] = useState('')
+    var { data, isLoading, isError } = useJobs(activeQuery)
+    var jobs = data?.jobs || []
 
-  var searchInputState = useState('')
-  var searchInput = searchInputState[0]
-  var setSearchInput = searchInputState[1]
+    useEffect(function(){ window.scrollTo(0, 0) }, [])
 
-  var activeQueryState = useState('')
-  var activeQuery = activeQueryState[0]
-  var setActiveQuery = activeQueryState[1]
+    function handleSearch(e) {
+        e.preventDefault()
+        setActiveQuery(searchInput.trim())
+    }
 
-  var jobsResult = useJobs(activeQuery)
-  var jobs = jobsResult.data && jobsResult.data.jobs ? jobsResult.data.jobs : []
-  var isLoading = jobsResult.isLoading
-  var isError = jobsResult.isError
+    return (
+        <PageLayout title="JOB SEARCH" subtitle="// AI-MATCHED OPENINGS">
+            <style>{CSS}</style>
 
-  function handleSearch(e) {
-    e.preventDefault()
-    setActiveQuery(searchInput.trim())
-  }
+            {/* ── TOP JOB SITES ── */}
+            <div style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'4px 12px 4px 8px', border:'1px solid rgba(240,237,232,0.1)', marginBottom:14 }}>
+                <span style={{ fontSize:11, color:'#BE473D' }}>01</span>
+                <span style={{ fontFamily:MONO, fontSize:11, letterSpacing:2.5, color:'rgba(240,237,232,0.5)' }}>TOP JOB SITES</span>
+            </div>
 
-  return (
-    <PageLayout title="Job search">
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:1, background:'rgba(240,237,232,0.05)', marginBottom:24 }}>
+                {JOB_SITES.map(function(site) {
+                    return (
+                        <a key={site.name} href={site.url} target="_blank" rel="noreferrer" className="site-card"
+                           style={{ display:'block', background:'#3C091E', padding:'14px 12px', textDecoration:'none',
+                               borderTop:'2px solid transparent', transition:'all .22s' }}
+                           onMouseEnter={function(e) { e.currentTarget.style.borderTopColor=site.accent; e.currentTarget.style.background='rgba(240,237,232,0.04)' }}
+                           onMouseLeave={function(e) { e.currentTarget.style.borderTopColor='transparent'; e.currentTarget.style.background='#3C091E' }}>
+                            <div style={{ fontFamily:MONO, fontSize:12, color:'#F0EDE8', letterSpacing:.5, marginBottom:5 }}>{site.name}</div>
+                            <div style={{ fontFamily:'monospace', fontSize:11, color:'rgba(240,237,232,0.42)' }}>{site.desc}</div>
+                        </a>
+                    )
+                })}
+            </div>
 
-      <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">
-        Top job sites
-      </p>
+            {/* ── SEARCH BAR ── */}
+            <div style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'4px 12px 4px 8px', border:'1px solid rgba(240,237,232,0.1)', marginBottom:12 }}>
+                <span style={{ fontSize:11, color:'#BE473D' }}>02</span>
+                <span style={{ fontFamily:MONO, fontSize:11, letterSpacing:2.5, color:'rgba(240,237,232,0.5)' }}>SEARCH JOBS</span>
+            </div>
 
-      <div className="grid grid-cols-3 gap-2 mb-6">
-        {JOB_SITES.map(function(site) {
-          return (
-            <SiteCard
-              key={site.name}
-              url={site.url}
-              bg={site.bg}
-              text={site.text}
-              name={site.name}
-              desc={site.desc}
-            />
-          )
-        })}
-      </div>
+            <form onSubmit={handleSearch} style={{ display:'flex', gap:1, marginBottom:24 }}>
+                <input type="text" value={searchInput}
+                       onChange={function(e) { setSearchInput(e.target.value) }}
+                       placeholder="e.g. nurse Metro Manila, software engineer Cebu..."
+                       style={{ flex:1, background:'rgba(240,237,232,0.05)', border:'1px solid rgba(240,237,232,0.1)', color:'#F0EDE8', padding:'12px 14px', fontFamily:MONO, fontSize:11, letterSpacing:.5, transition:'border-color .18s' }}
+                       onFocus={function(e) { e.currentTarget.style.borderColor='rgba(190,71,61,0.5)' }}
+                       onBlur={function(e) { e.currentTarget.style.borderColor='rgba(240,237,232,0.1)' }} />
+                <button type="submit"
+                        style={{ background:'#BE473D', border:'none', color:'#F0EDE8', padding:'0 20px', fontFamily:MONO, fontSize:10, letterSpacing:2, cursor:'pointer', flexShrink:0, whiteSpace:'nowrap', transition:'opacity .18s' }}
+                        onMouseEnter={function(e) { e.currentTarget.style.opacity='.85' }}
+                        onMouseLeave={function(e) { e.currentTarget.style.opacity='1' }}>
+                    SEARCH
+                </button>
+            </form>
 
-      {/* Search bar */}
-      <form onSubmit={handleSearch} className="flex gap-2 mb-5">
-        <input
-          type="text"
-          value={searchInput}
-          onChange={function(e) { setSearchInput(e.target.value) }}
-          placeholder="Search e.g. nurse Metro Manila, software engineer..."
-          className="flex-1 bg-white border border-[#EAE4DC] rounded-xl px-4 py-2.5 text-sm text-[#1C0A08] outline-none focus:border-[#C0392B] placeholder:text-gray-300"
-        />
-        <button
-          type="submit"
-          className="bg-[#C0392B] text-white text-xs font-bold px-4 py-2.5 rounded-xl flex-shrink-0"
-        >
-          Search
-        </button>
-      </form>
+            {/* ── RESULTS ── */}
+            <div style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'4px 12px 4px 8px', border:'1px solid rgba(240,237,232,0.1)', marginBottom:14 }}>
+                <span style={{ fontSize:11, color:'#BE473D' }}>03</span>
+                <span style={{ fontFamily:MONO, fontSize:11, letterSpacing:2.5, color:'rgba(240,237,232,0.5)' }}>
+          {activeQuery ? 'RESULTS FOR "' + activeQuery.toUpperCase() + '"' : 'AI MATCHES FOR YOU'}
+        </span>
+            </div>
 
-      <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">
-        {activeQuery ? 'Results for "' + activeQuery + '"' : 'AI matches for you'}
-      </p>
+            {/* Loading */}
+            {isLoading && (
+                <div style={{ border:'1px solid rgba(240,237,232,0.07)', borderBottom:'none', marginBottom:24 }}>
+                    {[1,2,3].map(function(i) { return <SkeletonRow key={i} /> })}
+                </div>
+            )}
 
-      {isLoading && (
-        <div className="flex flex-col gap-3 mb-6">
-          <SkeletonCard />
-          <SkeletonCard />
-          <SkeletonCard />
-        </div>
-      )}
+            {/* Error */}
+            {isError && (
+                <div style={{ border:'1px solid rgba(190,71,61,0.22)', background:'rgba(190,71,61,0.05)', padding:'16px', marginBottom:24 }}>
+                    <div style={{ fontFamily:MONO, fontSize:11, color:'#BE473D', letterSpacing:1, marginBottom:4 }}>COULD NOT LOAD JOBS</div>
+                    <div style={{ fontFamily:'monospace', fontSize:12, color:'rgba(240,237,232,0.45)' }}>Make sure the backend is running and try again.</div>
+                </div>
+            )}
 
-      {isError && (
-        <div className="bg-red-50 border border-red-100 rounded-2xl p-4 mb-6">
-          <div className="text-sm font-bold text-red-800 mb-1">Could not load jobs</div>
-          <div className="text-xs text-red-600">
-            Make sure the backend is running and try again.
-          </div>
-        </div>
-      )}
+            {/* Empty */}
+            {!isLoading && !isError && jobs.length === 0 && (
+                <div style={{ border:'1px solid rgba(240,237,232,0.06)', padding:32, textAlign:'center', marginBottom:24 }}>
+                    <div style={{ fontFamily:MONO, fontSize:11, color:'rgba(240,237,232,0.38)', letterSpacing:1, marginBottom:6 }}>NO JOBS FOUND</div>
+                    <div style={{ fontFamily:'monospace', fontSize:12, color:'rgba(240,237,232,0.28)' }}>Try a different search or check back later.</div>
+                </div>
+            )}
 
-      {!isLoading && !isError && jobs.length === 0 && (
-        <div className="bg-[#F7F3EE] border border-[#EAE4DC] rounded-2xl p-6 text-center mb-6">
-          <div className="text-2xl mb-2">🔍</div>
-          <div className="text-sm font-bold text-[#1C0A08] mb-1">No jobs found</div>
-          <div className="text-xs text-gray-400">
-            Try a different search term or check back later.
-          </div>
-        </div>
-      )}
+            {/* Job list */}
+            {!isLoading && !isError && jobs.length > 0 && (
+                <div style={{ border:'1px solid rgba(240,237,232,0.07)', borderBottom:'none', marginBottom:24 }}>
+                    {jobs.map(function(job) {
+                        return <JobCard key={job.id} job={job} navigate={navigate} />
+                    })}
+                </div>
+            )}
 
-      {!isLoading && jobs.length > 0 && (
-        <div className="flex flex-col gap-3 mb-6">
-          {jobs.map(function(job) {
-            return (
-              <JobCard
-                key={job.id}
-                job={job}
-                navigate={navigate}
-              />
-            )
-          })}
-        </div>
-      )}
+            {/* ── RED FLAG CHECKER ── */}
+            <div style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'4px 12px 4px 8px', border:'1px solid rgba(240,237,232,0.1)', marginBottom:14 }}>
+                <span style={{ fontSize:11, color:'#BE473D' }}>04</span>
+                <span style={{ fontFamily:MONO, fontSize:11, letterSpacing:2.5, color:'rgba(240,237,232,0.5)' }}>RED FLAG CHECKER</span>
+            </div>
 
-      {/* Red Flag Checker — now with URL and text input */}
-      <RedFlagChecker />
+            <RedFlagChecker navigate={navigate} />
 
-    </PageLayout>
-  )
+        </PageLayout>
+    )
 }
