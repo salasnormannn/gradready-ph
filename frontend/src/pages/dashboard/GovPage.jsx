@@ -3,354 +3,137 @@ import { useNavigate } from 'react-router-dom'
 import PageLayout from '../../components/ui/PageLayout'
 import useAuthStore from '../../store/authStore'
 
-var GOV_ITEMS = [
-  {
-    id: 'tin',
-    icon: '🪪',
-    name: 'TIN / BIR',
-    desc: 'Tax Identification Number',
-    time: '30 mins (online) or 1-2 hrs (walk-in)',
-    fee: 'Free',
-    link: 'https://orus.bir.gov.ph',
-    kuyaPrompt: 'How do I register for TIN as a fresh graduate in the Philippines? Give me step by step instructions.',
-    steps: [
-      'Go to orus.bir.gov.ph and create a BIR ORUS account using your email',
-      'Click "New Application" and select taxpayer type — choose "Individual"',
-      'If you are a new employee: select Form 1902 (Compensation Income Earner)',
-      'If freelancing or self-employed: select Form 1901',
-      'Fill out all required fields: full name, birthdate, address, contact info',
-      'Upload a valid government ID (passport, driver\'s license, or any primary ID)',
-      'Submit your application online — your TIN will be issued digitally',
-      'Download your Digital TIN ID from the ORUS portal',
-      'Note: TIN is FREE. Never pay anyone to get your TIN.',
-    ],
-    requirements: ['Valid government ID', 'Personal email address', 'Home address'],
-  },
-  {
-    id: 'sss',
-    icon: '🛡️',
-    name: 'SSS',
-    desc: 'Social Security System',
-    time: '30 mins (online)',
-    fee: 'Free',
-    link: 'https://my.sss.gov.ph',
-    kuyaPrompt: 'How do I register for SSS online as a fresh graduate? Give me step by step instructions.',
-    steps: [
-      'Go to my.sss.gov.ph and click "Not yet registered in My.SSS?"',
-      'Select membership type: Employed, Self-Employed, or Voluntary',
-      'Fill out your personal details: full name, birthdate, civil status',
-      'Enter your contact information: email, mobile number, home address',
-      'Upload a valid government ID with photo and signature',
-      'Submit the form — your SS Number will be sent to your email within 1-3 business days',
-      'Once you receive your SS Number, log in to My.SSS to complete your profile',
-      'Your employer will automatically deduct your monthly contributions from your salary',
-    ],
-    requirements: ['Valid government ID', 'Personal email address', 'Mobile number'],
-  },
-  {
-    id: 'nbi',
-    icon: '📋',
-    name: 'NBI Clearance',
-    desc: 'National Bureau of Investigation',
-    time: '1-3 hours (with appointment)',
-    fee: 'P155 (P130 + P25 e-clearance fee)',
-    link: 'https://clearance.nbi.gov.ph',
-    kuyaPrompt: 'How do I get an NBI clearance? What documents do I need to bring on appointment day?',
-    steps: [
-      'Go to clearance.nbi.gov.ph and create an account with your email',
-      'Log in and click "Apply for NBI Clearance"',
-      'Fill in your personal information accurately (must match your valid ID)',
-      'Choose your preferred NBI branch and available appointment date and time',
-      'Select your payment method: online (GCash, Maya, credit card) or payment centers (7-Eleven, Bayad Center)',
-      'Pay the fee of P155 and save your receipt',
-      'Print your Application Form with QR code',
-      'On appointment day: bring printed form, official receipt, and ONE valid government ID',
-      'Present documents at the NBI office, biometrics will be taken',
-      'If "No Hit": clearance released same day (30-60 minutes)',
-      'If "Hit": come back after 7-10 business days with your birth certificate',
-    ],
-    requirements: ['Printed application form with QR code', 'Official receipt of payment', '1 valid government ID with photo and signature'],
-  },
-  {
-    id: 'philhealth',
-    icon: '🏥',
-    name: 'PhilHealth',
-    desc: 'Philippine Health Insurance',
-    time: '30 mins (online or walk-in)',
-    fee: 'Free to register',
-    link: 'https://www.philhealth.gov.ph',
-    kuyaPrompt: 'How do I register for PhilHealth as a fresh graduate? Give me step by step instructions.',
-    steps: [
-      'Option A (Online): Go to philhealth.gov.ph and click "Online Services" then "Member Registration"',
-      'Fill out the online PMRF (PhilHealth Membership Registration Form)',
-      'Enter your personal details, address, and beneficiary information',
-      'Submit the form — your PhilHealth Identification Number (PIN) will be sent to your email',
-      'Option B (Walk-in): Go to any PhilHealth Local Health Insurance Office (LHIO)',
-      'Get a PMRF form and fill it out at the office',
-      'Submit form with one valid government ID',
-      'Receive your PIN on the same day',
-      'If employed: inform your HR department of your PhilHealth PIN for automatic deduction',
-      'If self-paying: pay monthly at PhilHealth offices, Bayad Center, GCash, or partner banks',
-    ],
-    requirements: ['Valid government ID', 'Personal email address', 'Beneficiary information (optional)'],
-  },
-  {
-    id: 'pagibig',
-    icon: '🏠',
-    name: 'Pag-IBIG / HDMF',
-    desc: 'Housing Development Mutual Fund',
-    time: '30 mins (online)',
-    fee: 'Free to register',
-    link: 'https://www.pagibigfund.gov.ph',
-    kuyaPrompt: 'How do I register for Pag-IBIG as a fresh graduate? What are the benefits?',
-    steps: [
-      'Go to pagibigfund.gov.ph and click "Member" then "Online Membership Registration"',
-      'Fill out the Membership Registration Form (MRF-1) with your personal details',
-      'Enter your employer information if already employed',
-      'Submit the form — your Pag-IBIG MID Number will be generated immediately',
-      'Save or screenshot your MID Number',
-      'Option: Walk-in to any Pag-IBIG branch with valid ID to register in person',
-      'Inform your HR department of your MID Number for automatic monthly deductions',
-      'Contributions: P100/month employee share (up to P100 maximum)',
-      'Bonus: Consider enrolling in MP2 (Modified Pag-IBIG 2) for 6-7% annual dividends',
-    ],
-    requirements: ['Valid government ID', 'Personal email address', 'Employer information (if employed)'],
-  },
-  {
-    id: 'philsys',
-    icon: '🇵🇭',
-    name: 'National ID (PhilSys)',
-    desc: 'Philippine Identification System',
-    time: '1-2 hours (on-site registration)',
-    fee: 'Free',
-    link: 'https://philsys.gov.ph',
-    kuyaPrompt: 'How do I get my Philippine National ID (PhilSys)? What are the requirements?',
-    steps: [
-      'Step 1 (Online Pre-registration): Go to philsys.gov.ph or download the PhilSys app',
-      'Fill out your personal information: full name, birthdate, place of birth, address',
-      'Choose your preferred PSA registration center and schedule',
-      'Save your transaction reference number',
-      'Step 2 (On-site Registration): Go to your scheduled registration center on your appointment date',
-      'Bring your primary document (birth certificate + secondary ID, or passport, driver\'s license, UMID)',
-      'Your photo, fingerprints, and iris scan will be captured',
-      'Sign the registration form',
-      'Receive your transaction slip with your PhilSys Number (PSN)',
-      'Physical card delivery: 2-6 months via PhilPost to your registered address',
-      'Use your transaction slip as temporary ID while waiting for the card',
-    ],
-    requirements: ['PSA Birth Certificate', 'Any secondary ID (school ID, barangay ID)', 'OR: Passport, Driver\'s License, UMID (any one)'],
-  },
+const MONO = 'Share Tech Mono, monospace'
+const CSS = `
+  .gov-row{transition:all .18s;border-left:2px solid transparent;}
+  .gov-row:hover{background:rgba(240,237,232,0.06)!important;border-left-color:#BE473D!important;}
+  .gov-row:hover .gov-name{color:#F0EDE8!important;}
+
+  @keyframes gov-drift-a { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-18px) rotate(5deg)} }
+  @keyframes gov-drift-b { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-12px) rotate(-4deg)} }
+  @keyframes gov-pulse   { 0%,100%{opacity:0.12} 50%{opacity:0.22} }
+  @keyframes gov-scan    { from{top:-2px} to{top:100%} }
+
+  .gov-bg {
+    position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden;
+  }
+  .gov-page-wrap { position:relative; z-index:1; }
+`
+
+var ITEMS=[
+  {id:'tin',icon:'🪪',name:'TIN / BIR',desc:'Tax Identification Number',time:'30 mins (online)',fee:'Free',link:'https://orus.bir.gov.ph',kuyaPrompt:'How do I register for TIN as a fresh graduate in the Philippines?',requirements:['Valid government ID','Personal email address','Home address'],steps:['Go to orus.bir.gov.ph and create a BIR ORUS account','Click "New Application" and select Form 1902 (employed) or Form 1901 (self-employed)','Fill out all required personal details and upload a valid government ID','Submit online — your TIN will be issued digitally','Download your Digital TIN ID from the ORUS portal','Note: TIN is FREE. Never pay anyone to get your TIN.']},
+  {id:'sss',icon:'🛡️',name:'SSS',desc:'Social Security System',time:'30 mins (online)',fee:'Free',link:'https://my.sss.gov.ph',kuyaPrompt:'How do I register for SSS online as a fresh graduate?',requirements:['Valid government ID','Personal email address','Mobile number'],steps:['Go to my.sss.gov.ph and click "Not yet registered in My.SSS?"','Select membership type: Employed, Self-Employed, or Voluntary','Fill out your personal details and upload a valid ID','Submit — your SS Number will be emailed within 1-3 days','Your employer will deduct monthly contributions from your salary']},
+  {id:'nbi',icon:'📋',name:'NBI Clearance',desc:'National Bureau of Investigation',time:'1-3 hours',fee:'₱155',link:'https://clearance.nbi.gov.ph',kuyaPrompt:'How do I get an NBI clearance? What documents do I need?',requirements:['Printed application form with QR code','Official receipt of payment','1 valid government ID'],steps:['Go to clearance.nbi.gov.ph and create an account','Apply for NBI Clearance and choose your branch and date','Pay ₱155 online or at Bayad Center / 7-Eleven','Print your Application Form with QR code','On appointment day: bring form, receipt, and one valid ID','If "No Hit": clearance released same day','If "Hit": come back after 7-10 days with birth certificate']},
+  {id:'philhealth',icon:'🏥',name:'PhilHealth',desc:'Philippine Health Insurance',time:'30 mins',fee:'Free',link:'https://www.philhealth.gov.ph',kuyaPrompt:'How do I register for PhilHealth as a fresh graduate?',requirements:['Valid government ID','Personal email address'],steps:['Go to philhealth.gov.ph > Online Services > Member Registration','Fill out the PMRF form with your personal details','Submit — your PhilHealth PIN will be emailed','Inform your HR of your PIN for automatic deduction','If self-paying: pay monthly at PhilHealth offices or GCash']},
+  {id:'pagibig',icon:'🏠',name:'Pag-IBIG / HDMF',desc:'Housing Development Mutual Fund',time:'30 mins',fee:'Free',link:'https://www.pagibigfund.gov.ph',kuyaPrompt:'How do I register for Pag-IBIG as a fresh graduate?',requirements:['Valid government ID','Personal email address'],steps:['Go to pagibigfund.gov.ph > Member > Online Membership Registration','Fill out the MRF-1 form with your personal details','Submit — your Pag-IBIG MID Number is generated immediately','Inform your HR for automatic monthly deductions','Consider enrolling in MP2 for 6-7% annual dividends']},
+  {id:'philsys',icon:'🇵🇭',name:'National ID (PhilSys)',desc:'Philippine Identification System',time:'1-2 hours',fee:'Free',link:'https://philsys.gov.ph',kuyaPrompt:'How do I get my Philippine National ID (PhilSys)?',requirements:['PSA Birth Certificate','Any secondary ID (school ID, barangay ID)'],steps:['Go to philsys.gov.ph or download the PhilSys app to pre-register','Fill out your info and choose a registration center','Go to your scheduled center with your documents','Have your photo, fingerprints, and iris scan captured','Receive your PhilSys Number (PSN) via transaction slip','Physical card arrives in 2-6 months via PhilPost']},
 ]
 
-var STATUS_CONFIG = {
-  done: { label: 'Done', bg: 'bg-green-50', text: 'text-green-700', dot: 'bg-green-500' },
-  in_progress: { label: 'In progress', bg: 'bg-amber-50', text: 'text-amber-700', dot: 'bg-amber-400' },
-  not_started: { label: 'Not started', bg: 'bg-gray-100', text: 'text-gray-500', dot: 'bg-gray-300' },
-}
+var SC={done:{label:'DONE',color:'#34D399',border:'rgba(52,211,153,0.3)'},in_progress:{label:'IN PROGRESS',color:'#FBBF24',border:'rgba(251,191,36,0.3)'},not_started:{label:'NOT STARTED',color:'rgba(240,237,232,0.25)',border:'rgba(240,237,232,0.1)'}}
 
-var STORAGE_KEY = 'gradready-gov-statuses'
+function sk(email){return 'gradready-gov-statuses-'+(email||'guest')}
+function load(email){try{var s=localStorage.getItem(sk(email));if(s)return JSON.parse(s)}catch(e){}var d={};ITEMS.forEach(function(i){d[i.id]='not_started'});return d}
+function save(statuses,email){try{localStorage.setItem(sk(email),JSON.stringify(statuses))}catch(e){}}
 
-function loadStatuses() {
-  try {
-    var saved = localStorage.getItem(STORAGE_KEY)
-    if (saved) return JSON.parse(saved)
-  } catch (e) {}
-  var defaults = {}
-  GOV_ITEMS.forEach(function(item) { defaults[item.id] = 'not_started' })
-  return defaults
-}
-
-function saveStatuses(statuses) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(statuses)) } catch (e) {}
-}
-
-function GovCard(props) {
-  var item = props.item
-  var status = props.status
-  var cfg = STATUS_CONFIG[status]
-  var navigate = props.navigate
-
-  var expandedState = useState(false)
-  var expanded = expandedState[0]
-  var setExpanded = expandedState[1]
-
-  var stepsExpandedState = useState(false)
-  var stepsExpanded = stepsExpandedState[0]
-  var setStepsExpanded = stepsExpandedState[1]
-
-  function handleCycleStatus(e) {
-    e.stopPropagation()
-    props.onCycleStatus()
-  }
-
-  function handleKuya() {
-    navigate('/dashboard/chat', { state: { initialMessage: item.kuyaPrompt } })
-  }
-
-  function handleOfficialSite() {
-    window.open(item.link, '_blank')
-  }
-
-  return (
-    <div className="bg-white border border-[#EAE4DC] rounded-2xl overflow-hidden">
-      <div
-        className="p-4 cursor-pointer"
-        onClick={function() { setExpanded(!expanded) }}
-      >
-        <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl bg-[#F7F3EE] flex items-center justify-center text-xl flex-shrink-0">
-            {item.icon}
+function GovRow({item,status,onCycle,navigate}){
+  var [open,setOpen]=useState(false)
+  var [steps,setSteps]=useState(false)
+  var cfg=SC[status]
+  return(
+      <div style={{borderBottom:'1px solid rgba(240,237,232,0.05)'}}>
+        <div className="gov-row" onClick={function(){setOpen(!open)}} style={{display:'flex',alignItems:'center',gap:14,padding:'14px 12px 14px 14px',cursor:'pointer',background:'transparent'}}>
+          <div style={{width:36,height:36,background:'rgba(190,71,61,0.1)',border:'1px solid rgba(190,71,61,0.18)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:17,flexShrink:0}}>{item.icon}</div>
+          <div style={{flex:1,minWidth:0}}>
+            <div className="gov-name" style={{fontFamily:MONO,fontSize:14,color:'rgba(240,237,232,0.85)',letterSpacing:.5,marginBottom:3,transition:'color .18s'}}>{item.name}</div>
+            <div style={{fontFamily:'monospace',fontSize:11,color:'rgba(240,237,232,0.42)'}}>{item.desc} · {item.time} · {item.fee}</div>
           </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap mb-0.5">
-              <span className="text-sm font-bold text-[#1C0A08]">{item.name}</span>
-              <button
-                onClick={handleCycleStatus}
-                className={cfg.bg + ' ' + cfg.text + ' text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1'}
-              >
-                <span className={cfg.dot + ' w-1.5 h-1.5 rounded-full inline-block'} />
-                {cfg.label}
-              </button>
-            </div>
-            <div className="text-xs text-gray-400">{item.desc}</div>
-            <div className="flex gap-3 mt-1">
-              <span className="text-xs text-gray-400">Time: {item.time}</span>
-              <span className="text-xs text-gray-400">Fee: {item.fee}</span>
-            </div>
-          </div>
-          <div className="text-gray-300 text-sm flex-shrink-0">
-            {expanded ? 'v' : '>'}
-          </div>
+          <button onClick={function(e){e.stopPropagation();onCycle()}} style={{padding:'4px 10px',border:'1px solid',borderColor:cfg.border,background:'transparent',color:cfg.color,fontFamily:MONO,fontSize:9,letterSpacing:1,cursor:'pointer',flexShrink:0,transition:'all .15s'}}>{cfg.label}</button>
+          <span style={{fontFamily:MONO,fontSize:16,color:'rgba(240,237,232,0.28)',flexShrink:0}}>{open?'∨':'›'}</span>
         </div>
+        {open&&(
+            <div style={{padding:'0 12px 16px 62px'}}>
+              <div style={{marginBottom:10}}>
+                <div style={{fontFamily:MONO,fontSize:9,color:'rgba(240,237,232,0.35)',letterSpacing:2,marginBottom:6}}>// REQUIREMENTS</div>
+                {item.requirements.map(function(r){return<div key={r} style={{fontFamily:'monospace',fontSize:12,color:'rgba(240,237,232,0.55)',lineHeight:1.7}}>› {r}</div>})}
+              </div>
+              <button onClick={function(){setSteps(!steps)}} style={{background:'transparent',border:'none',cursor:'pointer',fontFamily:MONO,fontSize:10,color:'#BE473D',letterSpacing:1,padding:0,marginBottom:steps?10:0}} onMouseEnter={function(e){e.currentTarget.style.opacity='.7'}} onMouseLeave={function(e){e.currentTarget.style.opacity='1'}}>{steps?'─ HIDE GUIDE':'+ SHOW STEP-BY-STEP GUIDE'}</button>
+              {steps&&(
+                  <div style={{marginBottom:12}}>
+                    {item.steps.map(function(step,i){return(
+                        <div key={i} style={{display:'flex',gap:10,alignItems:'flex-start',marginBottom:6}}>
+                          <div style={{width:20,height:20,background:'#BE473D',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:MONO,fontSize:9,color:'#F0EDE8',flexShrink:0}}>{i+1}</div>
+                          <div style={{fontFamily:'monospace',fontSize:12,color:'rgba(240,237,232,0.55)',lineHeight:1.65}}>{step}</div>
+                        </div>
+                    )})}
+                  </div>
+              )}
+              <div style={{display:'flex',gap:8}}>
+                <button onClick={function(){navigate('/dashboard/chat',{state:{initialMessage:item.kuyaPrompt}})}} style={{flex:1,padding:'11px',background:'#BE473D',border:'none',cursor:'pointer',fontFamily:MONO,fontSize:10,color:'#F0EDE8',letterSpacing:1,transition:'opacity .18s'}} onMouseEnter={function(e){e.currentTarget.style.opacity='.85'}} onMouseLeave={function(e){e.currentTarget.style.opacity='1'}}>ASK KUYA AI</button>
+                <button onClick={function(){window.open(item.link,'_blank','noopener,noreferrer')}} style={{flex:1,padding:'11px',background:'transparent',border:'1px solid rgba(240,237,232,0.07)',cursor:'pointer',fontFamily:MONO,fontSize:10,color:'rgba(240,237,232,0.5)',letterSpacing:1,transition:'all .18s'}} onMouseEnter={function(e){e.currentTarget.style.color='#F0EDE8';e.currentTarget.style.borderColor='rgba(240,237,232,0.3)'}} onMouseLeave={function(e){e.currentTarget.style.color='rgba(240,237,232,0.5)';e.currentTarget.style.borderColor='rgba(240,237,232,0.1)'}}>OFFICIAL SITE</button>
+              </div>
+            </div>
+        )}
       </div>
-
-      {expanded && (
-        <div className="px-4 pb-4 border-t border-[#F7F3EE]">
-
-          <div className="mt-3 mb-3">
-            <div className="text-xs font-bold text-[#888] uppercase tracking-wide mb-2">
-              Requirements
-            </div>
-            <div className="flex flex-col gap-1">
-              {item.requirements.map(function(req, i) {
-                return (
-                  <div key={i} className="flex items-start gap-2 text-xs text-[#1C0A08]">
-                    <span className="text-green-500 flex-shrink-0 mt-0.5">ok</span>
-                    <span>{req}</span>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-
-          <button
-            onClick={function() { setStepsExpanded(!stepsExpanded) }}
-            className="w-full text-left text-xs font-bold text-[#C0392B] mb-2 py-1"
-          >
-            {stepsExpanded ? 'Hide step-by-step guide' : 'Show step-by-step guide'}
-          </button>
-
-          {stepsExpanded && (
-            <div className="flex flex-col gap-2 mb-3">
-              {item.steps.map(function(step, i) {
-                return (
-                  <div key={i} className="flex items-start gap-2.5">
-                    <div className="w-5 h-5 rounded-full bg-[#C0392B] text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
-                      {i + 1}
-                    </div>
-                    <span className="text-xs text-[#1C0A08] leading-relaxed">{step}</span>
-                  </div>
-                )
-              })}
-            </div>
-          )}
-
-          <div className="flex gap-2 mt-2">
-            <button
-              onClick={handleKuya}
-              className="flex-1 bg-[#1C0A08] text-[#F4C430] text-xs font-bold py-2.5 rounded-xl"
-            >
-              Ask Kuya AI
-            </button>
-            <button
-              onClick={handleOfficialSite}
-              className="flex-1 bg-[#F7F3EE] text-[#1C0A08] text-xs font-bold py-2.5 rounded-xl border border-[#EAE4DC]"
-            >
-              Official site
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
   )
 }
 
-export default function GovPage() {
-  var navigate = useNavigate()
+export default function GovPage(){
+  var navigate=useNavigate()
+  var {user}=useAuthStore()
+  var email=user?(user.email||user.username||''):''
+  var [statuses,setStatuses]=useState(function(){return load(email)})
+  useEffect(function(){if(email){save(statuses,email);window.dispatchEvent(new Event('gov-status-updated'))}},[statuses,email])
+  function cycle(id){var order=['not_started','in_progress','done'];setStatuses(function(prev){var next=order[(order.indexOf(prev[id])+1)%order.length];return Object.assign({},prev,{[id]:next})})}
+  var doneCount=Object.values(statuses).filter(function(s){return s==='done'}).length
+  var pct=Math.round((doneCount/ITEMS.length)*100)
+  return(
+      <PageLayout title="GOV REGISTRATIONS" subtitle="// YOUR POST-GRAD CHECKLIST">
+        <style>{CSS}</style>
 
-  var statusState = useState(loadStatuses)
-  var statuses = statusState[0]
-  var setStatuses = statusState[1]
-
-  var authStore = useAuthStore()
-  var user = authStore.user
-  var userId = user && user.userId ? user.userId : 'guest'
-  var STORAGE_KEY = 'gradready-gov-statuses-' + userId
-
-  useEffect(function() {
-    saveStatuses(statuses)
-    // Dispatch event so dashboard can listen for updates
-    window.dispatchEvent(new Event('gov-status-updated'))
-  }, [statuses])
-
-  function cycleStatus(id) {
-    var order = ['not_started', 'in_progress', 'done']
-    setStatuses(function(prev) {
-      var current = prev[id]
-      var nextIndex = (order.indexOf(current) + 1) % order.length
-      var next = order[nextIndex]
-      var updated = Object.assign({}, prev)
-      updated[id] = next
-      return updated
-    })
-  }
-
-  var doneCount = Object.values(statuses).filter(function(s) { return s === 'done' }).length
-  var progressPct = Math.round((doneCount / GOV_ITEMS.length) * 100)
-
-  return (
-    <PageLayout title="Gov registrations">
-
-      <div className="bg-white border border-[#EAE4DC] rounded-2xl p-4 mb-5">
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-sm font-bold text-[#1C0A08]">Registration progress</span>
-          <span className="text-sm font-black text-[#C0392B]">{doneCount}/{GOV_ITEMS.length}</span>
+        {/* ── Background layer ── */}
+        <div className="gov-bg" aria-hidden="true">
+          {/* Central crimson glow */}
+          <div style={{position:'absolute',top:'18%',left:'50%',transform:'translateX(-50%)',width:'min(90vw,600px)',height:'min(90vw,600px)',borderRadius:'50%',background:'radial-gradient(circle,rgba(190,71,61,0.14) 0%,rgba(190,71,61,0.04) 40%,transparent 70%)',animation:'gov-pulse 6s ease-in-out infinite'}}/>
+          {/* Top-right accent blob */}
+          <div style={{position:'absolute',top:'-5%',right:'-5%',width:260,height:260,borderRadius:'50%',background:'radial-gradient(circle,rgba(200,138,75,0.08) 0%,transparent 65%)',animation:'gov-pulse 9s ease-in-out infinite'}}/>
+          {/* Bottom-left accent blob */}
+          <div style={{position:'absolute',bottom:'10%',left:'-8%',width:200,height:200,borderRadius:'50%',background:'radial-gradient(circle,rgba(190,71,61,0.07) 0%,transparent 65%)'}}/>
+          {/* Floating diamond — top right */}
+          <div style={{position:'absolute',top:'8%',right:'6%',width:44,height:44,border:'1px solid rgba(190,71,61,0.18)',transform:'rotate(45deg)',animation:'gov-drift-a 11s ease-in-out infinite'}}/>
+          {/* Floating diamond — bottom left */}
+          <div style={{position:'absolute',bottom:'22%',left:'4%',width:28,height:28,border:'1px solid rgba(240,237,232,0.07)',transform:'rotate(45deg)',animation:'gov-drift-b 8s ease-in-out infinite 1s'}}/>
+          {/* Floating ring */}
+          <div style={{position:'absolute',top:'38%',right:'3%',width:56,height:56,borderRadius:'50%',border:'1px solid rgba(190,71,61,0.1)',animation:'gov-drift-b 13s ease-in-out infinite 2s'}}/>
+          {/* Corner bracket — top left */}
+          <div style={{position:'absolute',top:16,left:16,width:32,height:32,borderTop:'1px solid rgba(190,71,61,0.22)',borderLeft:'1px solid rgba(190,71,61,0.22)'}}/>
+          {/* Corner bracket — bottom right */}
+          <div style={{position:'absolute',bottom:16,right:16,width:32,height:32,borderBottom:'1px solid rgba(190,71,61,0.22)',borderRight:'1px solid rgba(190,71,61,0.22)'}}/>
+          {/* Diagonal rule lines */}
+          <div style={{position:'absolute',top:'30%',left:0,width:'35%',height:1,background:'linear-gradient(90deg,transparent,rgba(190,71,61,0.08),transparent)',transform:'rotate(-8deg)',transformOrigin:'left'}}/>
+          <div style={{position:'absolute',bottom:'30%',right:0,width:'28%',height:1,background:'linear-gradient(90deg,transparent,rgba(240,237,232,0.05),transparent)',transform:'rotate(6deg)',transformOrigin:'right'}}/>
+          {/* Binary ambient text */}
+          <div style={{position:'absolute',top:'12%',left:'2%',fontFamily:'monospace',fontSize:8,color:'rgba(240,237,232,0.055)',letterSpacing:2,lineHeight:2,userSelect:'none'}}>{'01001010\n10110100\n00101101'}</div>
+          <div style={{position:'absolute',bottom:'14%',right:'2%',fontFamily:'monospace',fontSize:8,color:'rgba(240,237,232,0.045)',letterSpacing:2,lineHeight:2,userSelect:'none',textAlign:'right'}}>{'10011010\n01100101'}</div>
+          {/* Scanline */}
+          <div style={{position:'absolute',left:0,right:0,height:1,background:'linear-gradient(90deg,transparent,rgba(190,71,61,0.1),transparent)',animation:'gov-scan 12s linear infinite'}}/>
         </div>
-        <div className="h-2 bg-[#F0EBE4] rounded-full overflow-hidden">
-          <div
-            className="h-full bg-[#C0392B] rounded-full transition-all duration-500"
-            style={{ width: progressPct + '%' }}
-          />
+
+        <div className="gov-page-wrap">
+          <div style={{padding:'16px',border:'1px solid rgba(240,237,232,0.07)',background:'rgba(30,4,15,0.6)',marginBottom:20,position:'relative',overflow:'hidden',backdropFilter:'blur(2px)'}}>
+            <div style={{position:'absolute',top:-20,right:-20,width:100,height:100,borderRadius:'50%',background:'radial-gradient(circle,rgba(190,71,61,0.1) 0%,transparent 70%)',pointerEvents:'none'}}/>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
+              <span style={{fontFamily:MONO,fontSize:9,color:'rgba(240,237,232,0.3)',letterSpacing:2}}>// REGISTRATION PROGRESS</span>
+              <span style={{fontFamily:MONO,fontSize:9,color:'#BE473D'}}>{doneCount}/{ITEMS.length}</span>
+            </div>
+            <div style={{height:2,background:'rgba(240,237,232,0.07)',position:'relative',overflow:'hidden',marginBottom:8}}>
+              <div style={{position:'absolute',inset:0,width:pct+'%',background:'linear-gradient(90deg,#BE473D,#C8A84B)',boxShadow:'0 0 10px rgba(190,71,61,0.7)',transition:'width .8s cubic-bezier(.16,1,.3,1)'}}/>
+            </div>
+            <div style={{fontFamily:'monospace',fontSize:12,color:'rgba(240,237,232,0.42)',lineHeight:1.6}}>Tap any registration to expand. Tap the status badge to update progress.</div>
+          </div>
+          <div style={{border:'1px solid rgba(240,237,232,0.07)',borderBottom:'none'}}>
+            {ITEMS.map(function(item){return<GovRow key={item.id} item={item} status={statuses[item.id]} navigate={navigate} onCycle={function(){cycle(item.id)}}/>})}
+          </div>
         </div>
-        <p className="text-xs text-gray-400 mt-2">
-          Tap any card to expand. Tap the status badge to update progress.
-        </p>
-      </div>
-
-      <div className="flex flex-col gap-3">
-        {GOV_ITEMS.map(function(item) {
-          return (
-            <GovCard
-              key={item.id}
-              item={item}
-              status={statuses[item.id]}
-              navigate={navigate}
-              onCycleStatus={function() { cycleStatus(item.id) }}
-            />
-          )
-        })}
-      </div>
-
-    </PageLayout>
+      </PageLayout>
   )
 }
