@@ -393,13 +393,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Scroll cue */}
-          <div className="u7" style={{ position:'absolute', bottom:20, left:'50%', transform:'translateX(-50%)', display:'flex', flexDirection:'column', alignItems:'center', gap:5, zIndex:10, cursor:'pointer', opacity:0.3 }}
-               onClick={function(){ document.getElementById('db-body')?.scrollIntoView({ behavior:'smooth' }) }}>
-            <span style={{ fontFamily:MONO, fontSize:8, letterSpacing:3 }}>EXPLORE</span>
-            <div style={{ width:1, height:28, background:'rgba(240,237,232,0.6)' }} />
-            <div style={{ width:7, height:7, border:'1px solid rgba(240,237,232,0.6)', transform:'rotate(45deg)', marginTop:-4 }} />
-          </div>
+
         </section>
 
         {/* MARQUEE */}

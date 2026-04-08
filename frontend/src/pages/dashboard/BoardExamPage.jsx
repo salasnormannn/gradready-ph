@@ -17,8 +17,64 @@ const CSS = `
   .tip-row:hover{background:rgba(240,237,232,0.06)!important;}
 `
 
+// Official PRC 2026 Schedule — Resolution No. 2113 s. 2025
+var PRC_2026=[
+  {id:2,  profession:'Architects',                       examDate:'Jan 20 & 22, 2026',          examSort:'2026-01-20',appOpen:'Nov 11, 2025',appDeadline:'Dec 15, 2025',results:'Jan 27, 2026', courses:['architecture']},
+  {id:3,  profession:'Sanitary Engineers',               examDate:'Jan 26–28, 2026',             examSort:'2026-01-26',appOpen:'Nov 11, 2025',appDeadline:'Dec 29, 2025',results:'Jan 30, 2026', courses:['sanitary engineering']},
+  {id:4,  profession:'Criminologists',                   examDate:'Feb 4–6, 2026',               examSort:'2026-02-04',appOpen:'Nov 11, 2025',appDeadline:'Dec 29, 2025',results:'Mar 13, 2026', courses:['criminology']},
+  {id:5,  profession:'Respiratory Therapists',           examDate:'Feb 9–10, 2026',              examSort:'2026-02-09',appOpen:'Nov 11, 2025',appDeadline:'Jan 12, 2026',results:'Feb 13, 2026', courses:['respiratory therapy']},
+  {id:6,  profession:'Mechanical Engineers',             examDate:'Feb 11–13, 2026',             examSort:'2026-02-11',appOpen:'Nov 13, 2025',appDeadline:'Jan 12, 2026',results:'Feb 19, 2026', courses:['mechanical engineering']},
+  {id:8,  profession:'Master Plumbers',                  examDate:'Feb 19–20, 2026',             examSort:'2026-02-19',appOpen:'Nov 21, 2025',appDeadline:'Jan 20, 2026',results:'Feb 25, 2026', courses:['master plumber','plumbing']},
+  {id:9,  profession:'Nurses (PNLE)',                    examDate:'Feb 26–27, 2026',             examSort:'2026-02-26',appOpen:'Nov 28, 2025',appDeadline:'Jan 27, 2026',results:'Mar 19, 2026', courses:['nursing','nurse']},
+  {id:10, profession:'Medical Technologists (MTLE)',     examDate:'Mar 5–6, 2026',               examSort:'2026-03-05',appOpen:'Dec 5, 2025', appDeadline:'Feb 3, 2026', results:'Mar 11, 2026', courses:['medical technology','medtech']},
+  {id:11, profession:'Professional Teachers (LET)',      examDate:'Mar 15, 2026',                examSort:'2026-03-15',appOpen:'Dec 3, 2025', appDeadline:'Feb 3, 2026', results:'May 15, 2026', courses:['education','teacher']},
+  {id:12, profession:'Electronics Engineers (ECE)',      examDate:'Mar 17–18, 2026',             examSort:'2026-03-17',appOpen:'Dec 17, 2025',appDeadline:'Feb 16, 2026',results:'Mar 24, 2026', courses:['electronics engineering','ece']},
+  {id:14, profession:'Physicians (PLE)',                 examDate:'Mar 23–24 & 30–31, 2026',    examSort:'2026-03-23',appOpen:'Dec 23, 2025',appDeadline:'Feb 23, 2026',results:'Apr 8, 2026',  courses:['medicine','physician','medical']},
+  {id:15, profession:'Civil Engineers (CELE)',           examDate:'Mar 26–27, 2026',             examSort:'2026-03-26',appOpen:'Dec 26, 2025',appDeadline:'Feb 24, 2026',results:'Apr 7, 2026',  courses:['civil engineering']},
+  {id:18, profession:'Pharmacists',                      examDate:'Apr 18–19, 2026',             examSort:'2026-04-18',appOpen:'Jan 16, 2026',appDeadline:'Mar 20, 2026',results:'Apr 22, 2026', courses:['pharmacy']},
+  {id:19, profession:'Registered Electrical Engineers',  examDate:'Apr 21–22, 2026',             examSort:'2026-04-21',appOpen:'Jan 21, 2026',appDeadline:'Mar 23, 2026',results:'Apr 28, 2026', courses:['electrical engineering','ree']},
+  {id:21, profession:'Dentists',                         examDate:'May 4–6 & 11–18, 2026',      examSort:'2026-05-04',appOpen:'Feb 3, 2026', appDeadline:'Apr 6, 2026', results:'May 20, 2026', courses:['dentistry','dental']},
+  {id:26, profession:'Chemical Engineers',               examDate:'May 20–22, 2026',             examSort:'2026-05-20',appOpen:'Feb 19, 2026',appDeadline:'Apr 20, 2026',results:'May 26, 2026', courses:['chemical engineering']},
+  {id:27, profession:'Certified Public Accountants (CPALE)',examDate:'May 24–26, 2026',          examSort:'2026-05-24',appOpen:'Feb 6, 2026', appDeadline:'Apr 10, 2026',results:'Jun 2, 2026',  courses:['accountancy','cpa','accounting']},
+  {id:29, profession:'Physical Therapists',              examDate:'Jun 2–3, 2026',               examSort:'2026-06-02',appOpen:'Mar 4, 2026', appDeadline:'May 4, 2026', results:'Jun 5, 2026',  courses:['physical therapy']},
+  {id:30, profession:'Occupational Therapists',          examDate:'Jun 4, 2026',                 examSort:'2026-06-04',appOpen:'Mar 6, 2026', appDeadline:'May 5, 2026', results:'Jun 8, 2026',  courses:['occupational therapy']},
+  {id:31, profession:'Architects (2nd Sched)',           examDate:'Jun 8 & 10, 2026',            examSort:'2026-06-08',appOpen:'Mar 10, 2026',appDeadline:'May 11, 2026',results:'Jun 16, 2026', courses:['architecture']},
+  {id:32, profession:'Interior Designers',               examDate:'Jul 1–3, 2026',               examSort:'2026-07-01',appOpen:'Mar 31, 2026',appDeadline:'Jun 1, 2026', results:'Jul 22, 2026', courses:['interior design']},
+  {id:34, profession:'Landscape Architects',             examDate:'Jul 8–10, 2026',              examSort:'2026-07-08',appOpen:'Apr 8, 2026', appDeadline:'Jun 8, 2026', results:'Jul 14, 2026', courses:['landscape architecture']},
+  {id:36, profession:'Criminologists (2nd Sched)',       examDate:'Aug 1–3, 2026',               examSort:'2026-08-01',appOpen:'Apr 17, 2026',appDeadline:'Jun 17, 2026',results:'Sep 4, 2026',  courses:['criminology']},
+  {id:37, profession:'Mechanical Engineers (2nd Sched)', examDate:'Aug 7–9, 2026',               examSort:'2026-08-07',appOpen:'May 8, 2026', appDeadline:'Jul 8, 2026', results:'Aug 12, 2026', courses:['mechanical engineering']},
+  {id:40, profession:'Medical Technologists (2nd Sched)',examDate:'Aug 15–16, 2026',             examSort:'2026-08-15',appOpen:'May 15, 2026',appDeadline:'Jul 17, 2026',results:'Aug 19, 2026', courses:['medical technology','medtech']},
+  {id:41, profession:'Guidance Counselors',              examDate:'Aug 17–18, 2026',             examSort:'2026-08-17',appOpen:'May 19, 2026',appDeadline:'Jul 20, 2026',results:'Aug 24, 2026', courses:['guidance counseling','psychology']},
+  {id:42, profession:'Psychologists',                    examDate:'Aug 19–20, 2026',             examSort:'2026-08-19',appOpen:'May 21, 2026',appDeadline:'Jul 20, 2026',results:'Aug 27, 2026', courses:['psychology']},
+  {id:45, profession:'Nurses (PNLE) — 2nd Sched',       examDate:'Aug 29–30, 2026',             examSort:'2026-08-29',appOpen:'May 15, 2026',appDeadline:'Jul 15, 2026',results:'Sep 18, 2026', courses:['nursing','nurse']},
+  {id:47, profession:'Librarians',                       examDate:'Sep 3–4, 2026',               examSort:'2026-09-03',appOpen:'Jun 5, 2026', appDeadline:'Aug 4, 2026', results:'Sep 8, 2026',  courses:['library science','librarian']},
+  {id:48, profession:'Registered Electrical Engineers (2nd)',examDate:'Sep 5–6, 2026',           examSort:'2026-09-05',appOpen:'Jun 5, 2026', appDeadline:'Aug 6, 2026', results:'Sep 10, 2026', courses:['electrical engineering','ree']},
+  {id:51, profession:'Social Workers',                   examDate:'Sep 9–11, 2026',              examSort:'2026-09-09',appOpen:'Jun 11, 2026',appDeadline:'Aug 12, 2026',results:'Sep 16, 2026', courses:['social work']},
+  {id:52, profession:'Professional Teachers (LET) — 2nd',examDate:'Sep 20, 2026',               examSort:'2026-09-20',appOpen:'May 22, 2026',appDeadline:'Jul 23, 2026',results:'Nov 27, 2026', courses:['education','teacher']},
+  {id:53, profession:'Geodetic Engineers',               examDate:'Sep 23–24, 2026',             examSort:'2026-09-23',appOpen:'Jun 25, 2026',appDeadline:'Aug 27, 2026',results:'Sep 28, 2026', courses:['geodetic engineering']},
+  {id:54, profession:'Civil Engineers (2nd Sched)',      examDate:'Sep 26–27, 2026',             examSort:'2026-09-26',appOpen:'Jun 11, 2026',appDeadline:'Aug 12, 2026',results:'Oct 2, 2026',  courses:['civil engineering']},
+  {id:58, profession:'Physicians (PLE) — 2nd Sched',    examDate:'Oct 3–4 & 10–11, 2026',      examSort:'2026-10-03',appOpen:'Jul 3, 2026', appDeadline:'Sep 3, 2026', results:'Oct 16, 2026', courses:['medicine','physician','medical']},
+  {id:62, profession:'Professional Foresters',           examDate:'Oct 8–9, 2026',               examSort:'2026-10-08',appOpen:'Jul 10, 2026',appDeadline:'Sep 8, 2026', results:'Oct 13, 2026', courses:['forestry','forester']},
+  {id:65, profession:'Pharmacists (2nd Sched)',          examDate:'Oct 15–16, 2026',             examSort:'2026-10-15',appOpen:'Jul 31, 2026',appDeadline:'Sep 29, 2026',results:'Oct 21, 2026', courses:['pharmacy']},
+  {id:66, profession:'Electronics Engineers (2nd Sched)',examDate:'Oct 17–18, 2026',             examSort:'2026-10-17',appOpen:'Jul 17, 2026',appDeadline:'Sep 17, 2026',results:'Oct 23, 2026', courses:['electronics engineering','ece']},
+  {id:70, profession:'CPAs (CPALE) — 2nd Sched',        examDate:'Oct 24–26, 2026',             examSort:'2026-10-24',appOpen:'Jul 10, 2026',appDeadline:'Sep 9, 2026', results:'Nov 3, 2026',  courses:['accountancy','cpa','accounting']},
+  {id:71, profession:'Veterinarians',                    examDate:'Nov 4–6, 2026',               examSort:'2026-11-04',appOpen:'Aug 6, 2026', appDeadline:'Oct 5, 2026', results:'Nov 10, 2026', courses:['veterinary','veterinarian']},
+  {id:74, profession:'Nutritionist-Dietitians',          examDate:'Nov 12–13, 2026',             examSort:'2026-11-12',appOpen:'Aug 14, 2026',appDeadline:'Oct 13, 2026',results:'Nov 17, 2026', courses:['nutrition','dietetics','nutritionist']},
+  {id:75, profession:'Chemical Engineers (2nd Sched)',   examDate:'Nov 14–16, 2026',             examSort:'2026-11-14',appOpen:'Aug 14, 2026',appDeadline:'Oct 15, 2026',results:'Nov 18, 2026', courses:['chemical engineering']},
+  {id:78, profession:'Dentists (2nd Sched)',             examDate:'Nov 22–24 & Dec 5, 2026',    examSort:'2026-11-22',appOpen:'Aug 24, 2026',appDeadline:'Oct 23, 2026',results:'Dec 14, 2026', courses:['dentistry','dental']},
+  {id:82, profession:'Agriculturists (LEA)',             examDate:'Dec 1–3, 2026',               examSort:'2026-12-01',appOpen:'Sep 2, 2026', appDeadline:'Nov 3, 2026', results:'Dec 10, 2026', courses:['agriculture','agriculturist']},
+  {id:84, profession:'Physical Therapists (2nd Sched)', examDate:'Dec 5–6, 2026',               examSort:'2026-12-05',appOpen:'Sep 4, 2026', appDeadline:'Nov 4, 2026', results:'Dec 9, 2026',  courses:['physical therapy']},
+  {id:87, profession:'Radiologic Technologists',         examDate:'Dec 10–11, 2026',             examSort:'2026-12-10',appOpen:'Sep 11, 2026',appDeadline:'Nov 10, 2026',results:'Dec 16, 2026', courses:['radiologic technology','radiology','x-ray']},
+]
+
 function useBoardExams(){
-  return useQuery({queryKey:['board-exams'],queryFn:async function(){var r=await api.get('/api/board-exams');return r.data}})
+  return useQuery({
+    queryKey:['board-exams'],
+    queryFn:async function(){
+      try{var r=await api.get('/api/board-exams');if(r.data&&r.data.length>0)return r.data}catch(e){}
+      return PRC_2026
+    }
+  })
 }
 
 function useStudyPlan(){
@@ -125,53 +181,105 @@ export default function BoardExamPage(){
             </div>
         )}
 
-        {/* Upcoming schedules */}
-        <div style={{display:'inline-flex',alignItems:'center',gap:8,padding:'4px 12px 4px 8px',border:'1px solid rgba(240,237,232,0.07)',marginBottom:14}}>
-          <span style={{fontSize:11,color:'#BE473D'}}>02</span>
-          <span style={{fontSize:11,letterSpacing:2,color:'rgba(240,237,232,0.5)'}}>UPCOMING PRC SCHEDULES</span>
+        {/* PRC 2026 Schedules */}
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:8}}>
+          <div style={{display:'inline-flex',alignItems:'center',gap:8,padding:'4px 12px 4px 8px',border:'1px solid rgba(240,237,232,0.07)'}}>
+            <span style={{fontSize:11,color:'#BE473D'}}>02</span>
+            <span style={{fontSize:11,letterSpacing:2,color:'rgba(240,237,232,0.5)'}}>2026 PRC SCHEDULES</span>
+          </div>
+          <button onClick={function(){window.open('https://www.prc.gov.ph/2026-schedule-examination','_blank','noopener,noreferrer')}}
+                  style={{padding:'4px 10px',background:'transparent',border:'1px solid rgba(240,237,232,0.07)',cursor:'pointer',fontFamily:MONO,fontSize:8,color:'rgba(240,237,232,0.35)',letterSpacing:1,transition:'all .18s'}}
+                  onMouseEnter={function(e){e.currentTarget.style.color='#F0EDE8';e.currentTarget.style.borderColor='rgba(240,237,232,0.3)'}}
+                  onMouseLeave={function(e){e.currentTarget.style.color='rgba(240,237,232,0.35)';e.currentTarget.style.borderColor='rgba(240,237,232,0.07)'}}>
+            OFFICIAL SITE
+          </button>
+        </div>
+        <div style={{fontFamily:'monospace',fontSize:9,color:'rgba(240,237,232,0.22)',marginBottom:16,letterSpacing:.3}}>
+          Source: PRC Resolution No. 2113 s. 2025 · Showing schedules for your course only
         </div>
 
-        {isLoading&&<div style={{border:'1px solid rgba(240,237,232,0.05)',padding:24,textAlign:'center',fontFamily:MONO,fontSize:9,color:'rgba(240,237,232,0.2)',letterSpacing:2,marginBottom:20}}>LOADING SCHEDULES...</div>}
+        {isLoading&&<div style={{padding:24,textAlign:'center',fontFamily:MONO,fontSize:9,color:'rgba(240,237,232,0.2)',letterSpacing:2,marginBottom:20}}>LOADING...</div>}
 
-        {!isLoading&&exams.length===0&&(
-            <div style={{border:'1px solid rgba(240,237,232,0.05)',padding:24,marginBottom:20}}>
-              <div style={{fontFamily:MONO,fontSize:9,color:'rgba(240,237,232,0.25)',letterSpacing:1,marginBottom:6}}>NO SCHEDULES LOADED</div>
-              <div style={{fontFamily:'monospace',fontSize:10,color:'rgba(240,237,232,0.18)',lineHeight:1.6}}>Check the official PRC website for the latest board exam schedules.</div>
-              <button onClick={function(){window.open('https://www.prc.gov.ph','_blank','noopener,noreferrer')}}
-                      style={{marginTop:12,padding:'9px 16px',background:'transparent',border:'1px solid rgba(240,237,232,0.07)',cursor:'pointer',fontFamily:MONO,fontSize:9,color:'rgba(240,237,232,0.4)',letterSpacing:1,transition:'all .18s'}}
-                      onMouseEnter={function(e){e.currentTarget.style.color='#F0EDE8';e.currentTarget.style.borderColor='rgba(240,237,232,0.3)'}}
-                      onMouseLeave={function(e){e.currentTarget.style.color='rgba(240,237,232,0.4)';e.currentTarget.style.borderColor='rgba(240,237,232,0.1)'}}>
-                VISIT PRC.GOV.PH
-              </button>
-            </div>
-        )}
+        {!isLoading&&(function(){
+          var userCourse=(user?.course||'').toLowerCase()
+          var matched=exams.filter(function(exam){
+            if(!exam.courses)return false
+            return exam.courses.some(function(c){
+              return userCourse.includes(c)||c.split(' ').some(function(w){return w.length>3&&userCourse.includes(w)})
+            })
+          })
+          if(matched.length===0)matched=exams
 
-        {!isLoading&&exams.length>0&&(
-            <div style={{border:'1px solid rgba(240,237,232,0.07)',borderBottom:'none',marginBottom:20}}>
-              {exams.map(function(exam,i){
-                var days=daysUntil(exam.examDate||exam.date)
-                var color=urgencyColor(days)
-                return(
-                    <div key={exam.id||i} className="sched-row"
-                         style={{display:'flex',alignItems:'center',gap:14,padding:'14px 12px 14px 14px',borderBottom:'1px solid rgba(240,237,232,0.05)',background:'transparent'}}>
-                      <div style={{width:32,height:32,background:'rgba(190,71,61,0.1)',border:'1px solid rgba(190,71,61,0.18)',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:MONO,fontSize:10,color:'#BE473D',flexShrink:0,letterSpacing:0}}>
-                        PRC
+          // Group by month name
+          var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December']
+          var grouped={}
+          matched.forEach(function(exam){
+            var d=new Date(exam.examSort)
+            var m=MONTHS[d.getMonth()]
+            if(!grouped[m])grouped[m]=[]
+            grouped[m].push(exam)
+          })
+
+          return(
+              <div style={{display:'flex',flexDirection:'column',gap:20,marginBottom:20}}>
+                {Object.keys(grouped).map(function(month){
+                  return(
+                      <div key={month}>
+                        {/* Month header */}
+                        <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:10}}>
+                          <div style={{fontFamily:MONO,fontSize:9,color:'#BE473D',letterSpacing:3}}>{month.toUpperCase()}</div>
+                          <div style={{flex:1,height:1,background:'rgba(190,71,61,0.2)'}}/>
+                        </div>
+                        {/* Exam cards */}
+                        <div style={{display:'flex',flexDirection:'column',gap:8}}>
+                          {grouped[month].map(function(exam){
+                            var days=daysUntil(exam.examSort)
+                            var color=urgencyColor(days)
+                            var passed=days!==null&&days<0
+                            return(
+                                <div key={exam.id} style={{border:'1px solid rgba(240,237,232,0.08)',background:'rgba(240,237,232,0.02)',opacity:passed?0.4:1}}>
+                                  {/* Top row: name + days left */}
+                                  <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'12px 14px',borderBottom:'1px solid rgba(240,237,232,0.06)'}}>
+                                    <div style={{display:'flex',alignItems:'center',gap:10}}>
+                                      <div style={{width:26,height:26,background:'rgba(190,71,61,0.12)',border:'1px solid rgba(190,71,61,0.2)',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:MONO,fontSize:7,color:'#BE473D',flexShrink:0}}>PRC</div>
+                                      <div style={{fontFamily:MONO,fontSize:12,color:'rgba(240,237,232,0.9)',letterSpacing:.3}}>{exam.profession}</div>
+                                    </div>
+                                    <div style={{display:'flex',alignItems:'center',gap:5,flexShrink:0}}>
+                                      <div style={{fontFamily:MONO,fontSize:passed?9:15,color:color,letterSpacing:'-0.5px',lineHeight:1}}>{passed?'PASSED':days}</div>
+                                      {!passed&&<div style={{fontFamily:MONO,fontSize:8,color:'rgba(240,237,232,0.28)'}}>DAYS</div>}
+                                    </div>
+                                  </div>
+                                  {/* Date fields */}
+                                  <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr'}}>
+                                    <div style={{padding:'9px 12px',borderRight:'1px solid rgba(240,237,232,0.05)'}}>
+                                      <div style={{fontFamily:MONO,fontSize:7,color:'rgba(240,237,232,0.25)',letterSpacing:1.5,marginBottom:4}}>EXAM DATE</div>
+                                      <div style={{fontFamily:MONO,fontSize:9,color:passed?'rgba(240,237,232,0.3)':'#F0EDE8',lineHeight:1.4}}>{exam.examDate}</div>
+                                    </div>
+                                    <div style={{padding:'9px 12px',borderRight:'1px solid rgba(240,237,232,0.05)'}}>
+                                      <div style={{fontFamily:MONO,fontSize:7,color:'rgba(240,237,232,0.25)',letterSpacing:1.5,marginBottom:4}}>APP OPENS</div>
+                                      <div style={{fontFamily:MONO,fontSize:9,color:'rgba(240,237,232,0.5)',lineHeight:1.4}}>{exam.appOpen||'TBA'}</div>
+                                    </div>
+                                    <div style={{padding:'9px 12px'}}>
+                                      <div style={{fontFamily:MONO,fontSize:7,color:'rgba(240,237,232,0.25)',letterSpacing:1.5,marginBottom:4}}>DEADLINE</div>
+                                      <div style={{fontFamily:MONO,fontSize:9,color:passed?'rgba(240,237,232,0.3)':'#FBBF24',lineHeight:1.4}}>{exam.appDeadline||'TBA'}</div>
+                                    </div>
+                                  </div>
+                                  {exam.results&&(
+                                      <div style={{padding:'5px 12px 7px',borderTop:'1px solid rgba(240,237,232,0.04)',display:'flex',gap:6,alignItems:'center'}}>
+                                        <div style={{fontFamily:MONO,fontSize:7,color:'rgba(240,237,232,0.2)',letterSpacing:1}}>TARGET RESULTS:</div>
+                                        <div style={{fontFamily:MONO,fontSize:8,color:'rgba(240,237,232,0.38)'}}>{exam.results}</div>
+                                      </div>
+                                  )}
+                                </div>
+                            )
+                          })}
+                        </div>
                       </div>
-                      <div style={{flex:1,minWidth:0}}>
-                        <div className="sched-name" style={{fontFamily:MONO,fontSize:14,color:'rgba(240,237,232,0.85)',letterSpacing:.3,marginBottom:3,transition:'color .18s'}}>{exam.profession||exam.examName}</div>
-                        <div style={{fontFamily:'monospace',fontSize:11,color:'rgba(240,237,232,0.42)'}}>{exam.examDate||exam.date}{exam.venue?' · '+exam.venue:''}</div>
-                      </div>
-                      {days!==null&&(
-                          <div style={{textAlign:'right',flexShrink:0}}>
-                            <div style={{fontFamily:MONO,fontSize:14,color:color,letterSpacing:'-0.5px',lineHeight:1}}>{days<0?'DONE':days}</div>
-                            <div style={{fontFamily:MONO,fontSize:10,color:'rgba(240,237,232,0.35)',marginTop:2}}>{days<0?'PASSED':'DAYS LEFT'}</div>
-                          </div>
-                      )}
-                    </div>
-                )
-              })}
-            </div>
-        )}
+                  )
+                })}
+              </div>
+          )
+        })()}
 
         {/* Tips */}
         <div style={{display:'inline-flex',alignItems:'center',gap:8,padding:'4px 12px 4px 8px',border:'1px solid rgba(240,237,232,0.07)',marginBottom:14}}>

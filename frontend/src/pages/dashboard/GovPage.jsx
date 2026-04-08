@@ -82,7 +82,7 @@ export default function GovPage(){
   var {user}=useAuthStore()
   var email=user?(user.email||user.username||''):''
   var [statuses,setStatuses]=useState(function(){return load(email)})
-  useEffect(function(){save(statuses,email);window.dispatchEvent(new Event('gov-status-updated'))},[statuses])
+  useEffect(function(){if(email){save(statuses,email);window.dispatchEvent(new Event('gov-status-updated'))}},[statuses,email])
   function cycle(id){var order=['not_started','in_progress','done'];setStatuses(function(prev){var next=order[(order.indexOf(prev[id])+1)%order.length];return Object.assign({},prev,{[id]:next})})}
   var doneCount=Object.values(statuses).filter(function(s){return s==='done'}).length
   var pct=Math.round((doneCount/ITEMS.length)*100)
