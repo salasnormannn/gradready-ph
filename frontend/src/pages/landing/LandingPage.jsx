@@ -345,18 +345,6 @@ export default function LandingPage() {
 
           {/* Right — warm off-white */}
           <div className="stats-right" style={{ background:'#F0EDE8', display:'flex', flexDirection:'column', justifyContent:'flex-end', position:'relative' }}>
-            {/* Floating data labels */}
-            {[
-              ['6%','22%','// TIN REGISTRATION','01 · 02 · 03'],
-              ['58%','18%','// AI JOB MATCHING','01 · 02 · 03'],
-              ['12%','60%','// KUYA AI CHAT','01 · 02 · 03'],
-              ['68%','55%','// BOARD EXAM PREP','01 · 02 · 03'],
-            ].map(([x,y,l,s],i)=>(
-                <div key={i} className="h5" style={{ position:'absolute', left:x, top:y, animationDelay:(1+i*.15)+'s' }}>
-                  <div style={{ fontFamily:'monospace', fontSize:9, color:'rgba(60,9,30,0.3)', letterSpacing:1.5, marginBottom:2 }}>{l}</div>
-                  <div style={{ fontFamily:'monospace', fontSize:8, color:'rgba(60,9,30,0.15)' }}>{s}</div>
-                </div>
-            ))}
 
             {/* Diagonal line decoration */}
             <DiagLine x={0} y={35} angle={-15} length={150} />
