@@ -261,9 +261,13 @@ export default function LandingPage() {
     return () => obs.disconnect()
   }, [loaded])
 
-  function go() { token ? navigate(isOnboarded?'/dashboard':'/onboarding') : navigate('/register') }
-  function signIn() { token ? navigate(isOnboarded?'/dashboard':'/onboarding') : navigate('/login') }
+  function go() {
+    navigate('/register')
+  }
 
+  function signIn() {
+    navigate('/login')
+  }
   if (!loaded) return <><style>{GLOBAL_CSS}</style><Loader onDone={() => setLoaded(true)} /></>
 
   const navScrolled = scrollY > 60
