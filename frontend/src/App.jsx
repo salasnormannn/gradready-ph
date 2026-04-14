@@ -30,7 +30,11 @@ function OnboardingRoute({ children }) {
 
 function PublicRoute({ children }) {
   const { token, isOnboarded } = useAuthStore()
-  if (token) return <Navigate to={isOnboarded ? '/dashboard' : '/onboarding'} replace />
+
+  if (token && isOnboarded) {
+    return <Navigate to="/dashboard" replace />
+  }
+
   return children
 }
 
@@ -60,7 +64,6 @@ export default function App() {
         <Route path="/dashboard/profile/edit" element={<PrivateRoute><EditProfilePage /></PrivateRoute>} />
         <Route path="/dashboard/tracker"  element={<PrivateRoute><JobTrackerPage /></PrivateRoute>} />
         <Route path="/dashboard/salary"   element={<PrivateRoute><SalaryBoardPage /></PrivateRoute>} />
-{/*         <Route path="/dashboard/reviews"  element={<PrivateRoute><CompanyReviewsPage /></PrivateRoute>} /> */}
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
