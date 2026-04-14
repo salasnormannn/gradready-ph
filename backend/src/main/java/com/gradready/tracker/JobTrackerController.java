@@ -29,6 +29,7 @@ public class JobTrackerController {
     }
 
     @PatchMapping("/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<JobApplicationResponse> update(
             @AuthenticationPrincipal UserDetails user,
             @PathVariable UUID id,
