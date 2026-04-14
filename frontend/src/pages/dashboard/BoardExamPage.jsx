@@ -144,73 +144,58 @@ export default function BoardExamPage(){
           </div>
         </div>
 
-        {/* AI Study Plan Generator */}
-        <div style={{display:'inline-flex',alignItems:'center',gap:8,padding:'4px 12px 4px 8px',border:'1px solid rgba(240,237,232,0.07)',marginBottom:14}}>
-          <span style={{fontSize:11,color:'#BE473D'}}>01</span>
-          <span style={{fontSize:11,letterSpacing:2,color:'rgba(240,237,232,0.5)'}}>AI STUDY PLAN GENERATOR</span>
-        </div>
-
-        <form onSubmit={handleGenerate}>
-          <div style={{marginBottom:12}}>
-            <div style={{fontFamily:MONO,fontSize:10,color:'rgba(240,237,232,0.42)',letterSpacing:2,marginBottom:6}}>// YOUR PROFESSION / COURSE</div>
-            <input type="text" value={profession} onChange={function(e){setProfession(e.target.value)}} placeholder="e.g. Nursing, Civil Engineering, CPA"
-                   style={{width:'100%',padding:'12px 14px',background:'rgba(240,237,232,0.05)',border:'1px solid rgba(240,237,232,0.07)',color:'#F0EDE8',fontFamily:MONO,fontSize:14,letterSpacing:.5,transition:'border-color .18s'}}
-                   onFocus={function(e){e.target.style.borderColor='rgba(190,71,61,0.5)'}}
-                   onBlur={function(e){e.target.style.borderColor='rgba(240,237,232,0.1)'}}/>
-          </div>
-          <div style={{marginBottom:16}}>
-            <div style={{fontFamily:MONO,fontSize:10,color:'rgba(240,237,232,0.42)',letterSpacing:2,marginBottom:6}}>// EXAM DATE</div>
-            <input type="date" value={examDate} onChange={function(e){setExamDate(e.target.value)}}
-                   style={{width:'100%',padding:'12px 14px',background:'rgba(240,237,232,0.05)',border:'1px solid rgba(240,237,232,0.07)',color:'#F0EDE8',fontFamily:MONO,fontSize:12,letterSpacing:.5,transition:'border-color .18s',colorScheme:'dark'}}
-                   onFocus={function(e){e.target.style.borderColor='rgba(190,71,61,0.5)'}}
-                   onBlur={function(e){e.target.style.borderColor='rgba(240,237,232,0.1)'}}/>
-          </div>
-          <button type="submit" disabled={generating||!examDate||!profession}
-                  style={{width:'100%',padding:'13px',background:generating||!examDate||!profession?'rgba(190,71,61,0.3)':'#BE473D',border:'none',cursor:generating||!examDate||!profession?'not-allowed':'pointer',fontFamily:MONO,fontSize:10,color:'#F0EDE8',letterSpacing:3,marginBottom:20,transition:'opacity .18s'}}
-                  onMouseEnter={function(e){if(!generating&&examDate&&profession)e.currentTarget.style.opacity='.85'}}
-                  onMouseLeave={function(e){e.currentTarget.style.opacity='1'}}>
-            {generating?'GENERATING PLAN...':'GENERATE AI STUDY PLAN'}
-          </button>
-        </form>
-
-        {/* Plan result */}
-        {planResult&&(
-            <div style={{padding:'16px',border:'1px solid rgba(190,71,61,0.25)',background:'rgba(190,71,61,0.05)',marginBottom:20}}>
-              <div style={{fontFamily:MONO,fontSize:9,color:'#BE473D',letterSpacing:2,marginBottom:10}}>// YOUR STUDY PLAN</div>
-              <div style={{fontFamily:'monospace',fontSize:13,color:'rgba(240,237,232,0.65)',lineHeight:1.8,whiteSpace:'pre-wrap'}}>{typeof planResult==='string'?planResult:planResult.plan||JSON.stringify(planResult)}</div>
-            </div>
-        )}
-
-        {/* PRC 2026 Schedules */}
-        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:8}}>
-          <div style={{display:'inline-flex',alignItems:'center',gap:8,padding:'4px 12px 4px 8px',border:'1px solid rgba(240,237,232,0.07)'}}>
-            <span style={{fontSize:11,color:'#BE473D'}}>02</span>
-            <span style={{fontSize:11,letterSpacing:2,color:'rgba(240,237,232,0.5)'}}>2026 PRC SCHEDULES</span>
-          </div>
-          <button onClick={function(){window.open('https://www.prc.gov.ph/2026-schedule-examination','_blank','noopener,noreferrer')}}
-                  style={{padding:'4px 10px',background:'transparent',border:'1px solid rgba(240,237,232,0.07)',cursor:'pointer',fontFamily:MONO,fontSize:8,color:'rgba(240,237,232,0.35)',letterSpacing:1,transition:'all .18s'}}
-                  onMouseEnter={function(e){e.currentTarget.style.color='#F0EDE8';e.currentTarget.style.borderColor='rgba(240,237,232,0.3)'}}
-                  onMouseLeave={function(e){e.currentTarget.style.color='rgba(240,237,232,0.35)';e.currentTarget.style.borderColor='rgba(240,237,232,0.07)'}}>
-            OFFICIAL SITE
-          </button>
-        </div>
-        <div style={{fontFamily:'monospace',fontSize:9,color:'rgba(240,237,232,0.22)',marginBottom:16,letterSpacing:.3}}>
-          Source: PRC Resolution No. 2113 s. 2025 · Showing schedules for your course only
-        </div>
-
         {isLoading&&<div style={{padding:24,textAlign:'center',fontFamily:MONO,fontSize:9,color:'rgba(240,237,232,0.2)',letterSpacing:2,marginBottom:20}}>LOADING...</div>}
 
         {!isLoading&&(function(){
           var userCourse=(user?.course||'').toLowerCase()
           var matched=exams.filter(function(exam){
             if(!exam.courses)return false
-            return exam.courses.some(function(c){
-              return userCourse.includes(c)||c.split(' ').some(function(w){return w.length>3&&userCourse.includes(w)})
-            })
+            return exam.courses.some(function(c){ return userCourse.includes(c) })
           })
-          if(matched.length===0)matched=exams
 
-          // Group by month name
+          // ── NON-BOARD TAKER ──────────────────────────────────────────
+          if(matched.length===0){
+            return(
+                <div style={{marginBottom:20}}>
+                  <div style={{padding:'20px 16px',border:'1px solid rgba(240,237,232,0.08)',background:'rgba(240,237,232,0.02)',position:'relative',overflow:'hidden'}}>
+                    {[{top:8,left:8},{top:8,right:8},{bottom:8,left:8},{bottom:8,right:8}].map(function(pos,i){
+                      return(
+                          <div key={i} style={{position:'absolute',...pos,width:10,height:10,
+                            borderTop:pos.top!==undefined?'1px solid rgba(190,71,61,0.25)':'none',
+                            borderBottom:pos.bottom!==undefined?'1px solid rgba(190,71,61,0.25)':'none',
+                            borderLeft:pos.left!==undefined?'1px solid rgba(190,71,61,0.25)':'none',
+                            borderRight:pos.right!==undefined?'1px solid rgba(190,71,61,0.25)':'none',
+                          }}/>
+                      )
+                    })}
+                    <div style={{fontFamily:MONO,fontSize:11,color:'rgba(240,237,232,0.28)',letterSpacing:2,marginBottom:10}}>// STATUS CHECK</div>
+                    <div style={{fontFamily:MONO,fontSize:18,color:'#F0EDE8',letterSpacing:'-0.5px',marginBottom:6,lineHeight:1.2}}>NO BOARD EXAM</div>
+                    <div style={{fontFamily:MONO,fontSize:18,color:'#BE473D',letterSpacing:'-0.5px',marginBottom:16,lineHeight:1.2}}>REQUIRED.</div>
+                    <div style={{fontFamily:'monospace',fontSize:12,color:'rgba(240,237,232,0.42)',lineHeight:1.8,marginBottom:20}}>
+                      Your course — <span style={{color:'rgba(240,237,232,0.7)'}}>{user?.course||'your course'}</span> — does not require a PRC licensure exam. Focus on job hunting, government registrations, and building your career.
+                    </div>
+                    <div style={{display:'flex',flexDirection:'column',gap:8}}>
+                      <button
+                          onClick={function(){navigate('/dashboard/chat',{state:{initialMessage:'What certifications or professional credentials should a '+(user?.course||'fresh graduate')+' pursue to boost their career? List specific ones with brief descriptions.'}})}}
+                          style={{width:'100%',padding:'13px',background:'#BE473D',border:'none',cursor:'pointer',fontFamily:MONO,fontSize:10,color:'#F0EDE8',letterSpacing:3,transition:'opacity .18s'}}
+                          onMouseEnter={function(e){e.currentTarget.style.opacity='.85'}}
+                          onMouseLeave={function(e){e.currentTarget.style.opacity='1'}}>
+                        ASK KUYA AI FOR CERTIFICATIONS
+                      </button>
+                      <button
+                          onClick={function(){navigate('/dashboard')}}
+                          style={{width:'100%',padding:'13px',background:'transparent',border:'1px solid rgba(240,237,232,0.12)',cursor:'pointer',fontFamily:MONO,fontSize:10,color:'rgba(240,237,232,0.5)',letterSpacing:3,transition:'all .18s'}}
+                          onMouseEnter={function(e){e.currentTarget.style.color='#F0EDE8';e.currentTarget.style.borderColor='rgba(240,237,232,0.3)'}}
+                          onMouseLeave={function(e){e.currentTarget.style.color='rgba(240,237,232,0.5)';e.currentTarget.style.borderColor='rgba(240,237,232,0.12)'}}>
+                        BACK TO DASHBOARD
+                      </button>
+                    </div>
+                  </div>
+                </div>
+            )
+          }
+
+          // ── BOARD TAKER ──────────────────────────────────────────────
           var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December']
           var grouped={}
           matched.forEach(function(exam){
@@ -221,85 +206,135 @@ export default function BoardExamPage(){
           })
 
           return(
-              <div style={{display:'flex',flexDirection:'column',gap:20,marginBottom:20}}>
-                {Object.keys(grouped).map(function(month){
-                  return(
-                      <div key={month}>
-                        {/* Month header */}
-                        <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:10}}>
-                          <div style={{fontFamily:MONO,fontSize:9,color:'#BE473D',letterSpacing:3}}>{month.toUpperCase()}</div>
-                          <div style={{flex:1,height:1,background:'rgba(190,71,61,0.2)'}}/>
-                        </div>
-                        {/* Exam cards */}
-                        <div style={{display:'flex',flexDirection:'column',gap:8}}>
-                          {grouped[month].map(function(exam){
-                            var days=daysUntil(exam.examSort)
-                            var color=urgencyColor(days)
-                            var passed=days!==null&&days<0
-                            return(
-                                <div key={exam.id} style={{border:'1px solid rgba(240,237,232,0.08)',background:'rgba(240,237,232,0.02)',opacity:passed?0.4:1}}>
-                                  {/* Top row: name + days left */}
-                                  <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'12px 14px',borderBottom:'1px solid rgba(240,237,232,0.06)'}}>
-                                    <div style={{display:'flex',alignItems:'center',gap:10}}>
-                                      <div style={{width:26,height:26,background:'rgba(190,71,61,0.12)',border:'1px solid rgba(190,71,61,0.2)',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:MONO,fontSize:7,color:'#BE473D',flexShrink:0}}>PRC</div>
-                                      <div style={{fontFamily:MONO,fontSize:12,color:'rgba(240,237,232,0.9)',letterSpacing:.3}}>{exam.profession}</div>
-                                    </div>
-                                    <div style={{display:'flex',alignItems:'center',gap:5,flexShrink:0}}>
-                                      <div style={{fontFamily:MONO,fontSize:passed?9:15,color:color,letterSpacing:'-0.5px',lineHeight:1}}>{passed?'PASSED':days}</div>
-                                      {!passed&&<div style={{fontFamily:MONO,fontSize:8,color:'rgba(240,237,232,0.28)'}}>DAYS</div>}
-                                    </div>
-                                  </div>
-                                  {/* Date fields */}
-                                  <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr'}}>
-                                    <div style={{padding:'9px 12px',borderRight:'1px solid rgba(240,237,232,0.05)'}}>
-                                      <div style={{fontFamily:MONO,fontSize:7,color:'rgba(240,237,232,0.25)',letterSpacing:1.5,marginBottom:4}}>EXAM DATE</div>
-                                      <div style={{fontFamily:MONO,fontSize:9,color:passed?'rgba(240,237,232,0.3)':'#F0EDE8',lineHeight:1.4}}>{exam.examDate}</div>
-                                    </div>
-                                    <div style={{padding:'9px 12px',borderRight:'1px solid rgba(240,237,232,0.05)'}}>
-                                      <div style={{fontFamily:MONO,fontSize:7,color:'rgba(240,237,232,0.25)',letterSpacing:1.5,marginBottom:4}}>APP OPENS</div>
-                                      <div style={{fontFamily:MONO,fontSize:9,color:'rgba(240,237,232,0.5)',lineHeight:1.4}}>{exam.appOpen||'TBA'}</div>
-                                    </div>
-                                    <div style={{padding:'9px 12px'}}>
-                                      <div style={{fontFamily:MONO,fontSize:7,color:'rgba(240,237,232,0.25)',letterSpacing:1.5,marginBottom:4}}>DEADLINE</div>
-                                      <div style={{fontFamily:MONO,fontSize:9,color:passed?'rgba(240,237,232,0.3)':'#FBBF24',lineHeight:1.4}}>{exam.appDeadline||'TBA'}</div>
-                                    </div>
-                                  </div>
-                                  {exam.results&&(
-                                      <div style={{padding:'5px 12px 7px',borderTop:'1px solid rgba(240,237,232,0.04)',display:'flex',gap:6,alignItems:'center'}}>
-                                        <div style={{fontFamily:MONO,fontSize:7,color:'rgba(240,237,232,0.2)',letterSpacing:1}}>TARGET RESULTS:</div>
-                                        <div style={{fontFamily:MONO,fontSize:8,color:'rgba(240,237,232,0.38)'}}>{exam.results}</div>
+              <>
+                {/* AI Study Plan Generator */}
+                <div style={{display:'inline-flex',alignItems:'center',gap:8,padding:'4px 12px 4px 8px',border:'1px solid rgba(240,237,232,0.07)',marginBottom:14}}>
+                  <span style={{fontSize:11,color:'#BE473D'}}>01</span>
+                  <span style={{fontSize:11,letterSpacing:2,color:'rgba(240,237,232,0.5)'}}>AI STUDY PLAN GENERATOR</span>
+                </div>
+
+                <form onSubmit={handleGenerate}>
+                  <div style={{marginBottom:12}}>
+                    <div style={{fontFamily:MONO,fontSize:10,color:'rgba(240,237,232,0.42)',letterSpacing:2,marginBottom:6}}>// YOUR PROFESSION / COURSE</div>
+                    <input type="text" value={profession} onChange={function(e){setProfession(e.target.value)}} placeholder="e.g. Nursing, Civil Engineering, CPA"
+                           style={{width:'100%',padding:'12px 14px',background:'rgba(240,237,232,0.05)',border:'1px solid rgba(240,237,232,0.07)',color:'#F0EDE8',fontFamily:MONO,fontSize:14,letterSpacing:.5,transition:'border-color .18s'}}
+                           onFocus={function(e){e.target.style.borderColor='rgba(190,71,61,0.5)'}}
+                           onBlur={function(e){e.target.style.borderColor='rgba(240,237,232,0.1)'}}/>
+                  </div>
+                  <div style={{marginBottom:16}}>
+                    <div style={{fontFamily:MONO,fontSize:10,color:'rgba(240,237,232,0.42)',letterSpacing:2,marginBottom:6}}>// EXAM DATE</div>
+                    <input type="date" value={examDate} onChange={function(e){setExamDate(e.target.value)}}
+                           style={{width:'100%',padding:'12px 14px',background:'rgba(240,237,232,0.05)',border:'1px solid rgba(240,237,232,0.07)',color:'#F0EDE8',fontFamily:MONO,fontSize:12,letterSpacing:.5,transition:'border-color .18s',colorScheme:'dark'}}
+                           onFocus={function(e){e.target.style.borderColor='rgba(190,71,61,0.5)'}}
+                           onBlur={function(e){e.target.style.borderColor='rgba(240,237,232,0.1)'}}/>
+                  </div>
+                  <button type="submit" disabled={generating||!examDate||!profession}
+                          style={{width:'100%',padding:'13px',background:generating||!examDate||!profession?'rgba(190,71,61,0.3)':'#BE473D',border:'none',cursor:generating||!examDate||!profession?'not-allowed':'pointer',fontFamily:MONO,fontSize:10,color:'#F0EDE8',letterSpacing:3,marginBottom:20,transition:'opacity .18s'}}
+                          onMouseEnter={function(e){if(!generating&&examDate&&profession)e.currentTarget.style.opacity='.85'}}
+                          onMouseLeave={function(e){e.currentTarget.style.opacity='1'}}>
+                    {generating?'GENERATING PLAN...':'GENERATE AI STUDY PLAN'}
+                  </button>
+                </form>
+
+                {planResult&&(
+                    <div style={{padding:'16px',border:'1px solid rgba(190,71,61,0.25)',background:'rgba(190,71,61,0.05)',marginBottom:20}}>
+                      <div style={{fontFamily:MONO,fontSize:9,color:'#BE473D',letterSpacing:2,marginBottom:10}}>// YOUR STUDY PLAN</div>
+                      <div style={{fontFamily:'monospace',fontSize:13,color:'rgba(240,237,232,0.65)',lineHeight:1.8,whiteSpace:'pre-wrap'}}>{typeof planResult==='string'?planResult:planResult.plan||JSON.stringify(planResult)}</div>
+                    </div>
+                )}
+
+                {/* PRC 2026 Schedules */}
+                <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:8}}>
+                  <div style={{display:'inline-flex',alignItems:'center',gap:8,padding:'4px 12px 4px 8px',border:'1px solid rgba(240,237,232,0.07)'}}>
+                    <span style={{fontSize:11,color:'#BE473D'}}>02</span>
+                    <span style={{fontSize:11,letterSpacing:2,color:'rgba(240,237,232,0.5)'}}>2026 PRC SCHEDULES</span>
+                  </div>
+                  <button onClick={function(){window.open('https://www.prc.gov.ph/2026-schedule-examination','_blank','noopener,noreferrer')}}
+                          style={{padding:'4px 10px',background:'transparent',border:'1px solid rgba(240,237,232,0.07)',cursor:'pointer',fontFamily:MONO,fontSize:8,color:'rgba(240,237,232,0.35)',letterSpacing:1,transition:'all .18s'}}
+                          onMouseEnter={function(e){e.currentTarget.style.color='#F0EDE8';e.currentTarget.style.borderColor='rgba(240,237,232,0.3)'}}
+                          onMouseLeave={function(e){e.currentTarget.style.color='rgba(240,237,232,0.35)';e.currentTarget.style.borderColor='rgba(240,237,232,0.07)'}}>
+                    OFFICIAL SITE
+                  </button>
+                </div>
+                <div style={{fontFamily:'monospace',fontSize:9,color:'rgba(240,237,232,0.22)',marginBottom:16,letterSpacing:.3}}>
+                  Source: PRC Resolution No. 2113 s. 2025 · Showing schedules for your course only
+                </div>
+
+                <div style={{display:'flex',flexDirection:'column',gap:20,marginBottom:20}}>
+                  {Object.keys(grouped).map(function(month){
+                    return(
+                        <div key={month}>
+                          <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:10}}>
+                            <div style={{fontFamily:MONO,fontSize:9,color:'#BE473D',letterSpacing:3}}>{month.toUpperCase()}</div>
+                            <div style={{flex:1,height:1,background:'rgba(190,71,61,0.2)'}}/>
+                          </div>
+                          <div style={{display:'flex',flexDirection:'column',gap:8}}>
+                            {grouped[month].map(function(exam){
+                              var days=daysUntil(exam.examSort)
+                              var color=urgencyColor(days)
+                              var passed=days!==null&&days<0
+                              return(
+                                  <div key={exam.id} style={{border:'1px solid rgba(240,237,232,0.08)',background:'rgba(240,237,232,0.02)',opacity:passed?0.4:1}}>
+                                    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'12px 14px',borderBottom:'1px solid rgba(240,237,232,0.06)'}}>
+                                      <div style={{display:'flex',alignItems:'center',gap:10}}>
+                                        <div style={{width:26,height:26,background:'rgba(190,71,61,0.12)',border:'1px solid rgba(190,71,61,0.2)',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:MONO,fontSize:7,color:'#BE473D',flexShrink:0}}>PRC</div>
+                                        <div style={{fontFamily:MONO,fontSize:12,color:'rgba(240,237,232,0.9)',letterSpacing:.3}}>{exam.profession}</div>
                                       </div>
-                                  )}
-                                </div>
-                            )
-                          })}
+                                      <div style={{display:'flex',alignItems:'center',gap:5,flexShrink:0}}>
+                                        <div style={{fontFamily:MONO,fontSize:passed?9:15,color:color,letterSpacing:'-0.5px',lineHeight:1}}>{passed?'PASSED':days}</div>
+                                        {!passed&&<div style={{fontFamily:MONO,fontSize:8,color:'rgba(240,237,232,0.28)'}}>DAYS</div>}
+                                      </div>
+                                    </div>
+                                    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr'}}>
+                                      <div style={{padding:'9px 12px',borderRight:'1px solid rgba(240,237,232,0.05)'}}>
+                                        <div style={{fontFamily:MONO,fontSize:7,color:'rgba(240,237,232,0.25)',letterSpacing:1.5,marginBottom:4}}>EXAM DATE</div>
+                                        <div style={{fontFamily:MONO,fontSize:9,color:passed?'rgba(240,237,232,0.3)':'#F0EDE8',lineHeight:1.4}}>{exam.examDate}</div>
+                                      </div>
+                                      <div style={{padding:'9px 12px',borderRight:'1px solid rgba(240,237,232,0.05)'}}>
+                                        <div style={{fontFamily:MONO,fontSize:7,color:'rgba(240,237,232,0.25)',letterSpacing:1.5,marginBottom:4}}>APP OPENS</div>
+                                        <div style={{fontFamily:MONO,fontSize:9,color:'rgba(240,237,232,0.5)',lineHeight:1.4}}>{exam.appOpen||'TBA'}</div>
+                                      </div>
+                                      <div style={{padding:'9px 12px'}}>
+                                        <div style={{fontFamily:MONO,fontSize:7,color:'rgba(240,237,232,0.25)',letterSpacing:1.5,marginBottom:4}}>DEADLINE</div>
+                                        <div style={{fontFamily:MONO,fontSize:9,color:passed?'rgba(240,237,232,0.3)':'#FBBF24',lineHeight:1.4}}>{exam.appDeadline||'TBA'}</div>
+                                      </div>
+                                    </div>
+                                    {exam.results&&(
+                                        <div style={{padding:'5px 12px 7px',borderTop:'1px solid rgba(240,237,232,0.04)',display:'flex',gap:6,alignItems:'center'}}>
+                                          <div style={{fontFamily:MONO,fontSize:7,color:'rgba(240,237,232,0.2)',letterSpacing:1}}>TARGET RESULTS:</div>
+                                          <div style={{fontFamily:MONO,fontSize:8,color:'rgba(240,237,232,0.38)'}}>{exam.results}</div>
+                                        </div>
+                                    )}
+                                  </div>
+                              )
+                            })}
+                          </div>
                         </div>
-                      </div>
-                  )
-                })}
-              </div>
+                    )
+                  })}
+                </div>
+
+                {/* Tips */}
+                <div style={{display:'inline-flex',alignItems:'center',gap:8,padding:'4px 12px 4px 8px',border:'1px solid rgba(240,237,232,0.07)',marginBottom:14}}>
+                  <span style={{fontSize:11,color:'#BE473D'}}>03</span>
+                  <span style={{fontSize:11,letterSpacing:2,color:'rgba(240,237,232,0.5)'}}>EXAM TIPS</span>
+                </div>
+                <div style={{border:'1px solid rgba(240,237,232,0.07)',borderBottom:'none'}}>
+                  {TIPS.map(function(t){
+                    return(
+                        <div key={t.n} className="tip-row" style={{display:'flex',alignItems:'center',gap:14,padding:'18px 14px 18px 16px',borderBottom:'1px solid rgba(240,237,232,0.05)',background:'transparent'}}>
+                          <span style={{fontFamily:MONO,fontSize:11,color:'rgba(240,237,232,0.32)',letterSpacing:1,flexShrink:0,width:26}}>{t.n}</span>
+                          <div style={{flex:1,minWidth:0}}>
+                            <div style={{fontFamily:MONO,fontSize:15,color:'rgba(240,237,232,0.85)',letterSpacing:.3,marginBottom:4}}>{t.title}</div>
+                            <div style={{fontFamily:'monospace',fontSize:12,color:'rgba(240,237,232,0.42)',lineHeight:1.5}}>{t.sub}</div>
+                          </div>
+                        </div>
+                    )
+                  })}
+                </div>
+              </>
           )
         })()}
-
-        {/* Tips */}
-        <div style={{display:'inline-flex',alignItems:'center',gap:8,padding:'4px 12px 4px 8px',border:'1px solid rgba(240,237,232,0.07)',marginBottom:14}}>
-          <span style={{fontSize:11,color:'#BE473D'}}>03</span>
-          <span style={{fontSize:11,letterSpacing:2,color:'rgba(240,237,232,0.5)'}}>EXAM TIPS</span>
-        </div>
-
-        <div style={{border:'1px solid rgba(240,237,232,0.07)',borderBottom:'none'}}>
-          {TIPS.map(function(t){
-            return(
-                <div key={t.n} className="tip-row" style={{display:'flex',alignItems:'center',gap:14,padding:'18px 14px 18px 16px',borderBottom:'1px solid rgba(240,237,232,0.05)',background:'transparent'}}>
-                  <span style={{fontFamily:MONO,fontSize:11,color:'rgba(240,237,232,0.32)',letterSpacing:1,flexShrink:0,width:26}}>{t.n}</span>
-                  <div style={{flex:1,minWidth:0}}>
-                    <div style={{fontFamily:MONO,fontSize:15,color:'rgba(240,237,232,0.85)',letterSpacing:.3,marginBottom:4}}>{t.title}</div>
-                    <div style={{fontFamily:'monospace',fontSize:12,color:'rgba(240,237,232,0.42)',lineHeight:1.5}}>{t.sub}</div>
-                  </div>
-                </div>
-            )
-          })}
-        </div>
 
       </PageLayout>
   )

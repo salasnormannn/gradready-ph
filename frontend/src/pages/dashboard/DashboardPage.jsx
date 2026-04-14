@@ -430,13 +430,13 @@ export default function DashboardPage() {
                 {FEATURES.map(function(f){
                   return (
                       <Link key={f.to} to={f.to} className="feat-row" style={{ textDecoration:'none', display:'flex', alignItems:'center', gap:16, padding:'16px 12px 16px 14px', borderBottom:'1px solid rgba(240,237,232,0.06)', background:'transparent' }}>
-                        <span className="fnum" style={{ fontFamily:MONO, fontSize:9, color:'rgba(240,237,232,0.18)', letterSpacing:1, flexShrink:0, width:22, transition:'color .18s' }}>{f.n}</span>
+                        <span className="fnum" style={{ fontFamily:MONO, fontSize:10, color:'rgba(240,237,232,0.18)', letterSpacing:1, flexShrink:0, width:22, transition:'color .18s' }}>{f.n}</span>
                         <div style={{ flex:1, minWidth:0 }}>
                           <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:3 }}>
-                            <span className="flbl" style={{ fontFamily:MONO, fontSize:12, color:'rgba(240,237,232,0.65)', letterSpacing:.5, transition:'color .18s' }}>{f.label}</span>
-                            {f.hot && <span style={{ fontFamily:'monospace', fontSize:7, color:'#BE473D', padding:'2px 6px', border:'1px solid rgba(190,71,61,0.4)', letterSpacing:1, flexShrink:0 }}>AI</span>}
+                            <span className="flbl" style={{ fontFamily:MONO, fontSize:15, color:'rgba(240,237,232,0.65)', letterSpacing:.5, transition:'color .18s' }}>{f.label}</span>
+                            {f.hot && <span style={{ fontFamily:'monospace', fontSize:8, color:'#BE473D', padding:'2px 6px', border:'1px solid rgba(190,71,61,0.4)', letterSpacing:1, flexShrink:0 }}>AI</span>}
                           </div>
-                          <div style={{ fontFamily:'monospace', fontSize:9.5, color:'rgba(240,237,232,0.22)', letterSpacing:.3 }}>{f.sub}</div>
+                          <div style={{ fontFamily:'monospace', fontSize:11, color:'rgba(240,237,232,0.22)', letterSpacing:.3 }}>{f.sub}</div>
                         </div>
                         <span className="farr" style={{ fontFamily:MONO, fontSize:18, color:'rgba(240,237,232,0.18)', flexShrink:0, opacity:0.3, transition:'all .18s' }}>›</span>
                       </Link>
@@ -473,7 +473,7 @@ export default function DashboardPage() {
                 {QUICK.map(function(q){
                   return (
                       <button key={q} className="qrow" onClick={function(){ navigate('/dashboard/chat', { state:{ initialMessage:q } }) }}
-                              style={{ width:'100%', padding:'14px 16px', border:'none', borderBottom:'1px solid rgba(60,9,30,0.07)', background:'transparent', cursor:'pointer', fontFamily:MONO, fontSize:10, color:'rgba(60,9,30,0.5)', letterSpacing:.5, textAlign:'left', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+                              style={{ width:'100%', padding:'14px 16px', border:'none', borderBottom:'1px solid rgba(60,9,30,0.07)', background:'transparent', cursor:'pointer', fontFamily:MONO, fontSize:13, color:'rgba(60,9,30,0.5)', letterSpacing:.5, textAlign:'left', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
                         {q}
                         <span className="qarr" style={{ fontFamily:MONO, fontSize:16, color:'#BE473D', opacity:0, transition:'opacity .18s', flexShrink:0 }}>›</span>
                       </button>
@@ -484,8 +484,8 @@ export default function DashboardPage() {
               <Link to="/dashboard/chat" className="kuya-link" style={{ textDecoration:'none', display:'flex', alignItems:'center', gap:16, padding:'16px 18px', border:'1px solid rgba(60,9,30,0.1)', background:'rgba(60,9,30,0.035)' }}>
                 <div style={{ width:40, height:40, background:'#BE473D', display:'flex', alignItems:'center', justifyContent:'center', fontSize:20, flexShrink:0 }}>🤙</div>
                 <div style={{ flex:1, minWidth:0 }}>
-                  <div style={{ fontFamily:MONO, fontSize:11, color:'#3C091E', letterSpacing:1.5, marginBottom:2 }}>KUYA AI IS READY</div>
-                  <div style={{ fontFamily:'monospace', fontSize:9, color:'rgba(60,9,30,0.38)', lineHeight:1.6 }}>
+                  <div style={{ fontFamily:MONO, fontSize:13, color:'#3C091E', letterSpacing:1.5, marginBottom:2 }}>KUYA AI IS READY</div>
+                  <div style={{ fontFamily:'monospace', fontSize:11, color:'rgba(60,9,30,0.38)', lineHeight:1.6 }}>
                     <span style={{ color:'#1E8449' }}>●</span> ONLINE · UY {name}! ANONG TANONG MO?
                   </div>
                 </div>
