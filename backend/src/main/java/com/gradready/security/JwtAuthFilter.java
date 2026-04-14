@@ -36,13 +36,20 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         String token = authHeader.substring(7);
 
-        if (jwtUtil.isValid(token)) {
-            String email = jwtUtil.extractEmail(token);
-            var userDetails = userDetailsService.loadUserByUsername(email);
-            var authToken = new UsernamePasswordAuthenticationToken(
-                    userDetails, null, userDetails.getAuthorities());
-            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(authToken);
+        // Wrap in try-catch so expired/malformed tokens never throw —
+        // they just skip auth and let Spring Security's permit rules decide
+        try {
+            if (jwtUtil.isValid(token)) {
+                String email = jwtUtil.extractEmail(token);
+                var userDetails = userDetailsService.loadUserByUsername(email);
+                var authToken = new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities());
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+            }
+        } catch (Exception e) {
+            // Bad/expired token — clear any partial auth state and continue
+            SecurityContextHolder.clearContext();
         }
 
         filterChain.doFilter(request, response);
