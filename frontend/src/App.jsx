@@ -31,6 +31,9 @@ function OnboardingRoute({ children }) {
 function PublicRoute({ children }) {
   const { token, isOnboarded } = useAuthStore()
 
+  // Only redirect if we have a token AND the user has completed onboarding.
+  // If token exists but isOnboarded is false, fall through to show the page
+  // (e.g. stale token with no profile — let /dashboard's 401 clear it naturally).
   if (token && isOnboarded) {
     return <Navigate to="/dashboard" replace />
   }
