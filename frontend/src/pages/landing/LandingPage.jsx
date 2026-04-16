@@ -171,28 +171,30 @@ function Loader({ onDone }) {
 
   useEffect(() => {
     let p = 0
-    let msgIdx = 0
     let scrambleFrame = 0
-    let animDone = false
     let backendReady = false
 
-    // Ping backend to warm it up while the animation plays
+    // Ping backend — sets the flag that unlocks the final 15%
     const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
     fetch(`${baseURL}/api/health`, { method: 'GET' })
       .then(() => { backendReady = true })
-      .catch(() => { backendReady = true }) // still proceed even if ping fails
-      .finally(() => {
-        if (animDone) setTimeout(onDone, 600)
-      })
+      .catch(() => { backendReady = true }) // proceed even on failure
 
     const interval = setInterval(() => {
-      p += Math.random() * 6 + 3
-      if (p > 100) p = 100
+      // While backend isn't ready, crawl slowly up to 85% (never reach 100%)
+      // Once backend is ready, sprint to 100%
+      const ceiling = backendReady ? 100 : 85
+      const remaining = ceiling - p
+      const increment = backendReady
+        ? Math.random() * 8 + 6                        // fast finish
+        : Math.random() * (remaining * 0.09) + 0.4     // slow crawl, decelerates near 85%
+
+      p = Math.min(p + increment, ceiling)
       setPct(Math.floor(p))
 
-      msgIdx = Math.floor((p / 100) * (msgs.length - 1))
-      const target1 = msgs[Math.min(msgIdx, msgs.length-1)][0]
-      const target2 = msgs[Math.min(msgIdx, msgs.length-1)][1]
+      const msgIdx = Math.floor((p / 100) * (msgs.length - 1))
+      const target1 = msgs[Math.min(msgIdx, msgs.length - 1)][0]
+      const target2 = msgs[Math.min(msgIdx, msgs.length - 1)][1]
       scrambleFrame++
 
       const scramble = (target, frame) => target.split('').map((ch, i) => {
@@ -206,10 +208,9 @@ function Loader({ onDone }) {
 
       if (p >= 100) {
         clearInterval(interval)
-        setLine1(msgs[msgs.length-1][0])
-        setLine2(msgs[msgs.length-1][1])
-        animDone = true
-        if (backendReady) setTimeout(onDone, 600)
+        setLine1(msgs[msgs.length - 1][0])
+        setLine2(msgs[msgs.length - 1][1])
+        setTimeout(onDone, 600)
       }
     }, 55)
 
