@@ -39,4 +39,14 @@ export const userApi = {
   updateProfile: (data) => api.put('/api/users/profile', data),
 }
 
+export const feedbackApi = {
+  submit: (data) => api.post('/api/feedback', data),
+}
+
+export const adminApi = {
+  getStats:      ()     => api.get('/api/admin/stats'),
+  getFeedback:   (type) => api.get('/api/admin/feedback', { params: type ? { type } : {} }),
+  getRecentUsers:()     => api.get('/api/admin/users/recent'),
+}
+
 export default api
