@@ -36,8 +36,8 @@ const STATUSES = [
 function Section({ title, children }) {
   return (
       <div style={{ marginBottom: 40 }}>
-        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 500, letterSpacing: 2.5, textTransform: 'uppercase', color: 'rgba(242,237,232,0.25)', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ width: 3, height: 12, background: '#C0392B' }} />
+        <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, fontWeight: 500, letterSpacing: 2.5, textTransform: 'uppercase', color: 'rgba(242,237,232,0.25)', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ width: 3, height: 12, background: '#C8A84B' }} />
           {title}
         </div>
         {children}
@@ -84,10 +84,10 @@ export default function EditProfilePage() {
   }
 
   const optBtn = (selected) => ({
-    width: '100%', textAlign: 'left', background: selected ? 'rgba(192,57,43,0.1)' : 'rgba(255,255,255,0.03)',
-    border: '1px solid ' + (selected ? '#C0392B' : 'rgba(242,237,232,0.08)'),
+    width: '100%', textAlign: 'left', background: selected ? 'rgba(200,168,75,0.1)' : 'rgba(255,255,255,0.03)',
+    border: '1px solid ' + (selected ? '#C8A84B' : 'rgba(242,237,232,0.08)'),
     color: selected ? '#F2EDE8' : 'rgba(242,237,232,0.6)',
-    padding: '13px 18px', fontFamily: "'DM Sans', sans-serif", fontSize: 14,
+    padding: '13px 18px', fontFamily: "'Inter', sans-serif", fontSize: 14,
     cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6,
   })
 
@@ -103,11 +103,11 @@ export default function EditProfilePage() {
   }
 
   return (
-      <PageLayout title="Edit profile" backTo="/dashboard/profile" accentColor="#C0392B">
+      <PageLayout title="Edit profile" backTo="/dashboard/profile" accentColor="#C8A84B">
         <style>{`@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900&family=DM+Sans:opsz,wght@9..40,400;9..40,500&display=swap');`}</style>
 
         {saved && (
-            <div style={{ border: '1px solid rgba(30,132,73,0.3)', background: 'rgba(30,132,73,0.08)', padding: '14px 20px', marginBottom: 32, fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#1E8449', display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ border: '1px solid rgba(30,132,73,0.3)', background: 'rgba(30,132,73,0.08)', padding: '14px 20px', marginBottom: 32, fontFamily: "'Inter', sans-serif", fontSize: 14, color: '#1E8449', display: 'flex', alignItems: 'center', gap: 10 }}>
               <span>✓</span> Profile saved — redirecting...
             </div>
         )}
@@ -129,7 +129,7 @@ export default function EditProfilePage() {
                               update('course', c)
                             }
                           }}>
-                    {selected && <span style={{ color: '#C0392B', fontSize: 14 }}>✓</span>}
+                    {selected && <span style={{ color: '#C8A84B', fontSize: 14 }}>✓</span>}
                     {c}
                   </button>
               )
@@ -138,7 +138,7 @@ export default function EditProfilePage() {
 
           {showOther && (
               <div style={{ marginTop: 10 }}>
-                <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 500, letterSpacing: 2, textTransform: 'uppercase', color: 'rgba(242,237,232,0.3)', display: 'block', marginBottom: 8 }}>
+                <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, fontWeight: 500, letterSpacing: 2, textTransform: 'uppercase', color: 'rgba(242,237,232,0.3)', display: 'block', marginBottom: 8 }}>
                   YOUR COURSE
                 </label>
                 <input
@@ -147,7 +147,7 @@ export default function EditProfilePage() {
                     value={form.course}
                     placeholder="e.g. BS Tourism Management"
                     onChange={e => update('course', e.target.value)}
-                    style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid #C0392B', color: '#F2EDE8', padding: '13px 16px', fontFamily: "'DM Sans', sans-serif", fontSize: 14, outline: 'none' }}
+                    style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid #C8A84B', color: '#F2EDE8', padding: '13px 16px', fontFamily: "'Inter', sans-serif", fontSize: 14, outline: 'none' }}
                 />
               </div>
           )}
@@ -157,18 +157,18 @@ export default function EditProfilePage() {
         <Section title="Education details">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div>
-              <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 500, letterSpacing: 2, textTransform: 'uppercase', color: 'rgba(242,237,232,0.3)', display: 'block', marginBottom: 8 }}>School / University</label>
+              <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, fontWeight: 500, letterSpacing: 2, textTransform: 'uppercase', color: 'rgba(242,237,232,0.3)', display: 'block', marginBottom: 8 }}>School / University</label>
               <input type="text" value={form.school} onChange={e => update('school', e.target.value)} placeholder="e.g. University of Santo Tomas"
-                     style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(242,237,232,0.12)', color: '#F2EDE8', padding: '13px 16px', fontFamily: "'DM Sans', sans-serif", fontSize: 14, outline: 'none', transition: 'border-color 0.2s' }}
-                     onFocus={e => { e.currentTarget.style.borderColor = '#C0392B' }}
+                     style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(242,237,232,0.12)', color: '#F2EDE8', padding: '13px 16px', fontFamily: "'Inter', sans-serif", fontSize: 14, outline: 'none', transition: 'border-color 0.2s' }}
+                     onFocus={e => { e.currentTarget.style.borderColor = '#C8A84B' }}
                      onBlur={e => { e.currentTarget.style.borderColor = 'rgba(242,237,232,0.12)' }}
               />
             </div>
             <div>
-              <label style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 500, letterSpacing: 2, textTransform: 'uppercase', color: 'rgba(242,237,232,0.3)', display: 'block', marginBottom: 8 }}>Graduation year</label>
+              <label style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, fontWeight: 500, letterSpacing: 2, textTransform: 'uppercase', color: 'rgba(242,237,232,0.3)', display: 'block', marginBottom: 8 }}>Graduation year</label>
               <input type="number" value={form.graduationYear} onChange={e => update('graduationYear', e.target.value)} placeholder="e.g. 2024" min="1990" max="2030"
-                     style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(242,237,232,0.12)', color: '#F2EDE8', padding: '13px 16px', fontFamily: "'DM Sans', sans-serif", fontSize: 14, outline: 'none', transition: 'border-color 0.2s' }}
-                     onFocus={e => { e.currentTarget.style.borderColor = '#C0392B' }}
+                     style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(242,237,232,0.12)', color: '#F2EDE8', padding: '13px 16px', fontFamily: "'Inter', sans-serif", fontSize: 14, outline: 'none', transition: 'border-color 0.2s' }}
+                     onFocus={e => { e.currentTarget.style.borderColor = '#C8A84B' }}
                      onBlur={e => { e.currentTarget.style.borderColor = 'rgba(242,237,232,0.12)' }}
               />
             </div>
@@ -180,7 +180,7 @@ export default function EditProfilePage() {
           <div style={{ maxHeight: 380, overflowY: 'auto' }}>
             {REGIONS.map(r => (
                 <button key={r} style={optBtn(form.region === r)} onClick={() => update('region', r)}>
-                  {form.region === r && <span style={{ color: '#C0392B', fontSize: 14 }}>✓</span>}
+                  {form.region === r && <span style={{ color: '#C8A84B', fontSize: 14 }}>✓</span>}
                   {r}
                 </button>
             ))}
@@ -192,7 +192,7 @@ export default function EditProfilePage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {STATUSES.map(s => (
                 <button key={s.value} style={{ ...optBtn(form.status === s.value), padding: '16px 18px' }} onClick={() => update('status', s.value)}>
-                  <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: form.status === s.value ? '#C0392B' : 'rgba(242,237,232,0.25)', flexShrink: 0 }}>{s.icon}</span>
+                  <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: form.status === s.value ? '#C8A84B' : 'rgba(242,237,232,0.25)', flexShrink: 0 }}>{s.icon}</span>
                   <span style={{ fontWeight: 500 }}>{s.label}</span>
                 </button>
             ))}
@@ -201,9 +201,9 @@ export default function EditProfilePage() {
 
         {/* Save */}
         <button onClick={handleSave} disabled={loading}
-                style={{ width: '100%', background: loading ? 'rgba(192,57,43,0.5)' : '#C0392B', border: 'none', color: '#F2EDE8', padding: '16px', fontFamily: "'DM Sans', sans-serif", fontSize: 15, fontWeight: 500, cursor: loading ? 'not-allowed' : 'pointer', transition: 'background 0.2s', clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))' }}
+                style={{ width: '100%', background: loading ? 'rgba(200,168,75,0.5)' : '#C8A84B', border: 'none', color: '#F2EDE8', padding: '16px', fontFamily: "'Inter', sans-serif", fontSize: 15, fontWeight: 500, cursor: loading ? 'not-allowed' : 'pointer', transition: 'background 0.2s', clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))' }}
                 onMouseEnter={e => { if (!loading) e.currentTarget.style.background = '#E74C3C' }}
-                onMouseLeave={e => { if (!loading) e.currentTarget.style.background = '#C0392B' }}>
+                onMouseLeave={e => { if (!loading) e.currentTarget.style.background = '#C8A84B' }}>
           {loading ? 'Saving changes...' : 'Save changes'}
         </button>
       </PageLayout>
