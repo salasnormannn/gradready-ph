@@ -40,6 +40,9 @@ public class User {
     @Column(name = "is_verified")
     private boolean isVerified = false;
 
+    @Column(name = "is_admin")
+    private boolean isAdmin = false;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

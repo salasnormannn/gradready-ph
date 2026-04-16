@@ -4,7 +4,7 @@ import useAuthStore from '../store/authStore'
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080',
   headers: { 'Content-Type': 'application/json' },
-  timeout: 60000,
+  timeout: 120000, // 2 min — cover letters / resumes can take 60–90s
 })
 
 // Attach JWT token to every request
@@ -37,6 +37,17 @@ export const authApi = {
 export const userApi = {
   getProfile: () => api.get('/api/users/profile'),
   updateProfile: (data) => api.put('/api/users/profile', data),
+}
+
+export const feedbackApi = {
+  submit: (data) => api.post('/api/feedback', data),
+}
+
+export const adminApi = {
+  getStats:       ()     => api.get('/api/admin/stats'),
+  getFeedback:    (type) => api.get('/api/admin/feedback', { params: type ? { type } : {} }),
+  getRecentUsers: ()     => api.get('/api/admin/users/recent'),
+  resolve:        (id)   => api.patch(`/api/admin/feedback/${id}/resolve`),
 }
 
 export default api

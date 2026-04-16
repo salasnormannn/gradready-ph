@@ -1,5 +1,6 @@
 package com.gradready.auth;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,4 +21,6 @@ public class AuthResponse {
     private String region;
     private String school;
     private String status;
+    @JsonProperty("isAdmin")
+    private boolean isAdmin;
 }

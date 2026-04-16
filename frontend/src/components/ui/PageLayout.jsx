@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import useAuthStore from '../../store/authStore'
+import { feedbackApi } from '../../services/api'
 
 const MONO = 'Inter, sans-serif'
 
@@ -12,7 +14,106 @@ const CSS = `
   ::selection { background:rgba(200,168,75,0.35); }
   @keyframes floatA { 0%,100%{transform:translateY(0)rotate(0deg)} 50%{transform:translateY(-12px)rotate(3deg)} }
   @keyframes floatB { 0%,100%{transform:translateY(0)rotate(0deg)} 50%{transform:translateY(-7px)rotate(-2deg)} }
+  @keyframes slideUp { from{transform:translateY(100%);opacity:0} to{transform:translateY(0);opacity:1} }
+  .fb-modal { animation: slideUp .25s cubic-bezier(.4,0,.2,1) both; }
+  @keyframes fbPulse { 0%,100%{box-shadow:0 0 0 0 rgba(200,168,75,0.45)} 50%{box-shadow:0 0 0 6px rgba(200,168,75,0)} }
+  .fb-btn { animation: fbPulse 2.8s ease-in-out infinite; }
 `
+
+const FEEDBACK_TYPES = [
+  { key: 'BUG',           icon: '🐛', label: 'Bug' },
+  { key: 'SUGGESTION',    icon: '💡', label: 'Suggestion' },
+  { key: 'CONTENT_ERROR', icon: '📝', label: 'Content Error' },
+  { key: 'OTHER',         icon: '💬', label: 'Other' },
+]
+
+function FeedbackModal({ onClose }) {
+  const location = useLocation()
+  const [type, setType] = useState('SUGGESTION')
+  const [message, setMessage] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [done, setDone] = useState(false)
+
+  async function handleSubmit() {
+    if (!message.trim() || submitting) return
+    setSubmitting(true)
+    try {
+      await feedbackApi.submit({ type, message: message.trim(), pageUrl: location.pathname })
+      setDone(true)
+    } catch {
+      // silently fail — don't block the user over a feedback error
+      setDone(true)
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <div style={{ position:'fixed', inset:0, zIndex:500, display:'flex', flexDirection:'column', justifyContent:'flex-end' }}>
+      {/* Backdrop */}
+      <div onClick={onClose} style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.55)', backdropFilter:'blur(4px)' }} />
+
+      {/* Panel */}
+      <div className="fb-modal" style={{ position:'relative', background:'#0d1b3e', border:'1px solid rgba(250,247,242,0.08)', borderBottom:'none', borderRadius:'16px 16px 0 0', padding:'24px 20px 32px', fontFamily:MONO }}>
+        {/* Handle bar */}
+        <div style={{ width:36, height:3, background:'rgba(250,247,242,0.15)', borderRadius:2, margin:'0 auto 20px' }} />
+
+        {done ? (
+          <div style={{ textAlign:'center', padding:'16px 0' }}>
+            <div style={{ fontSize:36, marginBottom:12 }}>✅</div>
+            <div style={{ fontSize:15, fontWeight:600, color:'#FAF7F2', marginBottom:6 }}>Salamat sa feedback!</div>
+            <div style={{ fontSize:12, color:'rgba(250,247,242,0.45)', marginBottom:20 }}>We'll use this to make GradReady better.</div>
+            <button onClick={onClose} style={{ padding:'10px 28px', background:'#C8A84B', border:'none', borderRadius:8, color:'#0F2044', fontFamily:MONO, fontSize:13, fontWeight:600, cursor:'pointer' }}>
+              Close
+            </button>
+          </div>
+        ) : (
+          <>
+            <div style={{ fontSize:14, fontWeight:600, color:'#FAF7F2', marginBottom:4 }}>Send Feedback</div>
+            <div style={{ fontSize:11, color:'rgba(250,247,242,0.4)', marginBottom:16 }}>Found a bug? Have a suggestion? Let us know!</div>
+
+            {/* Type pills */}
+            <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginBottom:16 }}>
+              {FEEDBACK_TYPES.map(t => (
+                <button key={t.key} onClick={() => setType(t.key)}
+                  style={{ padding:'6px 12px', border:'1px solid', borderRadius:20, fontFamily:MONO, fontSize:11, cursor:'pointer', transition:'all .15s',
+                    background: type === t.key ? 'rgba(200,168,75,0.15)' : 'transparent',
+                    borderColor: type === t.key ? '#C8A84B' : 'rgba(250,247,242,0.15)',
+                    color: type === t.key ? '#C8A84B' : 'rgba(250,247,242,0.5)' }}>
+                  {t.icon} {t.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Message textarea */}
+            <textarea
+              value={message}
+              onChange={e => setMessage(e.target.value)}
+              placeholder="Describe the issue or suggestion..."
+              rows={4}
+              style={{ width:'100%', background:'rgba(250,247,242,0.04)', border:'1px solid rgba(250,247,242,0.1)', borderRadius:8, padding:'10px 12px', color:'#FAF7F2', fontFamily:MONO, fontSize:13, lineHeight:1.6, resize:'none', outline:'none', boxSizing:'border-box', transition:'border-color .15s' }}
+              onFocus={e => { e.target.style.borderColor = 'rgba(200,168,75,0.4)' }}
+              onBlur={e => { e.target.style.borderColor = 'rgba(250,247,242,0.1)' }}
+            />
+
+            {/* Actions */}
+            <div style={{ display:'flex', gap:10, marginTop:12 }}>
+              <button onClick={onClose}
+                style={{ flex:1, padding:'10px', background:'transparent', border:'1px solid rgba(250,247,242,0.1)', borderRadius:8, color:'rgba(250,247,242,0.45)', fontFamily:MONO, fontSize:12, cursor:'pointer' }}>
+                Cancel
+              </button>
+              <button onClick={handleSubmit}
+                disabled={!message.trim() || submitting}
+                style={{ flex:2, padding:'10px', background: !message.trim() || submitting ? 'rgba(200,168,75,0.25)' : '#C8A84B', border:'none', borderRadius:8, color: !message.trim() || submitting ? 'rgba(250,247,242,0.3)' : '#0F2044', fontFamily:MONO, fontSize:13, fontWeight:600, cursor: !message.trim() || submitting ? 'not-allowed' : 'pointer', transition:'all .15s' }}>
+                {submitting ? 'Sending...' : 'Send Feedback'}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
 
 const NAV = [
     { icon:'⌂', label:'HOME',    to:'/dashboard' },
@@ -26,6 +127,7 @@ export default function PageLayout({ title, subtitle, children, backTo = '/dashb
     const location = useLocation()
     const { user } = useAuthStore()
     const initial = user?.fullName ? user.fullName.charAt(0).toUpperCase() : 'G'
+    const [feedbackOpen, setFeedbackOpen] = useState(false)
 
     return (
         <div style={{ minHeight:'100vh', background:'#0F2044', fontFamily:MONO, color:'#FAF7F2', paddingBottom:80 }}>
@@ -70,6 +172,18 @@ export default function PageLayout({ title, subtitle, children, backTo = '/dashb
             <div style={{ maxWidth:600, margin:'0 auto', padding:'24px 20px 32px', position:'relative', zIndex:1 }}>
                 {children}
             </div>
+
+            {/* FEEDBACK BUTTON */}
+            <button className="fb-btn" onClick={() => setFeedbackOpen(true)}
+                style={{ position:'fixed', bottom:90, right:16, zIndex:200, height:36, padding:'0 14px', background:'#C8A84B', border:'none', borderRadius:18, display:'flex', alignItems:'center', gap:6, cursor:'pointer', transition:'background .18s, transform .18s' }}
+                onMouseEnter={function(e){ e.currentTarget.style.background='#b8942b'; e.currentTarget.style.transform='scale(1.05)' }}
+                onMouseLeave={function(e){ e.currentTarget.style.background='#C8A84B'; e.currentTarget.style.transform='scale(1)' }}>
+                <span style={{ fontSize:14 }}>💬</span>
+                <span style={{ fontFamily:MONO, fontSize:11, fontWeight:600, color:'#0F2044', letterSpacing:.5 }}>Feedback</span>
+            </button>
+
+            {/* FEEDBACK MODAL */}
+            {feedbackOpen && <FeedbackModal onClose={() => setFeedbackOpen(false)} />}
 
             {/* BOTTOM NAV */}
             <div style={{ position:'fixed', bottom:0, left:0, right:0, zIndex:100, background:'rgba(8,20,52,0.97)', backdropFilter:'blur(24px)', borderTop:'1px solid rgba(250,247,242,0.055)', display:'flex' }}>
