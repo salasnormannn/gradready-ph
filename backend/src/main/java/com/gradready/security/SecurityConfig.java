@@ -40,7 +40,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/health").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/admin/**").permitAll()
+                        .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers("/api/jobs/**").authenticated()
                         .requestMatchers("/api/roadmap/**").authenticated()
                         .requestMatchers("/api/chat/**").authenticated()
@@ -49,6 +49,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/board-exam/**").authenticated()
                         .requestMatchers("/api/tracker/**").authenticated()
                         .requestMatchers("/api/salary/**").authenticated()
+                        .requestMatchers("/api/feedback/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
@@ -58,11 +59,15 @@ public class SecurityConfig {
     @Bean
     public UserDetailsService userDetailsService() {
         return email -> userRepository.findByEmail(email)
-                .map(user -> User
-                        .withUsername(user.getEmail())
-                        .password(user.getPasswordHash())
-                        .authorities("ROLE_USER")
-                        .build())
+                .map(user -> {
+                    String[] authorities = user.isAdmin()
+                            ? new String[]{"ROLE_USER", "ROLE_ADMIN"}
+                            : new String[]{"ROLE_USER"};
+                    return User.withUsername(user.getEmail())
+                            .password(user.getPasswordHash())
+                            .authorities(authorities)
+                            .build();
+                })
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
     }
 

@@ -67,6 +67,7 @@ public class AuthService {
                 .region(user.getRegion())
                 .school(user.getSchool())
                 .status(user.getStatus())
+                .isAdmin(user.isAdmin())
                 .build();
     }
 }
