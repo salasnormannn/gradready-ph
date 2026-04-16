@@ -4,7 +4,7 @@ import useAuthStore from '../store/authStore'
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080',
   headers: { 'Content-Type': 'application/json' },
-  timeout: 60000,
+  timeout: 120000, // 2 min — cover letters / resumes can take 60–90s
 })
 
 // Attach JWT token to every request
