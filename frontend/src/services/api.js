@@ -44,9 +44,10 @@ export const feedbackApi = {
 }
 
 export const adminApi = {
-  getStats:      ()     => api.get('/api/admin/stats'),
-  getFeedback:   (type) => api.get('/api/admin/feedback', { params: type ? { type } : {} }),
-  getRecentUsers:()     => api.get('/api/admin/users/recent'),
+  getStats:       ()     => api.get('/api/admin/stats'),
+  getFeedback:    (type) => api.get('/api/admin/feedback', { params: type ? { type } : {} }),
+  getRecentUsers: ()     => api.get('/api/admin/users/recent'),
+  resolve:        (id)   => api.patch(`/api/admin/feedback/${id}/resolve`),
 }
 
 export default api

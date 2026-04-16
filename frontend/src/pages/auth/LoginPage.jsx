@@ -53,7 +53,11 @@ export default function LoginPage() {
       const res = await authApi.login(data)
       queryClient.clear()
       setAuth(res.data, res.data.token)
-      navigate(res.data.course || res.data.region ? '/dashboard' : '/onboarding')
+      if (res.data.isAdmin) {
+        navigate('/admin')
+      } else {
+        navigate(res.data.course || res.data.region ? '/dashboard' : '/onboarding')
+      }
     } catch (err) {
       if (err.response?.status === 401) {
         setError('Invalid email or password.')

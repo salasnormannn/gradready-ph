@@ -27,6 +27,12 @@ public class Feedback {
     @Column(name = "page_url", length = 255)
     private String pageUrl;
 
+    @Column(nullable = false)
+    private boolean resolved = false;
+
+    @Column(name = "resolved_at")
+    private LocalDateTime resolvedAt;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 }

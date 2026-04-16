@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import useAuthStore from './store/authStore'
+import AdminDashboardPage from './pages/admin/AdminDashboardPage'
 import LandingPage from './pages/landing/LandingPage'
 import RegisterPage from './pages/auth/RegisterPage'
 import LoginPage from './pages/auth/LoginPage'
@@ -19,6 +20,13 @@ import SalaryBoardPage   from './pages/dashboard/SalaryBoardPage'
 function PrivateRoute({ children }) {
   const { token } = useAuthStore()
   return token ? children : <Navigate to="/login" replace />
+}
+
+function AdminRoute({ children }) {
+  const { token, user } = useAuthStore()
+  if (!token) return <Navigate to="/login" replace />
+  if (!user?.isAdmin) return <Navigate to="/dashboard" replace />
+  return children
 }
 
 function OnboardingRoute({ children }) {
@@ -67,6 +75,9 @@ export default function App() {
         <Route path="/dashboard/profile/edit" element={<PrivateRoute><EditProfilePage /></PrivateRoute>} />
         <Route path="/dashboard/tracker"  element={<PrivateRoute><JobTrackerPage /></PrivateRoute>} />
         <Route path="/dashboard/salary"   element={<PrivateRoute><SalaryBoardPage /></PrivateRoute>} />
+
+        {/* Admin route */}
+        <Route path="/admin" element={<AdminRoute><AdminDashboardPage /></AdminRoute>} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

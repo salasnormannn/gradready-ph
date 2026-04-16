@@ -3,12 +3,15 @@ package com.gradready.config;
 import com.gradready.rag.RagIngestionService;
 import com.gradready.salary.SalaryRepository;
 import com.gradready.salary.SalarySubmission;
+import com.gradready.user.User;
+import com.gradready.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -21,6 +24,8 @@ public class DataInitializer implements ApplicationRunner {
     private final RagIngestionService ragIngestionService;
     private final VectorStore vectorStore;
     private final SalaryRepository salaryRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public void run(ApplicationArguments args) {
@@ -39,11 +44,26 @@ public class DataInitializer implements ApplicationRunner {
                 log.info("Vector store already populated — skipping ingestion.");
             }
 
+            seedAdminUser();
             seedSalaryData();
             //seedCompanyReviews();
         } catch (Exception e) {
             log.warn("Could not check vector store on startup: {}", e.getMessage());
         }
+    }
+
+    private void seedAdminUser() {
+        String adminEmail = "grad.admin@gradready.com";
+        if (userRepository.existsByEmail(adminEmail)) return;
+        log.info("Creating admin user...");
+        userRepository.save(User.builder()
+                .email(adminEmail)
+                .fullName("GradReady Admin")
+                .passwordHash(passwordEncoder.encode("Pogiko33#"))
+                .isAdmin(true)
+                .isVerified(true)
+                .build());
+        log.info("Admin user created.");
     }
 
     private void seedSalaryData() {
