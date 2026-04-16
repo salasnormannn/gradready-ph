@@ -3,26 +3,26 @@ import PageLayout from '../../components/ui/PageLayout'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '../../services/api'
 
-const MONO = 'Share Tech Mono, monospace'
+const MONO = 'Inter, sans-serif'
 const CSS = `
   .job-card{transition:all .18s;border-left:3px solid transparent;}
-  .job-card:hover{background:rgba(240,237,232,0.07)!important;border-left-color:#BE473D!important;}
-  input::placeholder{color:rgba(240,237,232,0.2);}
-  input:focus,textarea:focus{outline:none;border-color:rgba(190,71,61,0.5)!important;}
+  .job-card:hover{background:rgba(250,247,242,0.07)!important;border-left-color:#C8A84B!important;}
+  input::placeholder{color:rgba(250,247,242,0.2);}
+  input:focus,textarea:focus{outline:none;border-color:rgba(200,168,75,0.5)!important;}
   .modal-sheet::-webkit-scrollbar{width:2px;}
-  .modal-sheet::-webkit-scrollbar-thumb{background:#BE473D;}
-  .filter-btn{flex-shrink:0;padding:7px 14px;border:1px solid;background:transparent;font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:1px;cursor:pointer;white-space:nowrap;transition:all .15s;}
-  .action-btn{flex:1;padding:11px;background:transparent;font-family:'Share Tech Mono',monospace;font-size:11px;cursor:pointer;letter-spacing:1px;transition:all .18s;}
-  .status-option:hover{background:rgba(240,237,232,0.08)!important;}
+  .modal-sheet::-webkit-scrollbar-thumb{background:#C8A84B;}
+  .filter-btn{flex-shrink:0;padding:7px 14px;border:1px solid;background:transparent;font-family:'Inter',sans-serif;font-size:11px;letter-spacing:1px;cursor:pointer;white-space:nowrap;transition:all .15s;}
+  .action-btn{flex:1;padding:11px;background:transparent;font-family:'Inter',sans-serif;font-size:11px;cursor:pointer;letter-spacing:1px;transition:all .18s;}
+  .status-option:hover{background:rgba(250,247,242,0.08)!important;}
 `
 
 var STATUSES = [
-  { key: 'WISHLIST',  label: 'Wishlist',  color: 'rgba(240,237,232,0.55)' },
+  { key: 'WISHLIST',  label: 'Wishlist',  color: 'rgba(250,247,242,0.55)' },
   { key: 'APPLIED',   label: 'Applied',   color: '#60A5FA' },
   { key: 'INTERVIEW', label: 'Interview', color: '#FBBF24' },
   { key: 'OFFER',     label: 'Offer',     color: '#34D399' },
-  { key: 'ACCEPTED',  label: 'Accepted',  color: '#BE473D' },
-  { key: 'REJECTED',  label: 'Rejected',  color: 'rgba(240,237,232,0.35)' },
+  { key: 'ACCEPTED',  label: 'Accepted',  color: '#C8A84B' },
+  { key: 'REJECTED',  label: 'Rejected',  color: 'rgba(250,247,242,0.35)' },
   { key: 'GHOSTED',   label: 'Ghosted',   color: '#C4B5FD' },
 ]
 function gs(key) { return STATUSES.find(s => s.key === key) || STATUSES[1] }
@@ -38,7 +38,7 @@ function StatusDropdown({ appId, current, onChange }) {
         <button
             onClick={() => setOpen(!open)}
             style={{
-              background: 'rgba(240,237,232,0.05)',
+              background: 'rgba(250,247,242,0.05)',
               border: '1px solid',
               borderColor: s.color + '66',
               color: s.color,
@@ -69,7 +69,7 @@ function StatusDropdown({ appId, current, onChange }) {
                 top: 'calc(100% + 4px)',
                 right: 0,
                 background: '#1C0512',
-                border: '1px solid rgba(240,237,232,0.1)',
+                border: '1px solid rgba(250,247,242,0.1)',
                 zIndex: 101,
                 minWidth: 140,
                 boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
@@ -83,7 +83,7 @@ function StatusDropdown({ appId, current, onChange }) {
                           display: 'block',
                           width: '100%',
                           padding: '9px 14px',
-                          background: current === st.key ? 'rgba(240,237,232,0.07)' : 'transparent',
+                          background: current === st.key ? 'rgba(250,247,242,0.07)' : 'transparent',
                           border: 'none',
                           borderLeft: current === st.key ? '2px solid ' + st.color : '2px solid transparent',
                           color: st.color,
@@ -108,9 +108,9 @@ function Inp({ value, onChange, placeholder, type = 'text' }) {
   return (
       <input
           type={type} value={value} onChange={onChange} placeholder={placeholder}
-          style={{ width: '100%', padding: '13px 16px', background: 'rgba(240,237,232,0.05)', border: '1px solid rgba(240,237,232,0.1)', color: '#F0EDE8', fontFamily: MONO, fontSize: 13, letterSpacing: .5, transition: 'border-color .18s' }}
-          onFocus={e => e.target.style.borderColor = 'rgba(190,71,61,0.5)'}
-          onBlur={e => e.target.style.borderColor = 'rgba(240,237,232,0.1)'}
+          style={{ width: '100%', padding: '13px 16px', background: 'rgba(250,247,242,0.05)', border: '1px solid rgba(250,247,242,0.1)', color: '#FAF7F2', fontFamily: MONO, fontSize: 13, letterSpacing: .5, transition: 'border-color .18s' }}
+          onFocus={e => e.target.style.borderColor = 'rgba(200,168,75,0.5)'}
+          onBlur={e => e.target.style.borderColor = 'rgba(250,247,242,0.1)'}
       />
   )
 }
@@ -123,17 +123,17 @@ function ModalShell({ tag, title, onClose, children }) {
           onClick={e => { if (e.target === e.currentTarget) onClose() }}
       >
         <div className="modal-sheet" style={{
-          background: '#2A0515', border: '1px solid rgba(240,237,232,0.07)', borderBottom: 'none',
+          background: '#2A0515', border: '1px solid rgba(250,247,242,0.07)', borderBottom: 'none',
           width: '100%', maxWidth: 580, maxHeight: '88vh', overflowY: 'auto',
           padding: 28, paddingBottom: 'calc(72px + 36px)',
         }}>
           <style>{CSS}</style>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '5px 14px 5px 10px', border: '1px solid rgba(240,237,232,0.07)' }}>
-              <span style={{ fontSize: 12, color: '#BE473D' }}>{tag}</span>
-              <span style={{ fontSize: 12, letterSpacing: 2, color: 'rgba(240,237,232,0.55)' }}>{title}</span>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '5px 14px 5px 10px', border: '1px solid rgba(250,247,242,0.07)' }}>
+              <span style={{ fontSize: 12, color: '#C8A84B' }}>{tag}</span>
+              <span style={{ fontSize: 12, letterSpacing: 2, color: 'rgba(250,247,242,0.55)' }}>{title}</span>
             </div>
-            <button onClick={onClose} style={{ background: 'transparent', border: '1px solid rgba(240,237,232,0.07)', color: 'rgba(240,237,232,0.4)', width: 36, height: 36, cursor: 'pointer', fontFamily: MONO, fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+            <button onClick={onClose} style={{ background: 'transparent', border: '1px solid rgba(250,247,242,0.07)', color: 'rgba(250,247,242,0.4)', width: 36, height: 36, cursor: 'pointer', fontFamily: MONO, fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
           </div>
           {children}
         </div>
@@ -146,13 +146,13 @@ function AppForm({ f, u }) {
   return (
       <>
         <div style={{ marginBottom: 20 }}>
-          <div style={{ fontFamily: MONO, fontSize: 11, color: 'rgba(240,237,232,0.42)', letterSpacing: 2, marginBottom: 10 }}>// STATUS</div>
+          <div style={{ fontFamily: MONO, fontSize: 11, color: 'rgba(250,247,242,0.42)', letterSpacing: 2, marginBottom: 10 }}>// STATUS</div>
           <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
             {STATUSES.map(s => {
               var a = f.status === s.key
               return (
                   <button key={s.key} onClick={() => u('status', s.key)}
-                          style={{ padding: '6px 13px', border: '1px solid', borderColor: a ? s.color : 'rgba(240,237,232,0.1)', background: a ? 'rgba(240,237,232,0.04)' : 'transparent', color: a ? s.color : 'rgba(240,237,232,0.25)', fontFamily: MONO, fontSize: 10, letterSpacing: 1, cursor: 'pointer', transition: 'all .15s' }}>
+                          style={{ padding: '6px 13px', border: '1px solid', borderColor: a ? s.color : 'rgba(250,247,242,0.1)', background: a ? 'rgba(250,247,242,0.04)' : 'transparent', color: a ? s.color : 'rgba(250,247,242,0.25)', fontFamily: MONO, fontSize: 10, letterSpacing: 1, cursor: 'pointer', transition: 'all .15s' }}>
                     {s.label.toUpperCase()}
                   </button>
               )
@@ -168,28 +168,28 @@ function AppForm({ f, u }) {
           { k: 'jobUrl',    l: 'JOB URL',    p: 'https://...' },
         ].map(fi => (
             <div key={fi.k} style={{ marginBottom: 14 }}>
-              <div style={{ fontFamily: MONO, fontSize: 11, color: 'rgba(240,237,232,0.42)', letterSpacing: 2, marginBottom: 7 }}>// {fi.l}</div>
+              <div style={{ fontFamily: MONO, fontSize: 11, color: 'rgba(250,247,242,0.42)', letterSpacing: 2, marginBottom: 7 }}>// {fi.l}</div>
               <Inp value={f[fi.k]} onChange={e => u(fi.k, e.target.value)} placeholder={fi.p} />
             </div>
         ))}
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
           <div>
-            <div style={{ fontFamily: MONO, fontSize: 11, color: 'rgba(240,237,232,0.42)', letterSpacing: 2, marginBottom: 7 }}>// MIN SALARY (PHP)</div>
+            <div style={{ fontFamily: MONO, fontSize: 11, color: 'rgba(250,247,242,0.42)', letterSpacing: 2, marginBottom: 7 }}>// MIN SALARY (PHP)</div>
             <Inp type="number" value={f.salaryMin} onChange={e => u('salaryMin', e.target.value)} placeholder="35000" />
           </div>
           <div>
-            <div style={{ fontFamily: MONO, fontSize: 11, color: 'rgba(240,237,232,0.42)', letterSpacing: 2, marginBottom: 7 }}>// MAX SALARY (PHP)</div>
+            <div style={{ fontFamily: MONO, fontSize: 11, color: 'rgba(250,247,242,0.42)', letterSpacing: 2, marginBottom: 7 }}>// MAX SALARY (PHP)</div>
             <Inp type="number" value={f.salaryMax} onChange={e => u('salaryMax', e.target.value)} placeholder="50000" />
           </div>
         </div>
 
         <div style={{ marginBottom: 22 }}>
-          <div style={{ fontFamily: MONO, fontSize: 11, color: 'rgba(240,237,232,0.42)', letterSpacing: 2, marginBottom: 7 }}>// NOTES</div>
+          <div style={{ fontFamily: MONO, fontSize: 11, color: 'rgba(250,247,242,0.42)', letterSpacing: 2, marginBottom: 7 }}>// NOTES</div>
           <textarea value={f.notes} onChange={e => u('notes', e.target.value)} placeholder="Notes, next steps..."
-                    rows={3} style={{ width: '100%', padding: '13px 16px', background: 'rgba(240,237,232,0.05)', border: '1px solid rgba(240,237,232,0.1)', color: '#F0EDE8', fontFamily: MONO, fontSize: 12, resize: 'none', letterSpacing: .3, transition: 'border-color .18s' }}
-                    onFocus={e => e.target.style.borderColor = 'rgba(190,71,61,0.5)'}
-                    onBlur={e => e.target.style.borderColor = 'rgba(240,237,232,0.1)'} />
+                    rows={3} style={{ width: '100%', padding: '13px 16px', background: 'rgba(250,247,242,0.05)', border: '1px solid rgba(250,247,242,0.1)', color: '#FAF7F2', fontFamily: MONO, fontSize: 12, resize: 'none', letterSpacing: .3, transition: 'border-color .18s' }}
+                    onFocus={e => e.target.style.borderColor = 'rgba(200,168,75,0.5)'}
+                    onBlur={e => e.target.style.borderColor = 'rgba(250,247,242,0.1)'} />
         </div>
       </>
   )
@@ -220,7 +220,7 @@ function AddModal({ onClose, onSave }) {
       <ModalShell tag="NEW" title="APPLICATION" onClose={onClose}>
         <AppForm f={f} u={u} />
         <button onClick={save} disabled={loading || !f.company || !f.role}
-                style={{ width: '100%', padding: '18px', background: loading || !f.company || !f.role ? 'rgba(190,71,61,0.3)' : '#BE473D', border: 'none', cursor: loading || !f.company || !f.role ? 'not-allowed' : 'pointer', fontFamily: MONO, fontSize: 12, color: '#F0EDE8', letterSpacing: 3, transition: 'opacity .18s' }}
+                style={{ width: '100%', padding: '18px', background: loading || !f.company || !f.role ? 'rgba(200,168,75,0.3)' : '#C8A84B', border: 'none', cursor: loading || !f.company || !f.role ? 'not-allowed' : 'pointer', fontFamily: MONO, fontSize: 12, color: '#FAF7F2', letterSpacing: 3, transition: 'opacity .18s' }}
                 onMouseEnter={e => { if (!loading && f.company && f.role) e.currentTarget.style.opacity = '.85' }}
                 onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}>
           {loading ? 'SAVING...' : 'SAVE APPLICATION'}
@@ -268,7 +268,7 @@ function EditModal({ app, onClose, onSave }) {
       <ModalShell tag="EDIT" title="APPLICATION" onClose={onClose}>
         <AppForm f={f} u={u} />
         <button onClick={save} disabled={loading || !f.company || !f.role}
-                style={{ width: '100%', padding: '18px', background: loading || !f.company || !f.role ? 'rgba(190,71,61,0.3)' : '#BE473D', border: 'none', cursor: loading || !f.company || !f.role ? 'not-allowed' : 'pointer', fontFamily: MONO, fontSize: 12, color: '#F0EDE8', letterSpacing: 3, transition: 'opacity .18s' }}
+                style={{ width: '100%', padding: '18px', background: loading || !f.company || !f.role ? 'rgba(200,168,75,0.3)' : '#C8A84B', border: 'none', cursor: loading || !f.company || !f.role ? 'not-allowed' : 'pointer', fontFamily: MONO, fontSize: 12, color: '#FAF7F2', letterSpacing: 3, transition: 'opacity .18s' }}
                 onMouseEnter={e => { if (!loading && f.company && f.role) e.currentTarget.style.opacity = '.85' }}
                 onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}>
           {loading ? 'SAVING...' : 'SAVE CHANGES'}
@@ -290,21 +290,21 @@ function AppCard({ app, onStatusChange, onDelete, onEdit }) {
 
   return (
       <div className="job-card"
-           style={{ background: 'rgba(240,237,232,0.03)', border: '1px solid rgba(240,237,232,0.08)', borderLeft: '3px solid transparent', marginBottom: 6, transition: 'all .18s' }}
-           onMouseEnter={e => { e.currentTarget.style.borderLeftColor = '#BE473D'; e.currentTarget.style.background = 'rgba(240,237,232,0.06)' }}
-           onMouseLeave={e => { e.currentTarget.style.borderLeftColor = 'transparent'; e.currentTarget.style.background = 'rgba(240,237,232,0.03)' }}
+           style={{ background: 'rgba(250,247,242,0.03)', border: '1px solid rgba(250,247,242,0.08)', borderLeft: '3px solid transparent', marginBottom: 6, transition: 'all .18s' }}
+           onMouseEnter={e => { e.currentTarget.style.borderLeftColor = '#C8A84B'; e.currentTarget.style.background = 'rgba(250,247,242,0.06)' }}
+           onMouseLeave={e => { e.currentTarget.style.borderLeftColor = 'transparent'; e.currentTarget.style.background = 'rgba(250,247,242,0.03)' }}
       >
         {/* Always-visible top */}
         <div onClick={() => setOpen(!open)} style={{ padding: '18px 20px', cursor: 'pointer' }}>
 
           {/* Role + status dropdown */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 8 }}>
-            <div style={{ fontFamily: MONO, fontSize: 17, color: '#F0EDE8', letterSpacing: .5, lineHeight: 1.3 }}>{app.role}</div>
+            <div style={{ fontFamily: MONO, fontSize: 17, color: '#FAF7F2', letterSpacing: .5, lineHeight: 1.3 }}>{app.role}</div>
             <StatusDropdown appId={app.id} current={app.status} onChange={onStatusChange} />
           </div>
 
           {/* Company + location */}
-          <div style={{ fontFamily: MONO, fontSize: 13, color: 'rgba(240,237,232,0.38)', marginBottom: 10 }}>
+          <div style={{ fontFamily: MONO, fontSize: 13, color: 'rgba(250,247,242,0.38)', marginBottom: 10 }}>
             {app.company}{app.location ? ' · ' + app.location : ''}
           </div>
 
@@ -312,29 +312,29 @@ function AppCard({ app, onStatusChange, onDelete, onEdit }) {
           {(app.workSetup || (app.salaryMin && app.salaryMax)) && (
               <div style={{ display: 'flex', gap: 20, marginBottom: 10 }}>
                 {app.workSetup && (
-                    <div style={{ fontFamily: MONO, fontSize: 12, color: 'rgba(240,237,232,0.45)' }}>
-                      <span style={{ color: 'rgba(240,237,232,0.25)' }}>Setup: </span>{app.workSetup}
+                    <div style={{ fontFamily: MONO, fontSize: 12, color: 'rgba(250,247,242,0.45)' }}>
+                      <span style={{ color: 'rgba(250,247,242,0.25)' }}>Setup: </span>{app.workSetup}
                     </div>
                 )}
                 {app.salaryMin && app.salaryMax && (
-                    <div style={{ fontFamily: MONO, fontSize: 12, color: 'rgba(240,237,232,0.45)' }}>
-                      <span style={{ color: 'rgba(240,237,232,0.25)' }}>Salary: </span>
+                    <div style={{ fontFamily: MONO, fontSize: 12, color: 'rgba(250,247,242,0.45)' }}>
+                      <span style={{ color: 'rgba(250,247,242,0.25)' }}>Salary: </span>
                       ₱{Number(app.salaryMin).toLocaleString()}–{Number(app.salaryMax).toLocaleString()}
                     </div>
                 )}
               </div>
           )}
 
-          <div style={{ fontFamily: MONO, fontSize: 11, color: 'rgba(240,237,232,0.22)', letterSpacing: 1 }}>
+          <div style={{ fontFamily: MONO, fontSize: 11, color: 'rgba(250,247,242,0.22)', letterSpacing: 1 }}>
             {open ? '▲ LESS' : '▼ MORE'}
           </div>
         </div>
 
         {/* Expanded section */}
         {open && (
-            <div style={{ borderTop: '1px solid rgba(240,237,232,0.06)', padding: '16px 20px' }}>
+            <div style={{ borderTop: '1px solid rgba(250,247,242,0.06)', padding: '16px 20px' }}>
               {app.notes && (
-                  <div style={{ fontFamily: 'monospace', fontSize: 13, color: 'rgba(240,237,232,0.48)', lineHeight: 1.7, marginBottom: 14, padding: '10px 14px', background: 'rgba(240,237,232,0.03)', border: '1px solid rgba(240,237,232,0.05)' }}>
+                  <div style={{ fontFamily: 'monospace', fontSize: 13, color: 'rgba(250,247,242,0.48)', lineHeight: 1.7, marginBottom: 14, padding: '10px 14px', background: 'rgba(250,247,242,0.03)', border: '1px solid rgba(250,247,242,0.05)' }}>
                     {app.notes}
                   </div>
               )}
@@ -352,18 +352,18 @@ function AppCard({ app, onStatusChange, onDelete, onEdit }) {
                 {app.jobUrl && (
                     <button onClick={openJob}
                             className="action-btn"
-                            style={{ border: '1px solid rgba(240,237,232,0.08)', color: 'rgba(240,237,232,0.5)' }}
-                            onMouseEnter={e => { e.currentTarget.style.color = '#F0EDE8'; e.currentTarget.style.borderColor = 'rgba(190,71,61,0.4)' }}
-                            onMouseLeave={e => { e.currentTarget.style.color = 'rgba(240,237,232,0.5)'; e.currentTarget.style.borderColor = 'rgba(240,237,232,0.08)' }}>
+                            style={{ border: '1px solid rgba(250,247,242,0.08)', color: 'rgba(250,247,242,0.5)' }}
+                            onMouseEnter={e => { e.currentTarget.style.color = '#FAF7F2'; e.currentTarget.style.borderColor = 'rgba(200,168,75,0.4)' }}
+                            onMouseLeave={e => { e.currentTarget.style.color = 'rgba(250,247,242,0.5)'; e.currentTarget.style.borderColor = 'rgba(250,247,242,0.08)' }}>
                       VIEW POST
                     </button>
                 )}
 
                 <button onClick={() => { if (window.confirm('Remove this application?')) onDelete(app.id) }}
                         className="action-btn"
-                        style={{ border: '1px solid rgba(190,71,61,0.2)', color: 'rgba(190,71,61,0.6)' }}
-                        onMouseEnter={e => { e.currentTarget.style.color = '#BE473D'; e.currentTarget.style.borderColor = 'rgba(190,71,61,0.5)' }}
-                        onMouseLeave={e => { e.currentTarget.style.color = 'rgba(190,71,61,0.6)'; e.currentTarget.style.borderColor = 'rgba(190,71,61,0.2)' }}>
+                        style={{ border: '1px solid rgba(200,168,75,0.2)', color: 'rgba(200,168,75,0.6)' }}
+                        onMouseEnter={e => { e.currentTarget.style.color = '#C8A84B'; e.currentTarget.style.borderColor = 'rgba(200,168,75,0.5)' }}
+                        onMouseLeave={e => { e.currentTarget.style.color = 'rgba(200,168,75,0.6)'; e.currentTarget.style.borderColor = 'rgba(200,168,75,0.2)' }}>
                   REMOVE
                 </button>
               </div>
@@ -412,7 +412,7 @@ export default function JobTrackerPage() {
         <style>{CSS}</style>
 
         {/* Stats grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 1, background: 'rgba(240,237,232,0.05)', marginBottom: 22 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 1, background: 'rgba(250,247,242,0.05)', marginBottom: 22 }}>
           {[
             { l: 'TOTAL',     v: stats.total     || 0 },
             { l: 'APPLIED',   v: stats.applied   || 0 },
@@ -421,16 +421,16 @@ export default function JobTrackerPage() {
             { l: 'ACCEPTED',  v: stats.accepted   || 0 },
             { l: 'REJECTED',  v: stats.rejected   || 0 },
           ].map(c => (
-              <div key={c.l} style={{ padding: '16px 14px', background: '#3C091E' }}>
-                <div style={{ fontFamily: MONO, fontSize: 10, color: 'rgba(240,237,232,0.32)', letterSpacing: 2, marginBottom: 6 }}>{c.l}</div>
-                <div style={{ fontFamily: MONO, fontSize: 26, color: '#F0EDE8', letterSpacing: '-1px' }}>{c.v}</div>
+              <div key={c.l} style={{ padding: '16px 14px', background: '#0F2044' }}>
+                <div style={{ fontFamily: MONO, fontSize: 10, color: 'rgba(250,247,242,0.32)', letterSpacing: 2, marginBottom: 6 }}>{c.l}</div>
+                <div style={{ fontFamily: MONO, fontSize: 26, color: '#FAF7F2', letterSpacing: '-1px' }}>{c.v}</div>
               </div>
           ))}
         </div>
 
         {/* Add button */}
         <button onClick={() => setShowAdd(true)}
-                style={{ width: '100%', padding: '15px', background: '#BE473D', border: 'none', cursor: 'pointer', fontFamily: MONO, fontSize: 12, color: '#F0EDE8', letterSpacing: 3, marginBottom: 16, transition: 'opacity .18s' }}
+                style={{ width: '100%', padding: '15px', background: '#C8A84B', border: 'none', cursor: 'pointer', fontFamily: MONO, fontSize: 12, color: '#FAF7F2', letterSpacing: 3, marginBottom: 16, transition: 'opacity .18s' }}
                 onMouseEnter={e => e.currentTarget.style.opacity = '.85'}
                 onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
           + ADD APPLICATION
@@ -443,7 +443,7 @@ export default function JobTrackerPage() {
             var count = key === 'ALL' ? apps.length : apps.filter(a => a.status === key).length
             return (
                 <button key={key} className="filter-btn"
-                        style={{ borderColor: active ? '#BE473D' : 'rgba(240,237,232,0.1)', color: active ? '#BE473D' : 'rgba(240,237,232,0.3)' }}
+                        style={{ borderColor: active ? '#C8A84B' : 'rgba(250,247,242,0.1)', color: active ? '#C8A84B' : 'rgba(250,247,242,0.3)' }}
                         onClick={() => setFilter(key)}>
                   {key === 'ALL' ? 'ALL' : gs(key).label.toUpperCase()}{count > 0 ? ` (${count})` : ''}
                 </button>
@@ -453,17 +453,17 @@ export default function JobTrackerPage() {
 
         {/* List */}
         {isLoading && (
-            <div style={{ border: '1px solid rgba(240,237,232,0.05)', padding: 32, textAlign: 'center', fontFamily: MONO, fontSize: 13, color: 'rgba(240,237,232,0.28)', letterSpacing: 2 }}>
+            <div style={{ border: '1px solid rgba(250,247,242,0.05)', padding: 32, textAlign: 'center', fontFamily: MONO, fontSize: 13, color: 'rgba(250,247,242,0.28)', letterSpacing: 2 }}>
               LOADING...
             </div>
         )}
 
         {!isLoading && filtered.length === 0 && (
-            <div style={{ border: '1px solid rgba(240,237,232,0.05)', padding: 40, textAlign: 'center' }}>
-              <div style={{ fontFamily: MONO, fontSize: 14, color: 'rgba(240,237,232,0.42)', letterSpacing: 1, marginBottom: 8 }}>
+            <div style={{ border: '1px solid rgba(250,247,242,0.05)', padding: 40, textAlign: 'center' }}>
+              <div style={{ fontFamily: MONO, fontSize: 14, color: 'rgba(250,247,242,0.42)', letterSpacing: 1, marginBottom: 8 }}>
                 {filter === 'ALL' ? 'NO APPLICATIONS YET' : 'NO ' + gs(filter).label.toUpperCase() + ' APPLICATIONS'}
               </div>
-              <div style={{ fontFamily: 'monospace', fontSize: 13, color: 'rgba(240,237,232,0.28)' }}>
+              <div style={{ fontFamily: 'monospace', fontSize: 13, color: 'rgba(250,247,242,0.28)' }}>
                 {filter === 'ALL' ? 'Tap "+ Add Application" to start tracking.' : 'Try a different filter above.'}
               </div>
             </div>

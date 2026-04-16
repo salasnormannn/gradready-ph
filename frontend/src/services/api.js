@@ -16,11 +16,12 @@ api.interceptors.request.use(function(config) {
   return config
 })
 
-// Handle 401 — logout user if token expired
+// Handle 401 — logout user if token expired (but not on auth endpoints)
 api.interceptors.response.use(
   function(response) { return response },
   function(error) {
-    if (error.response && error.response.status === 401) {
+    const isAuthEndpoint = error.config?.url?.startsWith('/api/auth/')
+    if (error.response && error.response.status === 401 && !isAuthEndpoint) {
       useAuthStore.getState().logout()
       window.location.href = '/login'
     }
