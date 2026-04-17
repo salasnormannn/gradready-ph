@@ -68,7 +68,7 @@ function StatusDropdown({ appId, current, onChange }) {
                 position: 'absolute',
                 top: 'calc(100% + 4px)',
                 right: 0,
-                background: '#1C0512',
+                background: '#0d1b3e',
                 border: '1px solid rgba(250,247,242,0.1)',
                 zIndex: 101,
                 minWidth: 140,
@@ -119,11 +119,11 @@ function Inp({ value, onChange, placeholder, type = 'text' }) {
 function ModalShell({ tag, title, onClose, children }) {
   return (
       <div
-          style={{ position: 'fixed', inset: 0, background: 'rgba(28,5,18,0.88)', zIndex: 600, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(8,20,52,0.88)', zIndex: 600, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
           onClick={e => { if (e.target === e.currentTarget) onClose() }}
       >
         <div className="modal-sheet" style={{
-          background: '#2A0515', border: '1px solid rgba(250,247,242,0.07)', borderBottom: 'none',
+          background: '#0d1b3e', border: '1px solid rgba(250,247,242,0.07)', borderBottom: 'none',
           width: '100%', maxWidth: 580, maxHeight: '88vh', overflowY: 'auto',
           padding: 28, paddingBottom: 'calc(72px + 36px)',
         }}>
@@ -334,7 +334,7 @@ function AppCard({ app, onStatusChange, onDelete, onEdit }) {
         {open && (
             <div style={{ borderTop: '1px solid rgba(250,247,242,0.06)', padding: '16px 20px' }}>
               {app.notes && (
-                  <div style={{ fontFamily: 'monospace', fontSize: 13, color: 'rgba(250,247,242,0.48)', lineHeight: 1.7, marginBottom: 14, padding: '10px 14px', background: 'rgba(250,247,242,0.03)', border: '1px solid rgba(250,247,242,0.05)' }}>
+                  <div style={{ fontFamily: MONO, fontSize: 13, color: 'rgba(250,247,242,0.48)', lineHeight: 1.7, marginBottom: 14, padding: '10px 14px', background: 'rgba(250,247,242,0.03)', border: '1px solid rgba(250,247,242,0.05)' }}>
                     {app.notes}
                   </div>
               )}
@@ -463,7 +463,7 @@ export default function JobTrackerPage() {
               <div style={{ fontFamily: MONO, fontSize: 14, color: 'rgba(250,247,242,0.42)', letterSpacing: 1, marginBottom: 8 }}>
                 {filter === 'ALL' ? 'NO APPLICATIONS YET' : 'NO ' + gs(filter).label.toUpperCase() + ' APPLICATIONS'}
               </div>
-              <div style={{ fontFamily: 'monospace', fontSize: 13, color: 'rgba(250,247,242,0.28)' }}>
+              <div style={{ fontFamily: MONO, fontSize: 13, color: 'rgba(250,247,242,0.28)' }}>
                 {filter === 'ALL' ? 'Tap "+ Add Application" to start tracking.' : 'Try a different filter above.'}
               </div>
             </div>
