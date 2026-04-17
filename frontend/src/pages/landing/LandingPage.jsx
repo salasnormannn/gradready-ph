@@ -237,6 +237,9 @@ function Loader({ onDone }) {
           <div style={{ width:'100%', height:1, background:'rgba(250,247,242,0.1)' }}>
             <div style={{ height:'100%', background:'#C8A84B', width:pct+'%', transition:'width .1s ease' }} />
           </div>
+          <div style={{ marginTop:16, fontSize:10, color:'rgba(250,247,242,0.22)', letterSpacing:1.5, lineHeight:1.7 }}>
+            Backend may take 1–2 min to wake up.<br />Please wait — it's worth it!
+          </div>
         </div>
       </div>
   )
